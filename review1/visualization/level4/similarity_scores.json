@@ -1,0 +1,15 @@
+{
+  "structural_similarity": 55.5,
+  "temporal_similarity": 95.8,
+  "overall_score": 71.6,
+  "weights": {
+    "structural": 0.6,
+    "temporal": 0.4
+  },
+  "metadata": {
+    "source": "joint_errors_user2.json",
+    "computation_date": "2026-01-13T07:53:35.692195",
+    "max_error_threshold": 1.5,
+    "temporal_baseline": 85.0
+  }
+}

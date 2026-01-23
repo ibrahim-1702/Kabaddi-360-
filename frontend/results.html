@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - Kabaddi Ghost Trainer</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-content">
+            <div class="logo">
+                <div class="logo-icon">K</div>
+                <span>Kabaddi Ghost Trainer</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+                <a href="gallery.html" class="nav-link">Gallery</a>
+                <a href="admin.html" class="nav-link">Admin</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+        <!-- Header Section -->
+        <section class="mb-xl">
+            <a href="dashboard.html"
+                style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-blue); margin-bottom: 1rem;">
+                ← New Analysis
+            </a>
+            <h1 class="fade-in">Analysis Results</h1>
+            <p class="fade-in" style="font-size: 1.125rem; color: var(--text-secondary);">
+                Complete pipeline analysis from Level-1 to Level-4
+            </p>
+        </section>
+
+        <!-- Overall Scores Card -->
+        <div class="card mb-lg" id="scores-card"
+            style="background: linear-gradient(135deg, rgba(30, 89, 242, 0.1) 0%, rgba(0, 255, 135, 0.05) 100%);">
+            <h2 style="margin-bottom: 1.5rem;">📊 Performance Scores</h2>
+            <div class="grid grid-3">
+                <div
+                    style="text-align: center; padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius-md);">
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Structural</p>
+                    <p id="structural-score"
+                        style="font-size: 3rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, #ffffff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        --</p>
+                    <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">Position Accuracy</p>
+                </div>
+                <div
+                    style="text-align: center; padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius-md);">
+                    <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Temporal</p>
+                    <p id="temporal-score"
+                        style="font-size: 3rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, #ffffff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        --</p>
+                    <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">Motion Consistency</p>
+                </div>
+                <div
+                    style="text-align: center; padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius-md); border: 2px solid var(--border-success);">
+                    <p style="font-size: 0.875rem; color: var(--success-green); margin-bottom: 0.5rem;">Overall</p>
+                    <p id="overall-score"
+                        style="font-size: 3rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, var(--success-green), #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        --</p>
+                    <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">Combined Score</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pipeline Stages -->
+        <section>
+            <h2 class="mb-lg">Pipeline Stages</h2>
+
+            <!-- Level 1: Pose Extraction -->
+            <div class="card mb-lg">
+                <div class="card-header">
+                    <div class="card-number">1</div>
+                    <div>
+                        <h3 class="card-title">Level-1: Pose Extraction & Cleaning</h3>
+                        <p class="card-description">YOLO detection → MediaPipe 33-joint → COCO-17 conversion → Cleaning
+                            pipeline</p>
+                    </div>
+                </div>
+
+                <div id="level1-content" class="mt-md">
+                    <div class="grid grid-2">
+                        <div>
+                            <h4 style="margin-bottom: 1rem; font-size: 1rem;">Expert Pose (Cleaned)</h4>
+                            <div class="video-container">
+                                <video id="level1-expert" class="video-player" controls></video>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 1rem; font-size: 1rem;">User Pose (Cleaned)</h4>
+                            <div class="video-container">
+                                <video id="level1-user" class="video-player" controls></video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level 2: Temporal Alignment -->
+            <div class="card mb-lg">
+                <div class="card-header">
+                    <div class="card-number">2</div>
+                    <div>
+                        <h3 class="card-title">Level-2: Temporal Alignment (DTW)</h3>
+                        <p class="card-description">Dynamic Time Warping using pelvis trajectory alignment</p>
+                    </div>
+                </div>
+
+                <div id="level2-content" class="mt-md">
+                    <div class="video-container">
+                        <video id="level2-video" class="video-player" controls></video>
+                    </div>
+                    <p class="text-center mt-sm" style="color: var(--text-secondary); font-size: 0.875rem;">
+                        Side-by-side comparison with temporal synchronization
+                    </p>
+                </div>
+            </div>
+
+            <!-- Level 3: Error Localization -->
+            <div class="card mb-lg">
+                <div class="card-header">
+                    <div class="card-number">3</div>
+                    <div>
+                        <h3 class="card-title">Level-3: Error Localization</h3>
+                        <p class="card-description">Frame-wise, joint-wise error computation with color coding</p>
+                    </div>
+                </div>
+
+                <div id="level3-content" class="mt-md">
+                    <div class="video-container mb-md">
+                        <video id="level3-video" class="video-player" controls></video>
+                    </div>
+
+                    <details
+                        style="background: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-md); cursor: pointer;">
+                        <summary style="font-weight: 600; margin-bottom: 1rem;">📊 Joint Error Statistics</summary>
+                        <div id="joint-errors" class="grid grid-2" style="gap: 0.5rem; font-size: 0.875rem;">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <!-- Level 4: Similarity Scoring -->
+            <div class="card mb-lg">
+                <div class="card-header">
+                    <div class="card-number success">4</div>
+                    <div>
+                        <h3 class="card-title">Level-4: Similarity Scoring</h3>
+                        <p class="card-description">Aggregated performance metrics (0-100 scale)</p>
+                    </div>
+                </div>
+
+                <div id="level4-content" class="mt-md">
+                    <div class="video-container">
+                        <video id="level4-video" class="video-player" controls></video>
+                    </div>
+                    <p class="text-center mt-sm" style="color: var(--text-secondary); font-size: 0.875rem;">
+                        Final visualization with scoring HUD overlay
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Actions -->
+        <section class="text-center mt-xl">
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <button onclick="downloadResults()" class="btn btn-secondary">
+                    Download JSON Results
+                </button>
+                <a href="dashboard.html" class="btn btn-primary">
+                    Try Another Pose →
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const sessionId = sessionStorage.getItem('sessionId');
+
+            if (!sessionId) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            await loadResults(sessionId);
+        });
+
+        async function loadResults(sessionId) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/results/${sessionId}`);
+                const data = await response.json();
+
+                // Update scores
+                document.getElementById('structural-score').textContent = data.scores.structural.toFixed(1);
+                document.getElementById('temporal-score').textContent = data.scores.temporal.toFixed(1);
+                document.getElementById('overall-score').textContent = data.scores.overall.toFixed(1);
+
+                // Load videos
+                if (data.videos.level1_expert) {
+                    document.getElementById('level1-expert').src = `http://localhost:5000${data.videos.level1_expert}`;
+                }
+                if (data.videos.level1_user) {
+                    document.getElementById('level1-user').src = `http://localhost:5000${data.videos.level1_user}`;
+                }
+                if (data.videos.level2_alignment) {
+                    document.getElementById('level2-video').src = `http://localhost:5000${data.videos.level2_alignment}`;
+                }
+                if (data.videos.level3_errors) {
+                    document.getElementById('level3-video').src = `http://localhost:5000${data.videos.level3_errors}`;
+                }
+                if (data.videos.level4_scoring) {
+                    document.getElementById('level4-video').src = `http://localhost:5000${data.videos.level4_scoring}`;
+                }
+
+                // Load joint errors
+                if (data.joint_errors) {
+                    const jointErrorsDiv = document.getElementById('joint-errors');
+                    const joints = Object.entries(data.joint_errors.joint_statistics || {});
+
+                    jointErrorsDiv.innerHTML = joints.map(([joint, stats]) => `
+                        <div style="padding: 0.75rem; background: var(--bg-card); border-radius: var(--radius-sm);">
+                            <strong>${joint.replace(/_/g, ' ')}</strong>: 
+                            <span style="color: var(${stats.mean > 0.1 ? '--text-secondary' : '--success-green'})">
+                                Mean: ${stats.mean.toFixed(3)}
+                            </span>
+                        </div>
+                    `).join('');
+                }
+
+            } catch (error) {
+                console.error('Error loading results:', error);
+                alert('Error loading results. Please try again.');
+            }
+        }
+
+        async function downloadResults() {
+            const sessionId = sessionStorage.getItem('sessionId');
+            window.open(`http://localhost:5000/api/results/${sessionId}/download`, '_blank');
+        }
+    </script>
+</body>
+
+</html>

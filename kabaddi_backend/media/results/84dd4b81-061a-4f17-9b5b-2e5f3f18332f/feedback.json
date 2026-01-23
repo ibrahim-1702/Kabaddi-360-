@@ -1,0 +1,11 @@
+{
+  "overall": "More practice needed. Focus on the basics and try matching individual poses first.",
+  "structural": "Your pose structure differs greatly from the target.",
+  "temporal": "Your timing is not aligned with the motion.",
+  "category": "poor",
+  "scores": {
+    "structural": NaN,
+    "temporal": NaN,
+    "overall": NaN
+  }
+}

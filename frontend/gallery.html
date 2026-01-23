@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Demo Gallery - Kabaddi Ghost Trainer</title>
+ <link rel="stylesheet" href="style.css">
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+</head>
+
+<body>
+ <!-- Header -->
+ <header class="header">
+  <div class="container header-content">
+   <div class="logo">
+    <div class="logo-icon">K</div>
+    <span>Kabaddi Ghost Trainer</span>
+   </div>
+   <nav class="nav">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="gallery.html" class="nav-link active">Gallery</a>
+    <a href="admin.html" class="nav-link">Admin</a>
+   </nav>
+  </div>
+ </header>
+
+ <!-- Main Content -->
+ <main class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+  <section class="mb-xl">
+   <h1 class="fade-in">Demo Gallery</h1>
+   <p class="fade-in" style="font-size: 1.125rem; color: var(--text-secondary);">
+    Explore all 12 demonstration videos from the Review-1 POC pipeline
+   </p>
+  </section>
+
+  <!-- Level 1: Pose Extraction -->
+  <section class="mb-xl">
+   <div class="card">
+    <div class="card-header mb-md">
+     <div class="card-number">1</div>
+     <div>
+      <h2 class="card-title">Level-1: Pose Extraction & Cleaning</h2>
+      <p class="card-description">5 stages: Raw Video → YOLO → MediaPipe → COCO-17 → Cleaned</p>
+     </div>
+    </div>
+
+    <div class="grid grid-3">
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/level1_pose/outputs/00_raw_reference.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">00 - Raw Reference Video</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">Original kabaddi clip input</p>
+     </div>
+
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/level1_pose/outputs/01_yolo_tracking.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">01 - YOLO Person Tracking</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">YOLOv8n detection with bounding boxes</p>
+     </div>
+
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/level1_pose/outputs/02_mediapipe_mp33.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">02 - MediaPipe 33-Joint</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">Holistic pose estimation</p>
+     </div>
+
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/level1_pose/outputs/03_coco17_raw.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">03 - COCO-17 Raw</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">MP33 → COCO-17 conversion</p>
+     </div>
+
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/level1_pose/outputs/04_coco17_cleaned.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">04 - COCO-17 Cleaned</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">Smoothed & normalized poses</p>
+     </div>
+    </div>
+   </div>
+  </section>
+
+  <!-- Level 2: Temporal Alignment -->
+  <section class="mb-xl">
+   <div class="card">
+    <div class="card-header mb-md">
+     <div class="card-number">2</div>
+     <div>
+      <h2 class="card-title">Level-2: Temporal Alignment (DTW)</h2>
+      <p class="card-description">4 user comparisons with expert pose using pelvis-based DTW</p>
+     </div>
+    </div>
+
+    <div class="grid grid-2">
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/level2/Outputs/output_temporal_alignment_user1.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">User 1 - DTW Alignment</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">Expert vs User 1 side-by-side</p>
+     </div>
+
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/level2/Outputs/output_temporal_alignment_user2.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">User 2 - DTW Alignment</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">Expert vs User 2 side-by-side</p>
+     </div>
+
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/level2/Outputs/output_temporal_alignment_user3.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">User 3 - DTW Alignment</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">Expert vs User 3 side-by-side</p>
+     </div>
+
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/level2/Outputs/output_temporal_alignment_user4.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">User 4 - DTW Alignment</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">Expert vs User 4 side-by-side</p>
+     </div>
+    </div>
+   </div>
+  </section>
+
+  <!-- Level 3: Error Localization -->
+  <section class="mb-xl">
+   <div class="card">
+    <div class="card-header mb-md">
+     <div class="card-number">3</div>
+     <div>
+      <h2 class="card-title">Level-3: Error Localization</h2>
+      <p class="card-description">Joint-wise error computation with color-coded visualization</p>
+     </div>
+    </div>
+
+    <div class="grid grid-2">
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/visualization/level3/output_error_localization.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">Error Visualization</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">Color-coded skeleton (green=good, red=error)</p>
+     </div>
+    </div>
+   </div>
+  </section>
+
+  <!-- Level 4: Similarity Scoring -->
+  <section class="mb-xl">
+   <div class="card">
+    <div class="card-header mb-md">
+     <div class="card-number success">4</div>
+     <div>
+      <h2 class="card-title">Level-4: Similarity Scoring</h2>
+      <p class="card-description">Final performance scores with HUD overlay</p>
+     </div>
+    </div>
+
+    <div class="grid grid-2">
+     <div class="video-card">
+      <div class="video-container">
+       <video class="video-player" controls>
+        <source src="http://localhost:5000/review1/visualization/level4/output_scoring_summary.mp4" type="video/mp4">
+       </video>
+      </div>
+      <h4 style="margin-top: 1rem; font-size: 1rem;">Scoring Summary</h4>
+      <p style="font-size: 0.875rem; color: var(--text-secondary);">Structural, temporal & overall scores</p>
+     </div>
+    </div>
+   </div>
+  </section>
+
+  <!-- Summary -->
+  <section class="text-center">
+   <div class="card"
+    style="background: linear-gradient(135deg, rgba(30, 89, 242, 0.1) 0%, rgba(0, 255, 135, 0.05) 100%);">
+    <h2 style="margin-bottom: 1rem;">Ready to Try It Yourself?</h2>
+    <p style="font-size: 1.125rem; margin-bottom: 2rem; color: var(--text-secondary);">
+     Upload your own video and get detailed AI-powered analysis
+    </p>
+    <a href="dashboard.html" class="btn btn-primary" style="font-size: 1.125rem; padding: 1rem 2rem;">
+     Start Your Analysis →
+    </a>
+   </div>
+  </section>
+ </main>
+
+ <script src="app.js"></script>
+</body>
+
+</html>
