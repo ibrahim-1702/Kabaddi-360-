@@ -12,14 +12,39 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 import cv2
+import threading
+
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Enable CORS for frontend
+
+# Enable CORS properly
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# Keep the manual headers too for extra safety
+@app.after_request
+def after_request(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    return response
+
+
+# Handle OPTIONS requests explicitly for all routes
+@app.route('/<path:path>', methods=['OPTIONS'])
+@app.route('/', methods=['OPTIONS'])
+def handle_options(path=None):
+    """Handle CORS preflight requests"""
+    response = jsonify({'status': 'ok'})
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    return response, 200
+
 
 # Configuration
 BASE_DIR = Path(__file__).parent.parent.parent  # Project root (kabaddi_trainer/)
-UPLOAD_FOLDER = Path(__file__).parent / 'data'  # backend/data/
+UPLOAD_FOLDER = BASE_DIR / 'data'  # kabaddi_trainer/data/ (Moved out of frontend)
 EXPERT_FOLDER = UPLOAD_FOLDER / 'expert_poses'
 USER_FOLDER = UPLOAD_FOLDER / 'user_uploads'
 RESULTS_FOLDER = UPLOAD_FOLDER / 'results'
@@ -32,6 +57,9 @@ for folder in [EXPERT_FOLDER, USER_FOLDER, RESULTS_FOLDER]:
 
 # In-memory database (for demo - use a real DB in production)
 expert_poses_db = []
+
+# In-memory status tracking for async processing
+analysis_status = {}  # {session_id: {status, progress, message, result}}
 
 
 # Helper Functions
@@ -187,32 +215,156 @@ def upload_user_video():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/analyze', methods=['POST'])
-def analyze_video():
-    """Trigger pipeline analysis"""
+
+
+
+def run_pipeline_async(session_id, pose_id, user_video_path):
+    """Run pipeline in background thread with status updates"""
     try:
-        data = request.json
-        session_id = data.get('session_id')
-        pose_id = data.get('pose_id')
-        user_video_path = data.get('user_video_path')
-        
-        if not all([session_id, pose_id, user_video_path]):
-            return jsonify({'error': 'Missing required parameters'}), 400
+        # Update status: started
+        analysis_status[session_id] = {
+            'status': 'processing',
+            'progress': 0,
+            'message': 'Starting analysis...',
+            'result': None,
+            'error': None
+        }
         
         # Import pipeline runner
-        from pipeline_runner import run_analysis_pipeline
+        from pipeline_runner import run_demo_pipeline
+        
+        # Update progress
+        analysis_status[session_id]['progress'] = 25
+        analysis_status[session_id]['message'] = 'Extracting poses...'
         
         # Run pipeline
-        result = run_analysis_pipeline(
+        result = run_demo_pipeline(
             session_id=session_id,
             pose_id=pose_id,
             user_video_path=user_video_path
         )
         
-        return jsonify(result)
+        # Update status: complete
+        analysis_status[session_id] = {
+            'status': 'complete',
+            'progress': 100,
+            'message': 'Analysis complete!',
+            'result': result,
+            'error': None
+        }
+        
+        print(f"[Async] Analysis completed successfully for session: {session_id}")
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        import traceback
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        
+        # Update status: error
+        analysis_status[session_id] = {
+            'status': 'error',
+            'progress': 0,
+            'message': f'Error: {error_msg}',
+            'result': None,
+            'error': error_msg
+        }
+        
+        print(f"[Async] ERROR in session {session_id}: {error_msg}")
+        print(f"[Async] Traceback:\n{error_trace}")
+
+
+@app.route('/api/analyze', methods=['POST'])
+def analyze_video():
+    """Trigger pipeline analysis (async)"""
+    try:
+        print(f"[API] analyze_video() called")
+        print(f"[API] Request method: {request.method}")
+        print(f"[API] Content-Type: {request.content_type}")
+        print(f"[API] Request data: {request.data[:200] if request.data else 'None'}")
+        
+        # Try to parse JSON
+        try:
+            data = request.json
+            if not data:
+                print(f"[API] ERROR: request.json is None")
+                return jsonify({'error': 'Invalid JSON data'}), 400
+        except Exception as json_error:
+            print(f"[API] ERROR parsing JSON: {json_error}")
+            return jsonify({'error': 'Invalid JSON format'}), 400
+        
+        session_id = data.get('session_id')
+        pose_id = data.get('pose_id')
+        user_video_path = data.get('user_video_path')
+        
+        if not all([session_id, pose_id, user_video_path]):
+            print(f"[API] ERROR: Missing parameters")
+            print(f"  session_id: {session_id}")
+            print(f"  pose_id: {pose_id}")
+            print(f"  user_video_path: {user_video_path}")
+            return jsonify({'error': 'Missing required parameters'}), 400
+        
+        print(f"[API] Starting async analysis:")
+        print(f"  Session ID: {session_id}")
+        print(f"  Pose ID: {pose_id}")
+        print(f"  User Video: {user_video_path}")
+        
+        # Start pipeline in background thread
+        thread = threading.Thread(
+            target=run_pipeline_async,
+            args=(session_id, pose_id, user_video_path)
+        )
+        thread.daemon = True
+        thread.start()
+        
+        print(f"[API] Thread started successfully")
+        
+        # Return immediately with session ID
+        return jsonify({
+            'success': True,
+            'session_id': session_id,
+            'message': 'Analysis started. Poll /api/status/<session_id> for progress.'
+        }), 202  # 202 Accepted
+        
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        print(f"[API] EXCEPTION in analyze_video(): {error_msg}")
+        print(f"[API] Traceback:\n{error_trace}")
+        return jsonify({'error': error_msg}), 500
+
+
+
+@app.route('/api/status/<session_id>', methods=['GET'])
+def get_analysis_status(session_id):
+    """Get analysis status for async processing"""
+    
+    if session_id not in analysis_status:
+        return jsonify({
+            'status': 'not_found',
+            'message': 'Session not found'
+        }), 404
+    
+    status_data = analysis_status[session_id]
+    
+    response = {
+        'status': status_data['status'],
+        'progress': status_data['progress'],
+        'message': status_data['message']
+    }
+    
+    # Include result if complete
+    if status_data['status'] == 'complete' and status_data['result']:
+        response['result'] = status_data['result']
+    
+    # Include error if failed
+    if status_data['status'] == 'error' and status_data['error']:
+        response['error'] = status_data['error']
+    
+    return jsonify(response)
+
+
+
 
 
 @app.route('/api/results/<session_id>', methods=['GET'])
@@ -310,8 +462,6 @@ def serve_data(filename):
 def serve_review1(filename):
     """Serve review1 demo files"""
     file_path = BASE_DIR / 'review1' / filename
-    print(f"Attempting to serve: {file_path}")
-    print(f"File exists: {file_path.exists()}")
     if not file_path.exists():
         return jsonify({'error': 'File not found', 'path': str(file_path)}), 404
     return send_file(file_path)
@@ -329,4 +479,4 @@ if __name__ == '__main__':
     print(f"\nStarting server at http://localhost:5000")
     print("=" * 70)
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000, use_reloader=False)

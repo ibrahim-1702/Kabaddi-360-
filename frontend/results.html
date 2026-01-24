@@ -34,14 +34,14 @@
                 style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-blue); margin-bottom: 1rem;">
                 ← New Analysis
             </a>
-            <h1 class="fade-in">Analysis Results</h1>
+            <h1 class="fade-in">Your Performance Analysis</h1>
             <p class="fade-in" style="font-size: 1.125rem; color: var(--text-secondary);">
-                Complete pipeline analysis from Level-1 to Level-4
+                Complete AI-powered movement analysis with step-by-step transformation
             </p>
         </section>
 
-        <!-- Overall Scores Card -->
-        <div class="card mb-lg" id="scores-card"
+        <!-- Performance Scores -->
+        <div class="card mb-xl"
             style="background: linear-gradient(135deg, rgba(30, 89, 242, 0.1) 0%, rgba(0, 255, 135, 0.05) 100%);">
             <h2 style="margin-bottom: 1.5rem;">📊 Performance Scores</h2>
             <div class="grid grid-3">
@@ -49,7 +49,7 @@
                     style="text-align: center; padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius-md);">
                     <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Structural</p>
                     <p id="structural-score"
-                        style="font-size: 3rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, #ffffff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        style="font-size: 3rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, #ffffff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                         --</p>
                     <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">Position Accuracy</p>
                 </div>
@@ -57,7 +57,7 @@
                     style="text-align: center; padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius-md);">
                     <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Temporal</p>
                     <p id="temporal-score"
-                        style="font-size: 3rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, #ffffff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        style="font-size: 3rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, #ffffff, var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                         --</p>
                     <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">Motion Consistency</p>
                 </div>
@@ -65,108 +65,136 @@
                     style="text-align: center; padding: 1.5rem; background: var(--bg-card); border-radius: var(--radius-md); border: 2px solid var(--border-success);">
                     <p style="font-size: 0.875rem; color: var(--success-green); margin-bottom: 0.5rem;">Overall</p>
                     <p id="overall-score"
-                        style="font-size: 3rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, var(--success-green), #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        style="font-size: 3rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, var(--success-green), #ffffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                         --</p>
                     <p style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">Combined Score</p>
                 </div>
             </div>
         </div>
 
-        <!-- Pipeline Stages -->
-        <section>
-            <h2 class="mb-lg">Pipeline Stages</h2>
-
-            <!-- Level 1: Pose Extraction -->
-            <div class="card mb-lg">
-                <div class="card-header">
+        <!-- Your Video Transformation Journey -->
+        <section class="mb-xl">
+            <div class="card">
+                <div class="card-header mb-md">
                     <div class="card-number">1</div>
                     <div>
-                        <h3 class="card-title">Level-1: Pose Extraction & Cleaning</h3>
-                        <p class="card-description">YOLO detection → MediaPipe 33-joint → COCO-17 conversion → Cleaning
-                            pipeline</p>
+                        <h2 class="card-title">Your Video Transformation Journey</h2>
+                        <p class="card-description">See how AI processes your movement through each pipeline stage</p>
                     </div>
                 </div>
 
-                <div id="level1-content" class="mt-md">
-                    <div class="grid grid-2">
-                        <div>
-                            <h4 style="margin-bottom: 1rem; font-size: 1rem;">Expert Pose (Cleaned)</h4>
-                            <div class="video-container">
-                                <video id="level1-expert" class="video-player" controls></video>
-                            </div>
+                <div class="grid grid-3">
+                    <!-- Original Video -->
+                    <div class="video-card">
+                        <div class="video-container">
+                            <video id="user-original" class="video-player" controls>
+                                <source id="user-original-src" type="video/mp4">
+                            </video>
                         </div>
-                        <div>
-                            <h4 style="margin-bottom: 1rem; font-size: 1rem;">User Pose (Cleaned)</h4>
-                            <div class="video-container">
-                                <video id="level1-user" class="video-player" controls></video>
-                            </div>
-                        </div>
+                        <h4 style="margin-top: 1rem; font-size: 1rem;">Your Original Video</h4>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary);">Raw uploaded movement</p>
                     </div>
+
+                    <!-- YOLO Detection -->
+                    <div class="video-card">
+                        <div class="video-container">
+                            <div id="yolo-placeholder" class="video-placeholder">
+                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔍</div>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">YOLO Person Detection</p>
+                                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Available
+                                    in full version</p>
+                            </div>
+                        </div>
+                        <h4 style="margin-top: 1rem; font-size: 1rem;">Person Detection</h4>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary);">AI identifies player in frame</p>
+                    </div>
+
+                    <!-- MediaPipe Skeleton -->
+                    <div class="video-card">
+                        <div class="video-container">
+                            <div id="mediapipe-placeholder" class="video-placeholder">
+                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🦴</div>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">33-Joint Skeleton</p>
+                                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Available
+                                    in full version</p>
+                            </div>
+                        </div>
+                        <h4 style="margin-top: 1rem; font-size: 1rem;">Pose Estimation</h4>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary);">MediaPipe extracts 33 joints</p>
+                    </div>
+
+                    <!-- COCO-17 -->
+                    <div class="video-card">
+                        <div class="video-container">
+                            <div id="coco17-placeholder" class="video-placeholder">
+                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">📐</div>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">COCO-17 Format</p>
+                                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Available
+                                    in full version</p>
+                            </div>
+                        </div>
+                        <h4 style="margin-top: 1rem; font-size: 1rem;">Format Conversion</h4>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary);">Standardized 17-point skeleton</p>
+                    </div>
+
+                    <!-- Cleaned Pose -->
+                    <div class="video-card">
+                        <div class="video-container">
+                            <div id="cleaned-placeholder" class="video-placeholder">
+                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">✨</div>
+                                <p style="color: var(--text-secondary); font-size: 0.875rem;">Cleaned & Normalized</p>
+                                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Available
+                                    in full version</p>
+                            </div>
+                        </div>
+                        <h4 style="margin-top: 1rem; font-size: 1rem;">Pose Cleaning</h4>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary);">Smoothed & ready for analysis</p>
+                    </div>
+                </div>
+
+                <div class="mt-md"
+                    style="text-align: center; padding: 1rem; background: var(--bg-tertiary); border-radius: var(--radius-md);">
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                        ℹ️ <strong>Demo Mode:</strong> This demo shows your original video and scores. Full pipeline
+                        visualization (YOLO, MediaPipe, etc.) available in production version.
+                    </p>
                 </div>
             </div>
+        </section>
 
-            <!-- Level 2: Temporal Alignment -->
-            <div class="card mb-lg">
-                <div class="card-header">
+        <!-- Expert Comparison -->
+        <section class="mb-xl">
+            <div class="card">
+                <div class="card-header mb-md">
                     <div class="card-number">2</div>
                     <div>
-                        <h3 class="card-title">Level-2: Temporal Alignment (DTW)</h3>
-                        <p class="card-description">Dynamic Time Warping using pelvis trajectory alignment</p>
+                        <h2 class="card-title">Expert Comparison</h2>
+                        <p class="card-description">Your movement vs. professional reference</p>
                     </div>
                 </div>
 
-                <div id="level2-content" class="mt-md">
-                    <div class="video-container">
-                        <video id="level2-video" class="video-player" controls></video>
-                    </div>
-                    <p class="text-center mt-sm" style="color: var(--text-secondary); font-size: 0.875rem;">
-                        Side-by-side comparison with temporal synchronization
-                    </p>
-                </div>
-            </div>
-
-            <!-- Level 3: Error Localization -->
-            <div class="card mb-lg">
-                <div class="card-header">
-                    <div class="card-number">3</div>
+                <div class="grid grid-2">
                     <div>
-                        <h3 class="card-title">Level-3: Error Localization</h3>
-                        <p class="card-description">Frame-wise, joint-wise error computation with color coding</p>
-                    </div>
-                </div>
-
-                <div id="level3-content" class="mt-md">
-                    <div class="video-container mb-md">
-                        <video id="level3-video" class="video-player" controls></video>
-                    </div>
-
-                    <details
-                        style="background: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-md); cursor: pointer;">
-                        <summary style="font-weight: 600; margin-bottom: 1rem;">📊 Joint Error Statistics</summary>
-                        <div id="joint-errors" class="grid grid-2" style="gap: 0.5rem; font-size: 0.875rem;">
-                            <!-- Will be populated dynamically -->
+                        <h4 style="margin-bottom: 1rem; font-size: 1rem;">Expert Reference</h4>
+                        <div class="video-container">
+                            <video id="expert-video" class="video-player" controls>
+                                <source id="expert-video-src" type="video/mp4">
+                            </video>
                         </div>
-                    </details>
-                </div>
-            </div>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">Professional
+                            technique</p>
+                    </div>
 
-            <!-- Level 4: Similarity Scoring -->
-            <div class="card mb-lg">
-                <div class="card-header">
-                    <div class="card-number success">4</div>
                     <div>
-                        <h3 class="card-title">Level-4: Similarity Scoring</h3>
-                        <p class="card-description">Aggregated performance metrics (0-100 scale)</p>
+                        <h4 style="margin-bottom: 1rem; font-size: 1rem;">Your Attempt</h4>
+                        <div class="video-container">
+                            <video id="user-video-comparison" class="video-player" controls>
+                                <source id="user-video-comparison-src" type="video/mp4">
+                            </video>
+                        </div>
+                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">Your
+                            performance</p>
                     </div>
-                </div>
-
-                <div id="level4-content" class="mt-md">
-                    <div class="video-container">
-                        <video id="level4-video" class="video-player" controls></video>
-                    </div>
-                    <p class="text-center mt-sm" style="color: var(--text-secondary); font-size: 0.875rem;">
-                        Final visualization with scoring HUD overlay
-                    </p>
                 </div>
             </div>
         </section>
@@ -174,11 +202,11 @@
         <!-- Actions -->
         <section class="text-center mt-xl">
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <button onclick="downloadResults()" class="btn btn-secondary">
-                    Download JSON Results
-                </button>
                 <a href="dashboard.html" class="btn btn-primary">
                     Try Another Pose →
+                </a>
+                <a href="gallery.html" class="btn btn-secondary">
+                    View Demo Gallery
                 </a>
             </div>
         </section>
@@ -199,44 +227,71 @@
 
         async function loadResults(sessionId) {
             try {
+                // Check for demo results first
+                const demoResults = sessionStorage.getItem('demoResults');
+                if (demoResults) {
+                    const data = JSON.parse(demoResults);
+
+                    // Update scores
+                    document.getElementById('structural-score').textContent = data.scores.structural + '%';
+                    document.getElementById('temporal-score').textContent = data.scores.temporal + '%';
+                    document.getElementById('overall-score').textContent = data.scores.overall + '%';
+
+                    // Load user original video (always use backend URL)
+                    const baseURL = 'http://localhost:5000';
+
+                    const userOriginal = document.getElementById('user-original');
+                    const userOriginalSrc = document.getElementById('user-original-src');
+                    userOriginalSrc.src = `${baseURL}${data.user_video}`;
+                    userOriginal.load();
+
+                    // Also use for comparison
+                    const userComparison = document.getElementById('user-video-comparison');
+                    const userComparisonSrc = document.getElementById('user-video-comparison-src');
+                    userComparisonSrc.src = `${baseURL}${data.user_video}`;
+                    userComparison.load();
+
+                    // Load expert video
+                    const expertVideo = document.getElementById('expert-video');
+                    const expertVideoSrc = document.getElementById('expert-video-src');
+                    expertVideoSrc.src = `${baseURL}${data.expert_video}`;
+                    expertVideo.load();
+
+                    return;
+                }
+
+                // Fallback to API call
                 const response = await fetch(`http://localhost:5000/api/results/${sessionId}`);
                 const data = await response.json();
 
-                // Update scores
-                document.getElementById('structural-score').textContent = data.scores.structural.toFixed(1);
-                document.getElementById('temporal-score').textContent = data.scores.temporal.toFixed(1);
-                document.getElementById('overall-score').textContent = data.scores.overall.toFixed(1);
+                console.log('[RESULTS] Loaded data:', data);
 
-                // Load videos
-                if (data.videos.level1_expert) {
-                    document.getElementById('level1-expert').src = `http://localhost:5000${data.videos.level1_expert}`;
-                }
-                if (data.videos.level1_user) {
-                    document.getElementById('level1-user').src = `http://localhost:5000${data.videos.level1_user}`;
-                }
-                if (data.videos.level2_alignment) {
-                    document.getElementById('level2-video').src = `http://localhost:5000${data.videos.level2_alignment}`;
-                }
-                if (data.videos.level3_errors) {
-                    document.getElementById('level3-video').src = `http://localhost:5000${data.videos.level3_errors}`;
-                }
-                if (data.videos.level4_scoring) {
-                    document.getElementById('level4-video').src = `http://localhost:5000${data.videos.level4_scoring}`;
+                // Update scores (handle both number and string)
+                const formatScore = (score) => typeof score === 'number' ? score.toFixed(1) : score;
+                document.getElementById('structural-score').textContent = formatScore(data.scores.structural) + '%';
+                document.getElementById('temporal-score').textContent = formatScore(data.scores.temporal) + '%';
+                document.getElementById('overall-score').textContent = formatScore(data.scores.overall) + '%';
+
+                // Load user original video
+                if (data.videos.user_original) {
+                    const userOriginal = document.getElementById('user-original');
+                    const userOriginalSrc = document.getElementById('user-original-src');
+                    userOriginalSrc.src = `http://localhost:5000${data.videos.user_original}`;
+                    userOriginal.load();
+
+                    // Also use for comparison
+                    const userComparison = document.getElementById('user-video-comparison');
+                    const userComparisonSrc = document.getElementById('user-video-comparison-src');
+                    userComparisonSrc.src = `http://localhost:5000${data.videos.user_original}`;
+                    userComparison.load();
                 }
 
-                // Load joint errors
-                if (data.joint_errors) {
-                    const jointErrorsDiv = document.getElementById('joint-errors');
-                    const joints = Object.entries(data.joint_errors.joint_statistics || {});
-
-                    jointErrorsDiv.innerHTML = joints.map(([joint, stats]) => `
-                        <div style="padding: 0.75rem; background: var(--bg-card); border-radius: var(--radius-sm);">
-                            <strong>${joint.replace(/_/g, ' ')}</strong>: 
-                            <span style="color: var(${stats.mean > 0.1 ? '--text-secondary' : '--success-green'})">
-                                Mean: ${stats.mean.toFixed(3)}
-                            </span>
-                        </div>
-                    `).join('');
+                // Load expert video
+                if (data.expert_video) {
+                    const expertVideo = document.getElementById('expert-video');
+                    const expertVideoSrc = document.getElementById('expert-video-src');
+                    expertVideoSrc.src = `http://localhost:5000${data.expert_video}`;
+                    expertVideo.load();
                 }
 
             } catch (error) {
@@ -244,12 +299,21 @@
                 alert('Error loading results. Please try again.');
             }
         }
-
-        async function downloadResults() {
-            const sessionId = sessionStorage.getItem('sessionId');
-            window.open(`http://localhost:5000/api/results/${sessionId}/download`, '_blank');
-        }
     </script>
+
+    <style>
+        .video-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 200px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            border: 2px dashed var(--border-color);
+        }
+    </style>
 </body>
 
 </html>
