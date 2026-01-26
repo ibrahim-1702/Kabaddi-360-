@@ -72,130 +72,91 @@
             </div>
         </div>
 
-        <!-- Your Video Transformation Journey -->
+        <!-- Level-1: Raw Video -->
         <section class="mb-xl">
             <div class="card">
                 <div class="card-header mb-md">
                     <div class="card-number">1</div>
                     <div>
-                        <h2 class="card-title">Your Video Transformation Journey</h2>
-                        <p class="card-description">See how AI processes your movement through each pipeline stage</p>
+                        <h2 class="card-title">Level-1: Your Uploaded Video</h2>
+                        <p class="card-description">Original kabaddi movement input</p>
                     </div>
                 </div>
 
-                <div class="grid grid-3">
-                    <!-- Original Video -->
-                    <div class="video-card">
-                        <div class="video-container">
-                            <video id="user-original" class="video-player" controls>
-                                <source id="user-original-src" type="video/mp4">
-                            </video>
-                        </div>
-                        <h4 style="margin-top: 1rem; font-size: 1rem;">Your Original Video</h4>
-                        <p style="font-size: 0.875rem; color: var(--text-secondary);">Raw uploaded movement</p>
-                    </div>
-
-                    <!-- YOLO Detection -->
-                    <div class="video-card">
-                        <div class="video-container">
-                            <div id="yolo-placeholder" class="video-placeholder">
-                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔍</div>
-                                <p style="color: var(--text-secondary); font-size: 0.875rem;">YOLO Person Detection</p>
-                                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Available
-                                    in full version</p>
-                            </div>
-                        </div>
-                        <h4 style="margin-top: 1rem; font-size: 1rem;">Person Detection</h4>
-                        <p style="font-size: 0.875rem; color: var(--text-secondary);">AI identifies player in frame</p>
-                    </div>
-
-                    <!-- MediaPipe Skeleton -->
-                    <div class="video-card">
-                        <div class="video-container">
-                            <div id="mediapipe-placeholder" class="video-placeholder">
-                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🦴</div>
-                                <p style="color: var(--text-secondary); font-size: 0.875rem;">33-Joint Skeleton</p>
-                                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Available
-                                    in full version</p>
-                            </div>
-                        </div>
-                        <h4 style="margin-top: 1rem; font-size: 1rem;">Pose Estimation</h4>
-                        <p style="font-size: 0.875rem; color: var(--text-secondary);">MediaPipe extracts 33 joints</p>
-                    </div>
-
-                    <!-- COCO-17 -->
-                    <div class="video-card">
-                        <div class="video-container">
-                            <div id="coco17-placeholder" class="video-placeholder">
-                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">📐</div>
-                                <p style="color: var(--text-secondary); font-size: 0.875rem;">COCO-17 Format</p>
-                                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Available
-                                    in full version</p>
-                            </div>
-                        </div>
-                        <h4 style="margin-top: 1rem; font-size: 1rem;">Format Conversion</h4>
-                        <p style="font-size: 0.875rem; color: var(--text-secondary);">Standardized 17-point skeleton</p>
-                    </div>
-
-                    <!-- Cleaned Pose -->
-                    <div class="video-card">
-                        <div class="video-container">
-                            <div id="cleaned-placeholder" class="video-placeholder">
-                                <div style="font-size: 3rem; margin-bottom: 0.5rem;">✨</div>
-                                <p style="color: var(--text-secondary); font-size: 0.875rem;">Cleaned & Normalized</p>
-                                <p style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem;">Available
-                                    in full version</p>
-                            </div>
-                        </div>
-                        <h4 style="margin-top: 1rem; font-size: 1rem;">Pose Cleaning</h4>
-                        <p style="font-size: 0.875rem; color: var(--text-secondary);">Smoothed & ready for analysis</p>
-                    </div>
+                <div class="video-container" style="max-width: 800px; margin: 0 auto;">
+                    <video id="level1-raw" class="video-player" controls>
+                        <source id="level1-raw-src" type="video/mp4">
+                    </video>
                 </div>
-
-                <div class="mt-md"
-                    style="text-align: center; padding: 1rem; background: var(--bg-tertiary); border-radius: var(--radius-md);">
-                    <p style="color: var(--text-secondary); font-size: 0.875rem;">
-                        ℹ️ <strong>Demo Mode:</strong> This demo shows your original video and scores. Full pipeline
-                        visualization (YOLO, MediaPipe, etc.) available in production version.
-                    </p>
-                </div>
+                <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+                    Raw uploaded movement (unprocessed)
+                </p>
             </div>
         </section>
 
-        <!-- Expert Comparison -->
+        <!-- Level-2: DTW Alignment -->
         <section class="mb-xl">
             <div class="card">
                 <div class="card-header mb-md">
                     <div class="card-number">2</div>
                     <div>
-                        <h2 class="card-title">Expert Comparison</h2>
-                        <p class="card-description">Your movement vs. professional reference</p>
+                        <h2 class="card-title">Level-2: Temporal Alignment (DTW)</h2>
+                        <p class="card-description">Side-by-side comparison using pelvis-based DTW</p>
                     </div>
                 </div>
 
-                <div class="grid grid-2">
-                    <div>
-                        <h4 style="margin-bottom: 1rem; font-size: 1rem;">Expert Reference</h4>
-                        <div class="video-container">
-                            <video id="expert-video" class="video-player" controls>
-                                <source id="expert-video-src" type="video/mp4">
-                            </video>
-                        </div>
-                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">Professional
-                            technique</p>
-                    </div>
+                <div class="video-container" style="max-width: 1000px; margin: 0 auto;">
+                    <video id="level2-alignment" class="video-player" controls>
+                        <source id="level2-alignment-src" type="video/mp4">
+                    </video>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+                    Expert (green) vs Your Movement (cyan) - Temporally aligned
+                </p>
+            </div>
+        </section>
 
+        <!-- Level-3: Error Localization -->
+        <section class="mb-xl">
+            <div class="card">
+                <div class="card-header mb-md">
+                    <div class="card-number">3</div>
                     <div>
-                        <h4 style="margin-bottom: 1rem; font-size: 1rem;">Your Attempt</h4>
-                        <div class="video-container">
-                            <video id="user-video-comparison" class="video-player" controls>
-                                <source id="user-video-comparison-src" type="video/mp4">
-                            </video>
-                        </div>
-                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--text-secondary);">Your
-                            performance</p>
+                        <h2 class="card-title">Level-3: Error Localization</h2>
+                        <p class="card-description">Color-coded skeleton showing joint-wise errors</p>
                     </div>
                 </div>
+
+                <div class="video-container" style="max-width: 800px; margin: 0 auto;">
+                    <video id="level3-errors" class="video-player" controls>
+                        <source id="level3-errors-src" type="video/mp4">
+                    </video>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+                    Phase-based analysis: EARLY → MID → LATE
+                </p>
+            </div>
+        </section>
+
+        <!-- Level-4: Similarity Scoring -->
+        <section class="mb-xl">
+            <div class="card">
+                <div class="card-header mb-md">
+                    <div class="card-number">4</div>
+                    <div>
+                        <h2 class="card-title">Level-4: Similarity Scoring</h2>
+                        <p class="card-description">Final performance scores with HUD overlay</p>
+                    </div>
+                </div>
+
+                <div class="video-container" style="max-width: 800px; margin: 0 auto;">
+                    <video id="level4-scoring" class="video-player" controls>
+                        <source id="level4-scoring-src" type="video/mp4">
+                    </video>
+                </div>
+                <p style="text-align: center; margin-top: 1rem; color: var(--text-secondary);">
+                    Performance summary with structural, temporal, and overall scores
+                </p>
             </div>
         </section>
 
@@ -272,26 +233,45 @@
                 document.getElementById('temporal-score').textContent = formatScore(data.scores.temporal) + '%';
                 document.getElementById('overall-score').textContent = formatScore(data.scores.overall) + '%';
 
-                // Load user original video
-                if (data.videos.user_original) {
-                    const userOriginal = document.getElementById('user-original');
-                    const userOriginalSrc = document.getElementById('user-original-src');
-                    userOriginalSrc.src = `http://localhost:5000${data.videos.user_original}`;
-                    userOriginal.load();
+                // Load visualization videos
+                if (data.visualization_videos) {
+                    console.log('[RESULTS] Loading visualization videos...');
 
-                    // Also use for comparison
-                    const userComparison = document.getElementById('user-video-comparison');
-                    const userComparisonSrc = document.getElementById('user-video-comparison-src');
-                    userComparisonSrc.src = `http://localhost:5000${data.videos.user_original}`;
-                    userComparison.load();
-                }
+                    // Level-1 raw video
+                    if (data.visualization_videos.level1_raw) {
+                        const level1 = document.getElementById('level1-raw');
+                        const level1Src = document.getElementById('level1-raw-src');
+                        level1Src.src = `http://localhost:5000${data.visualization_videos.level1_raw}`;
+                        level1.load();
+                        console.log('[RESULTS] ✓ Level-1 video loaded');
+                    }
 
-                // Load expert video
-                if (data.expert_video) {
-                    const expertVideo = document.getElementById('expert-video');
-                    const expertVideoSrc = document.getElementById('expert-video-src');
-                    expertVideoSrc.src = `http://localhost:5000${data.expert_video}`;
-                    expertVideo.load();
+                    // Level-2 DTW alignment
+                    if (data.visualization_videos.level2_alignment) {
+                        const level2 = document.getElementById('level2-alignment');
+                        const level2Src = document.getElementById('level2-alignment-src');
+                        level2Src.src = `http://localhost:5000${data.visualization_videos.level2_alignment}`;
+                        level2.load();
+                        console.log('[RESULTS] ✓ Level-2 video loaded');
+                    }
+
+                    // Level-3 error visualization
+                    if (data.visualization_videos.level3_errors) {
+                        const level3 = document.getElementById('level3-errors');
+                        const level3Src = document.getElementById('level3-errors-src');
+                        level3Src.src = `http://localhost:5000${data.visualization_videos.level3_errors}`;
+                        level3.load();
+                        console.log('[RESULTS] ✓ Level-3 video loaded');
+                    }
+
+                    // Level-4 scoring
+                    if (data.visualization_videos.level4_scoring) {
+                        const level4 = document.getElementById('level4-scoring');
+                        const level4Src = document.getElementById('level4-scoring-src');
+                        level4Src.src = `http://localhost:5000${data.visualization_videos.level4_scoring}`;
+                        level4.load();
+                        console.log('[RESULTS] ✓ Level-4 video loaded');
+                    }
                 }
 
             } catch (error) {

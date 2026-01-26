@@ -1,0 +1,797 @@
+
+
+========== SLIDE 1 ==========
+
+An AR-Based Coaching System for Kabaddi Using Pose Estimation and LLM Feedback
+Dr. T. Mala,					    Mohamed Ibrahim MS,
+Professor,						          2024178011
+
+
+========== SLIDE 2 ==========
+
+1. Introduction
+Kabaddi is a high-intensity contact sport that requires explosive movements such as toe-touch, scorpion kick, hand touch, dubki, bonus step, and jump raid. Mastery of these skills demands precise timing, balance, and body coordination.
+
+Players—especially beginners—often struggle to correctly learn these techniques because visual demonstrations are brief, coaches may not always be available, and players cannot see their own mistakes in real time.
+
+This project introduces an AR-based Kabaddi Ghost Trainer, where a virtual avatar demonstrates reference moves and the system evaluates how closely the player replicates them using pose estimation, sequence comparison, and feedback generation.
+
+The goal is to help Kabaddi learners practice independently, receive real-time correction cues, and improve movements with clear visual and data-driven guidance.
+
+
+========== SLIDE 3 ==========
+
+2. Introduction (Kabaddi skills)
+Toe Touch
+A quick forward extension of the leg to tap the defender while maintaining balance.
+Scorpion Kick
+A backward high kick performed when facing away from the defender.
+
+
+
+Jump Raid (Dive Escape)
+A leap over defenders to avoid blocks while maintaining raid rhythm.
+
+
+
+Hand Touch / Running Hand Touch
+Fast hand extension during forward motion to tag defenders.
+
+Dubki
+A low-body dive used to slip under a defender’s block.
+Bonus Step
+A long stride into the bonus line using body stretch and hip flexibility.
+Ankle Hold Pose
+Forward lunge targeting ankle
+Thigh Hold Pose
+Side-entry tackle posture
+Chain Tackle Formation Pose
+Coordinated multi-player defensive posture to tackle a rider
+Running Raid Pose
+Continuous forward locomotion Used before hand touch or toe touch
+
+
+========== SLIDE 4 ==========
+
+2. Problem Statement
+Problem:
+Kabaddi learners lack continuous visual guidance, real-time correction, and objective scoring, making it difficult to accurately replicate advanced movements.
+
+Solutions Provided By the Proposed System:
+AR Playback of Reference Moves
+Players can view a 3D/AR “ghost” demonstrating the correct technique, allowing them to mimic the move with proper angle and timing.
+Automated Movement Analysis
+The user's captured movement is processed using pose estimation and compared with expert reference sequences.
+Error Identification
+Joint-wise mistakes, timing mismatches, and posture deviations are detected using similarity metrics and threshold-based classifiers.
+LLM-Generated Coaching Feedback
+The system produces simple, actionable instructions (“Raise your right elbow higher”, “Lean less forward”, etc.) to guide improvement.
+
+
+
+========== SLIDE 5 ==========
+
+4. Literature Survey
+
+
+========== SLIDE 6 ==========
+
+4. Literature Survey cont.
+
+
+========== SLIDE 7 ==========
+
+5. Overall System Architecture (High Level)
+
+
+
+========== SLIDE 8 ==========
+
+6. Modules 
+ Pose Extraction & Cleaning
+YOLO PERSON DETECTION (RAIDER)
+POSE ESTIMATION
+FORMAT CONVERTION
+DATA CANONICALIZATION
+
+TEMPORAL ALIGNMENT
+PELVIS TRAJECTORY EXTRACTION
+DYNAMIC TIME WARPING
+ALIGNED SQUENCE GENERATOR
+
+JOINT ERROR ANALYSIS
+ERROR COMPUTATION ENGINE
+STATISTICAL AGGREGATION MODULE
+DATA SERIALIZATION
+
+SIMLARITY SCORE
+SIMILARITY SCORE ENGINE
+
+
+
+
+
+========== SLIDE 9 ==========
+
+6 A. Modules (POSE EXTRACTION & CLEANING)
+Module 1: POSE EXTRACTION & CLEANING
+
+SUB-MODULES :
+YOLO PERSON DETECTION
+POSE ESTIMATION
+FORMAT CONVERTION
+DATA CANONICALIZATION & CLEANING
+
+
+========== SLIDE 10 ==========
+
+6A (i) – Module Overview & Block Diagram
+SUB-Module:
+YOLO-Based Person Detection and Tracking
+
+Block Diagram: 
+
+
+========== SLIDE 11 ==========
+
+6A (i) – Algorithm Details
+Algorithms Used
+YOLOv8 – Object Detection
+Role: Detect all human instances in each frame.
+Result: B = { (x1, y1, x2, y2, confidence, class=person) }
+ByteTrack – Multi-object Tracking
+Role: Assign persistent IDs to detected persons across frames.
+Result: Track ID → Sequence of bounding boxes over time
+Motion-Based Raider Selection (Heuristic) “Cumulative Displacement Heuristic”
+Formula: 
+		motion_i = Σ || position_t − position_(t−1) ||
+		raider = argmax(motion_i)
+
+
+
+
+========== SLIDE 12 ==========
+
+6A (i)– Algorithm Details cont.
+Final OUTPUT:
+Raider_BBoxes = {
+  frame_1: (x1, y1, x2, y2),
+  frame_2: (x1, y1, x2, y2),
+  ...
+}
+
+Sample I/P, O/P:
+	Sample Input: raw video with 5–7 players visible
+	
+Sample Output (video with annotations)
+	Frame 45:
+	Raider ID = 3
+	Bounding Box = (420, 180, 610, 520)
+
+
+
+========== SLIDE 13 ==========
+
+6A (ii) – Module Overview & Block Diagram
+Module Name
+Single-Person Pose Estimation using MediaPipe BlazePose
+Purpose
+Extract of 2D skeletal keypoints of identified raider from video frames.
+Converts pixel-level video data into structured pose coordinates.
+Block Digram:
+Raider Bounding Box Sequence
+            ↓
+Frame-wise Raider Cropping
+            ↓
+MediaPipe Pose Estimation (MP33)
+            ↓
+Raw Pose Keypoints (33 joints, normalized)
+
+
+========== SLIDE 14 ==========
+
+6A (ii) Algorithm Details
+
+Algorithm Used
+MediaPipe BlazePose (33-Keypoint Model)
+Step 1: Raider-Locked Frame Cropping
+Input: Frame + Raider Bounding Box
+Padding: ±40 pixels
+Clipping: Stay within frame bounds
+Result: Tight region of interest (ROI) containing only the raider
+Step 2: MediaPipe Pose Estimation 
+CNN-based pose estimation model
+Trained for full-body human pose
+Configuration Used
+Videos (not static image)
+Temporal landmark smoothing enabled
+Confidence thresholds applied internally
+Pose Representation
+For each frame:
+Pose_t = {
+	joint_0: (x, y),
+	joint_1: (x, y),
+	...
+	joint_32: (x, y)
+}
+
+
+
+========== SLIDE 15 ==========
+
+6A (ii) Algorithm Details (cont)
+Sample Input & Output
+Sample Input
+Frame 120
+Raider Bounding Box = (420, 180, 610, 520)
+Sample Output
+Pose[120] =
+	[
+  		(0.48, 0.12),   # nose
+  		(0.46, 0.10),   # left eye
+  		...
+  		(0.52, 0.91)    # right foot
+	]
+Shape:
+(33 joints × 2 coordinates)
+
+
+
+========== SLIDE 16 ==========
+
+6A (iii) Module Overview & Block Diagram
+Module Name
+Pose Format Conversion: MediaPipe-33 to COCO-17
+Purpose
+Convert MP33-keypoint pose representation into standard COCO-17 skeleton format for downstream analysis and compatibility with AR redndering.
+Reduction of redundant joints and use widely accepted pose standard (COCO17).
+
+
+Block diagram:
+Raw MP33 Pose Data (Normalized)
+            ↓
+Joint Index Mapping
+            ↓
+Coordinate Transformation
+            ↓
+COCO-17 Pose Data (Pixel Space)
+
+
+========== SLIDE 17 ==========
+
+6A (iii) Algorithm Details
+Algorithm Type
+Deterministic Joint Index Mapping + Coordinate Transformation
+(No learning, no estimation)
+Step 1: Joint Index Mapping
+Each COCO-17 joint is mapped to a specific MediaPipe landmark index. 
+Mapping Table (Fixed)
+
+
+
+========== SLIDE 18 ==========
+
+6A(iii) Algorithm Details (cont)
+Step 2: Coordinate Transformation
+Transformation Formula
+	For each joint:
+	x_pixel = bbox_x1 + lm.x × bbox_width
+y_pixel = bbox_y1 + lm.y × bbox_height
+Visibility Rule
+If landmark visibility < 0.5:
+(x, y) = NaN
+
+
+
+========== SLIDE 19 ==========
+
+6A(iii) Algorithm Details (cont)
+Sample Input & Output
+Sample Input:
+	
+
+
+
+Sample Output:
+
+
+========== SLIDE 20 ==========
+
+6A(iv) Module Overview & Block Diagram
+Module Name
+COCO-17 Pose Canonicalization and Temporal Cleaning
+Purpose
+Convert raw COCO-17 pose to stable, normalized, and noise-free pose sequence for temporal alignment and error analysis.
+
+Block diagram:
+Raw COCO-17 Pose Sequence
+            ↓
+Temporal Interpolation
+            ↓
+Pelvis Centering
+            ↓
+Scale Normalization
+            ↓
+Outlier Suppression
+            ↓
+EMA Smoothing
+            ↓
+Cleaned & Normalized COCO-17 Pose
+
+
+========== SLIDE 21 ==========
+
+6A(iv) Algorithms Used
+Type:
+	Deterministic Signal-Processing Pipeline (5 Steps)
+Step 1: Temporal Interpolation
+Algorithm: (Rule Based)	Linear Interpolation Across Time
+Rule
+ Interpolates only if at least two valid frames exist for a joint
+
+Step 2: Pelvis Centering (Translation Normalization)
+Algorithm:	Pelvis-Based Centering
+Formula:
+	pelvis(t) = (left_hip + right_hip) / 2
+	joint_centered = joint − pelvis(t)
+
+
+========== SLIDE 22 ==========
+
+6A(iv) Algorithms Used (cont)
+Step 3: Scale Normalization
+Algorithm	Torso-Length Normalization
+Formula
+	torso_length = || shoulder_center − hip_center ||
+	joint_normalized = joint_centered / torso_length
+Step 4: Outlier Suppression
+Algorithm	Z-Score Velocity-Based Outlier Detection
+Logic
+velocity(t) = || pose(t) − pose(t−1) ||
+z = (velocity − μ) / σ
+
+If |z| > 3.0 → replace pose(t) with pose(t−1)
+
+
+========== SLIDE 23 ==========
+
+6B Modules (POSE EXTRACTION & CLEANING)
+Module 2: POSE EXTRACTION & CLEANING
+
+SUB-MODULES :
+PELVIS TRAJECTORY EXTRACTION
+DYNAMIC TIME WARPING
+ALIGNED SQUENCE GENERATOR
+
+
+========== SLIDE 24 ==========
+
+6B (i) – Module Overview & Block Diagram
+SUB-Module:
+	PELVIS TRAJECTORY EXTRACTION
+
+Block Diagram: 
+Cleaned COCO-17 Pose Sequence
+            ↓
+Left Hip + Right Hip Selection
+            ↓
+Pelvis Midpoint Computation
+            ↓
+Pelvis Trajectory (T × 2)
+
+
+========== SLIDE 25 ==========
+
+6B(i) Algorithm Details
+Algorithm Type	
+Deterministic Anatomical Anchor Extraction
+
+Joint Selection
+From COCO-17 skeleton:
+Left Hip  → Joint index 11
+Right Hip → Joint index 12
+These joints are guaranteed to exist after Level-1 cleaning.
+Pelvis Computation Formula
+For each frame t:
+pelvis(t) = (pose[t, 11] + pose[t, 12]) / 2,
+Where: pose[t, j] is the (x, y) coordinate of joint j at frame t
+
+
+
+========== SLIDE 26 ==========
+
+6B(i) Algorithm Details (cont)
+Sample Input & Output
+
+Sample Input
+
+
+Sample Output
+
+
+========== SLIDE 27 ==========
+
+6B (ii) – Module Overview & Block Diagram
+SUB-Module:
+	 Dynamic Time Warping for Temporal Alignment
+
+Block Diagram: 
+Expert Pelvis Trajectory (T_e × 2)
+                │
+                ├──→ DTW Cost Matrix Computation
+                │
+User Pelvis Trajectory (T_u × 2)
+                ↓
+        Optimal Alignment Path
+                ↓
+     Aligned Frame Index Pairs
+
+
+========== SLIDE 28 ==========
+
+6B (ii) – Algorithm Details
+Algorithm Type
+Dynamic Programming-Based Temporal Alignment
+
+Step 1: Cost Matrix Construction
+Distance Metric
+	For expert frame i and user frame j:
+		d(i, j) = || expert_pelvis[i] − user_pelvis[j] ||
+
+Step 2: Optimal Path Backtracking
+Backtracking Rule
+Start from:
+(i, j) = (T_expert, T_user)
+
+At each step, move to the minimum of:
+D[i−1, j−1], D[i−1, j], D[i, j−1]
+
+Termination condition :
+	(i == 0 AND j == 0)
+
+
+
+
+========== SLIDE 29 ==========
+
+6B (ii) – Algorithm Details (cont)
+Sample Input & Output
+
+Sample Input
+Expert length = 100 frames
+User length   = 120 frames
+
+Sample Output
+Aligned length = 115 frames
+path_expert = [0,1,1,2,3,3,4,...]
+path_user   = [0,1,2,3,4,5,5,...]
+
+
+
+
+========== SLIDE 30 ==========
+
+6B (iii) – Module Overview & Block Diagram
+SUB-Module:
+	Index-Based Aligned Pose Sequence Generation
+
+Block Diagram: 
+Expert Pose Sequence (T_e × 17 × 2)
+                │
+                ├──→ DTW Alignment Indices
+                │
+User Pose Sequence (T_u × 17 × 2)
+                ↓
+     Index-Based Pose Extraction
+                ↓
+Aligned Expert & User Pose Sequences
+
+
+========== SLIDE 31 ==========
+
+6B (iii) Algorithm Details
+Algorithm Type
+	Direct Index-Based Pose Extraction
+Aligned Pose Construction Rule
+For each aligned frame index i:
+	expert_aligned[i] = expert_pose[path_expert[i]]
+	user_aligned[i]   = user_pose[path_user[i]]
+
+On Condition:
+expert_aligned.shape == user_aligned.shape
+
+
+========== SLIDE 32 ==========
+
+6B (iii) Algorithm Details (cont)
+Sample Input & Output
+Sample Input
+Expert pose length = 100 frames
+User pose length   = 120 frames
+DTW paths:
+path_expert = [0,1,1,2,3,3,4]
+path_user   = [0,1,2,3,4,5,5]
+
+Sample Output
+	Aligned length = 7 frames
+	expert_aligned: [pose_0, pose_1, pose_1, pose_2, pose_3, pose_3, pose_4]
+	user_aligned: pose_0, pose_1, pose_2, pose_3, pose_4, pose_5, pose_5]
+
+
+
+========== SLIDE 33 ==========
+
+6C Modules (JOINT ERROR ANALYSIS)
+Module 3: JOINT ERROR ANALYSIS
+
+SUB-MODULES :
+ERROR COMPUTATION ENGINE
+STATISTICAL AGGREGATION MODULE
+DATA SERIALIZATION
+
+
+========== SLIDE 34 ==========
+
+6C(i) Module Overview & Block Diagram
+SUB-Module:
+	Frame-wise and Joint-wise Error Computation Engine
+
+Block Diagram: 
+
+Aligned Expert Pose (T × 17 × 2)
+                │
+               ├──→ Euclidean Distance Computation
+                │
+Aligned User Pose (T × 17 × 2)
+                ↓
+          Error Matrix (T × 17)
+
+
+========== SLIDE 35 ==========
+
+6C (i) Algorithm Details
+Algorithm Type
+	Deterministic Euclidean Distance Computation
+Frame-wise Joint Error Formula
+For frame t and joint j:
+error(t, j) = || expert(t, j) − user(t, j) ||₂
+error(t, j) = sqrt( (x_e − x_u)² + (y_e − y_u)² )
+Where:
+	(x_e, y_e) → expert joint coordinates
+	(x_u, y_u) → user joint coordinates
+
+
+========== SLIDE 36 ==========
+
+6C (i) Algorithm Details (cont)
+Sample Input & Output
+Sample Input
+Frame 25
+Joint: Left Knee
+Expert: (0.45, 0.78)
+User:   (0.52, 0.71)
+Sample Output
+error = sqrt((0.45−0.52)² + (0.78−0.71)²)
+      ≈ 0.099
+Stored at:
+error_matrix[25][left_knee]
+
+
+
+========== SLIDE 37 ==========
+
+6C(ii) Module Overview & Block Diagram
+SUB-Module:
+	STATISTICAL AGGREGATION MODULE
+
+Block Diagram: 
+
+Joint Error Matrix (T × 17)
+            ↓
+Statistical Aggregation
+         ↓ ↓ ↓
+Joint Statistics
+Frame Statistics
+Phase Statistics
+
+
+========== SLIDE 38 ==========
+
+6C (ii) Algorithms Details
+Algorithm Type
+Deterministic Statistical Aggregation
+
+1. Joint-wise Temporal Aggregation
+	Statistics Computed (per joint)
+For joint j:
+	mean_error(j) = (1/T) Σ error(t, j)
+	max_error(j)  = max(error(t, j))
+	std_error(j)  = standard deviation(error(t, j))
+Output
+	17 joints → {mean, max, std}
+
+
+
+========== SLIDE 39 ==========
+
+6C (ii) Algorithms Details (cont)
+2. Frame-wise Spatial Aggregation
+
+Statistics Computed (per frame)
+For frame t:
+	mean_error(t) = (1/17) Σ error(t, j)
+	max_error(t)  = max(error(t, j))
+Output
+	T frames → {mean_error, max_error}
+
+
+
+========== SLIDE 40 ==========
+
+6C (ii) Algorithms Details (cont)
+3. Temporal Phase-wise Aggregation
+
+Phase Definition
+Given total frames T:
+Early phase: frames [0, T/3)
+Mid phase:   frames [T/3, 2T/3)
+Late phase:  frames [2T/3, T)
+
+Phase Statistics
+	For each phase p and joint j:
+	phase_error(p, j) = mean(error(t, j)) for t ∈ phase p
+	Output
+		3 phases × 17 joints
+
+
+========== SLIDE 41 ==========
+
+6C (ii) Algorithms Details (cont)
+4. Frame–Joint Error Export
+Export Structure
+Frame t:
+  joint_0 → error
+  joint_1 → error
+  ...
+  joint_16 → error
+Sample Input & Output
+Sample Input
+error_matrix[40][left_knee] = 0.082
+error_matrix[41][left_knee] = 0.091
+Sample Output
+left_knee:
+  mean = 0.042
+  max  = 0.089
+  std  = 0.018
+
+
+
+========== SLIDE 42 ==========
+
+6C(iii) Module Overview & Block Diagram
+SUB-Module:
+	 DATA SERIALIZATION
+	
+Block Diagram:
+Joint Error Matrix
+Joint Statistics
+Frame Statistics
+Phase Statistics
+            ↓
+Structured Data Packaging
+            ↓
+joint_errors.json
+
+
+========== SLIDE 43 ==========
+
+6C (iii) Algorithms Details
+Algorithm Type
+	Deterministic Data Packaging & Export
+JSON Structure
+1. Metadata Section
+metadata:
+  num_frames
+  num_joints
+  alignment_method
+  expert_pose_path
+  user_pose_path
+2. Joint Statistics
+Summarized performance per joint.
+joint_statistics:
+  joint_name:
+    mean
+    max
+    std
+3. Frame Statistics
+Overall body deviation per frame.
+frame_statistics:
+  frame_index:
+    mean_error
+    max_error
+4. Phase Statistics
+Temporal progression of joint errors.
+phase_statistics:
+  early:
+    joint_name → mean_error
+  mid:
+    joint_name → mean_error
+  late:
+    joint_name → mean_error
+5. Frame–Joint Error Export
+Full error detail retained.
+frame_joint_errors:
+  frame_index:
+    joint_name → error
+
+
+========== SLIDE 44 ==========
+
+6C (iii) Algorithms Details (cont)
+Sample Input & Output
+Sample Input
+left_knee:
+  mean = 0.042
+  max  = 0.089
+  std  = 0.018
+Serialized Output
+"left_knee": {
+  "mean": 0.042,
+  "max": 0.089,
+  "std": 0.018
+}
+
+
+
+========== SLIDE 45 ==========
+
+6D Modules (SIMILARITY SCORING)
+Module 4: JOINT SIMILARITY SCORING
+
+SUB-MODULES :
+SIMILARITY SCORE ENGINE
+
+
+========== SLIDE 46 ==========
+
+6D (i) Module Overview & Block Diagram
+Module Name
+SIMILARITY SCORE ENGINE
+
+Block Diagram (What to Draw)
+joint_errors.json
+        ↓
+Structural Similarity Computation
+Temporal Similarity Computation
+        ↓
+Weighted Score Aggregation
+        ↓
+Similarity Scores (0–100%)
+
+
+
+========== SLIDE 47 ==========
+
+6D (i) Scoring Algorithms
+Algorithm Type
+	Deterministic Score Aggregation
+
+1. Structural Similarity Score
+	Extract mean joint errors: mean_errors = { mean_error(j) for all 17 joints }
+	Compute overall mean joint error: mean_joint_error = nanmean(mean_errors)
+	Normalize using fixed threshold: structural_similarity = (1 − mean_joint_error / MAX_ERROR_THRESHOLD) × 100
+Where:	MAX_ERROR_THRESHOLD = 1.5 Clamp result to [0, 100].
+
+
+2. Temporal Similarity Score
+Extract aligned frame count: T_aligned
+Compare with baseline:
+BASELINE_FRAMES = 115
+Compute deviation:
+frame_deviation = |T_aligned − BASELINE_FRAMES|
+Normalize deviation:
+temporal_quality =
+1 − (frame_deviation / (BASELINE_FRAMES × 0.5))
+Scale to score range:
+temporal_similarity = 70 + (temporal_quality × 30)
+

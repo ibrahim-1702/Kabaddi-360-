@@ -1,5 +1,5 @@
 {
-  "session_id": "b052e2e2-4904-4800-9390-895c22e2efcd",
+  "session_id": "c29e150a-4c53-4738-8246-a6278eebf5ec",
   "pose_id": "9d3dbf9c-4ef2-4633-8f59-22564dcb041b",
   "scores": {
     "structural": 55.5,
@@ -2626,21 +2626,27 @@
     }
   },
   "videos": {
-    "user_original": "/data/user_uploads/user_b052e2e2-4904-4800-9390-895c22e2efcd.mp4",
+    "user_original": "/data/user_uploads/user_c29e150a-4c53-4738-8246-a6278eebf5ec.mp4",
     "expert_reference": "/data/expert_poses/9d3dbf9c-4ef2-4633-8f59-22564dcb041b.mp4"
   },
+  "visualization_videos": {
+    "level1_raw": "/data/user_uploads/user_c29e150a-4c53-4738-8246-a6278eebf5ec.mp4",
+    "level2_alignment": "/data/results/c29e150a-4c53-4738-8246-a6278eebf5ec/level2_alignment.mp4",
+    "level3_errors": "/data/results/c29e150a-4c53-4738-8246-a6278eebf5ec/level3_errors.mp4",
+    "level4_scoring": "/data/results/c29e150a-4c53-4738-8246-a6278eebf5ec/level4_scoring.mp4"
+  },
   "pose_files": {
-    "expert_aligned": "data\\results\\b052e2e2-4904-4800-9390-895c22e2efcd\\expert_aligned.npy",
-    "user_aligned": "data\\results\\b052e2e2-4904-4800-9390-895c22e2efcd\\user_aligned.npy",
-    "joint_errors": "data\\results\\b052e2e2-4904-4800-9390-895c22e2efcd\\joint_errors.json",
-    "similarity_scores": "data\\results\\b052e2e2-4904-4800-9390-895c22e2efcd\\similarity_scores.json"
+    "expert_aligned": "data\\results\\c29e150a-4c53-4738-8246-a6278eebf5ec\\expert_aligned.npy",
+    "user_aligned": "data\\results\\c29e150a-4c53-4738-8246-a6278eebf5ec\\user_aligned.npy",
+    "joint_errors": "data\\results\\c29e150a-4c53-4738-8246-a6278eebf5ec\\joint_errors.json",
+    "similarity_scores": "data\\results\\c29e150a-4c53-4738-8246-a6278eebf5ec\\similarity_scores.json"
   },
   "metadata": {
     "expert_frames": 78,
     "user_frames": 107,
     "aligned_frames": 107,
-    "processing_time_seconds": 7.81,
-    "timestamp": "2026-01-24 20:47:19",
+    "processing_time_seconds": 16.2,
+    "timestamp": "2026-01-25 11:21:45",
     "pipeline_version": "production_v1"
   }
 }

@@ -34,6 +34,19 @@ except ImportError as e:
     print(f"[WARNING] Level-1 not available: {e}")
     LEVEL1_AVAILABLE = False
 
+# Import visualization generator
+try:
+    from frontend.backend.visualization_generator import (
+        create_level2_visualization,
+        create_level3_visualization,
+        create_level4_visualization
+    )
+    VISUALIZATION_AVAILABLE = True
+    print("[Init] Visualization generator loaded successfully")
+except ImportError as e:
+    print(f"[WARNING] Visualization not available: {e}")
+    VISUALIZATION_AVAILABLE = False
+
 # We'll implement DTW, error computation, and scoring inline (copied from source)
 # This avoids complex import dependencies
 
@@ -532,7 +545,16 @@ def run_demo_pipeline(session_id: str, pose_id: str, user_video_path: str) -> Di
         np.save(aligned_expert_path, aligned_expert)
         np.save(aligned_user_path, aligned_user)
         
-        print(f"  Aligned shape: ({T_aligned}, 17, 2)\n")
+        print(f"  Aligned shape: ({T_aligned}, 17, 2)")
+        
+        # Generate Level-2 visualization
+        if VISUALIZATION_AVAILABLE:
+            print("  Generating Level-2 visualization...")
+            level2_video_path = session_dir / 'level2_alignment.mp4'
+            create_level2_visualization(aligned_expert, aligned_user, level2_video_path)
+            print(f"  ✓ Level-2 video: {level2_video_path.name}")
+        
+        print()  # Blank line
         
         # ====================================================================
         # STEP 4: Error Computation (Level-3)
@@ -547,7 +569,16 @@ def run_demo_pipeline(session_id: str, pose_id: str, user_video_path: str) -> Di
             clean_error_data = sanitize_for_json(error_data)
             json.dump(clean_error_data, f, indent=2)
         
-        print(f"  Joint errors saved: {error_json_path.name}\n")
+        print(f"  Joint errors saved: {error_json_path.name}")
+        
+        # Generate Level-3 visualization
+        if VISUALIZATION_AVAILABLE:
+            print("  Generating Level-3 visualization...")
+            level3_video_path = session_dir / 'level3_errors.mp4'
+            create_level3_visualization(aligned_expert, aligned_user, error_data, level3_video_path)
+            print(f"  ✓ Level-3 video: {level3_video_path.name}")
+        
+        print()  # Blank line
         
         # ====================================================================
         # STEP 5: Similarity Scoring (Level-4)
@@ -561,7 +592,16 @@ def run_demo_pipeline(session_id: str, pose_id: str, user_video_path: str) -> Di
         with open(scores_json_path, 'w') as f:
             json.dump(scores, f, indent=2)
         
-        print(f"  Scores saved: {scores_json_path.name}\n")
+        print(f"  Scores saved: {scores_json_path.name}")
+        
+        # Generate Level-4 visualization
+        if VISUALIZATION_AVAILABLE:
+            print("  Generating Level-4 visualization...")
+            level4_video_path = session_dir / 'level4_scoring.mp4'
+            create_level4_visualization(aligned_user, scores, level4_video_path)
+            print(f"  ✓ Level-4 video: {level4_video_path.name}")
+        
+        print()  # Blank line
         
         # ====================================================================
         # Save Complete Results
@@ -577,6 +617,12 @@ def run_demo_pipeline(session_id: str, pose_id: str, user_video_path: str) -> Di
             'videos': {
                 'user_original': f"/data/user_uploads/{Path(user_video_path).name}",
                 'expert_reference': f"/data/expert_poses/{expert_video.name}",
+            },
+            'visualization_videos': {
+                'level1_raw': f"/data/user_uploads/{Path(user_video_path).name}",  # User's uploaded video
+                'level2_alignment': f"/data/results/{session_id}/level2_alignment.mp4" if VISUALIZATION_AVAILABLE else None,
+                'level3_errors': f"/data/results/{session_id}/level3_errors.mp4" if VISUALIZATION_AVAILABLE else None,
+                'level4_scoring': f"/data/results/{session_id}/level4_scoring.mp4" if VISUALIZATION_AVAILABLE else None,
             },
             'pose_files': {
                 'expert_aligned': str(aligned_expert_path.relative_to(BASE_DIR)),
