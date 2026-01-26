@@ -1,11 +1,11 @@
 [
   {
-    "id": "9d3dbf9c-4ef2-4633-8f59-22564dcb041b",
-    "name": "Bonus Pose",
+    "id": "039fc84f-6e7f-4bd6-85ed-7c49abb8766b",
+    "name": "Bonus",
     "description": "",
-    "video_url": "/data/expert_poses/9d3dbf9c-4ef2-4633-8f59-22564dcb041b.mp4",
-    "thumbnail": "/data/expert_poses/9d3dbf9c-4ef2-4633-8f59-22564dcb041b_thumb.jpg",
+    "video_url": "/data/expert_poses/039fc84f-6e7f-4bd6-85ed-7c49abb8766b.mp4",
+    "thumbnail": "/data/expert_poses/039fc84f-6e7f-4bd6-85ed-7c49abb8766b_thumb.jpg",
     "duration": "2s",
-    "uploaded_at": "2026-01-23T21:33:58.698838"
+    "uploaded_at": "2026-01-26T20:18:11.577764"
   }
 ]

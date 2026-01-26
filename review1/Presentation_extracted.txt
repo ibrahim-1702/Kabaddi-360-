@@ -174,18 +174,9 @@ Sample Output (video with annotations)
 
 6A (ii) – Module Overview & Block Diagram
 Module Name
-Single-Person Pose Estimation using MediaPipe BlazePose
-Purpose
-Extract of 2D skeletal keypoints of identified raider from video frames.
-Converts pixel-level video data into structured pose coordinates.
+Pose Estimation using MediaPipe BlazePose
+
 Block Digram:
-Raider Bounding Box Sequence
-            ↓
-Frame-wise Raider Cropping
-            ↓
-MediaPipe Pose Estimation (MP33)
-            ↓
-Raw Pose Keypoints (33 joints, normalized)
 
 
 ========== SLIDE 14 ==========
@@ -203,17 +194,9 @@ Step 2: MediaPipe Pose Estimation
 CNN-based pose estimation model
 Trained for full-body human pose
 Configuration Used
-Videos (not static image)
-Temporal landmark smoothing enabled
-Confidence thresholds applied internally
-Pose Representation
-For each frame:
-Pose_t = {
-	joint_0: (x, y),
-	joint_1: (x, y),
-	...
-	joint_32: (x, y)
-}
+	Videos (not static image)
+	Temporal landmark smoothing enabled
+	Confidence thresholds applied internally
 
 
 
@@ -221,19 +204,21 @@ Pose_t = {
 
 6A (ii) Algorithm Details (cont)
 Sample Input & Output
+
 Sample Input
-Frame 120
-Raider Bounding Box = (420, 180, 610, 520)
+	Frame 120
+	Raider Bounding Box = (420, 180, 610, 520)
+
 Sample Output
-Pose[120] =
-	[
-  		(0.48, 0.12),   # nose
-  		(0.46, 0.10),   # left eye
-  		...
-  		(0.52, 0.91)    # right foot
-	]
-Shape:
-(33 joints × 2 coordinates)
+	Pose[120] =
+		[
+  			(0.48, 0.12),   # nose
+  			(0.46, 0.10),   # left eye
+  			...
+  			(0.52, 0.91)    # right foot
+		]
+	Shape:
+	(33 joints × 2 coordinates)
 
 
 
@@ -241,20 +226,9 @@ Shape:
 
 6A (iii) Module Overview & Block Diagram
 Module Name
-Pose Format Conversion: MediaPipe-33 to COCO-17
-Purpose
-Convert MP33-keypoint pose representation into standard COCO-17 skeleton format for downstream analysis and compatibility with AR redndering.
-Reduction of redundant joints and use widely accepted pose standard (COCO17).
-
+Format Conversion: MediaPipe-33 to COCO-17
 
 Block diagram:
-Raw MP33 Pose Data (Normalized)
-            ↓
-Joint Index Mapping
-            ↓
-Coordinate Transformation
-            ↓
-COCO-17 Pose Data (Pixel Space)
 
 
 ========== SLIDE 17 ==========
@@ -262,7 +236,7 @@ COCO-17 Pose Data (Pixel Space)
 6A (iii) Algorithm Details
 Algorithm Type
 Deterministic Joint Index Mapping + Coordinate Transformation
-(No learning, no estimation)
+
 Step 1: Joint Index Mapping
 Each COCO-17 joint is mapped to a specific MediaPipe landmark index. 
 Mapping Table (Fixed)
@@ -275,11 +249,11 @@ Mapping Table (Fixed)
 Step 2: Coordinate Transformation
 Transformation Formula
 	For each joint:
-	x_pixel = bbox_x1 + lm.x × bbox_width
-y_pixel = bbox_y1 + lm.y × bbox_height
+		x_pixel = bbox_x1 + lm.x × bbox_width
+		y_pixel = bbox_y1 + lm.y × bbox_height
 Visibility Rule
-If landmark visibility < 0.5:
-(x, y) = NaN
+	If landmark visibility < 0.5:
+		(x, y) = NaN
 
 
 
@@ -300,29 +274,14 @@ Sample Output:
 6A(iv) Module Overview & Block Diagram
 Module Name
 COCO-17 Pose Canonicalization and Temporal Cleaning
-Purpose
-Convert raw COCO-17 pose to stable, normalized, and noise-free pose sequence for temporal alignment and error analysis.
 
 Block diagram:
-Raw COCO-17 Pose Sequence
-            ↓
-Temporal Interpolation
-            ↓
-Pelvis Centering
-            ↓
-Scale Normalization
-            ↓
-Outlier Suppression
-            ↓
-EMA Smoothing
-            ↓
-Cleaned & Normalized COCO-17 Pose
 
 
 ========== SLIDE 21 ==========
 
 6A(iv) Algorithms Used
-Type:
+Algorithm Type:
 	Deterministic Signal-Processing Pipeline (5 Steps)
 Step 1: Temporal Interpolation
 Algorithm: (Rule Based)	Linear Interpolation Across Time
@@ -346,11 +305,11 @@ Formula
 	joint_normalized = joint_centered / torso_length
 Step 4: Outlier Suppression
 Algorithm	Z-Score Velocity-Based Outlier Detection
-Logic
-velocity(t) = || pose(t) − pose(t−1) ||
-z = (velocity − μ) / σ
+	
+	velocity(t) = || pose(t) − pose(t−1) ||
+	z = (velocity − μ) / σ
 
-If |z| > 3.0 → replace pose(t) with pose(t−1)
+	If |z| > 3.0 → replace pose(t) with pose(t−1)
 
 
 ========== SLIDE 23 ==========
@@ -371,13 +330,6 @@ SUB-Module:
 	PELVIS TRAJECTORY EXTRACTION
 
 Block Diagram: 
-Cleaned COCO-17 Pose Sequence
-            ↓
-Left Hip + Right Hip Selection
-            ↓
-Pelvis Midpoint Computation
-            ↓
-Pelvis Trajectory (T × 2)
 
 
 ========== SLIDE 25 ==========
@@ -388,13 +340,13 @@ Deterministic Anatomical Anchor Extraction
 
 Joint Selection
 From COCO-17 skeleton:
-Left Hip  → Joint index 11
-Right Hip → Joint index 12
+	Left Hip  → Joint index 11
+	Right Hip → Joint index 12
 These joints are guaranteed to exist after Level-1 cleaning.
 Pelvis Computation Formula
-For each frame t:
-pelvis(t) = (pose[t, 11] + pose[t, 12]) / 2,
-Where: pose[t, j] is the (x, y) coordinate of joint j at frame t
+	For each frame t:
+		pelvis(t) = (pose[t, 11] + pose[t, 12]) / 2,
+		Where: pose[t, j] is the (x, y) coordinate of joint j at frame t
 
 
 
@@ -404,6 +356,7 @@ Where: pose[t, j] is the (x, y) coordinate of joint j at frame t
 Sample Input & Output
 
 Sample Input
+
 
 
 Sample Output
@@ -416,15 +369,6 @@ SUB-Module:
 	 Dynamic Time Warping for Temporal Alignment
 
 Block Diagram: 
-Expert Pelvis Trajectory (T_e × 2)
-                │
-                ├──→ DTW Cost Matrix Computation
-                │
-User Pelvis Trajectory (T_u × 2)
-                ↓
-        Optimal Alignment Path
-                ↓
-     Aligned Frame Index Pairs
 
 
 ========== SLIDE 28 ==========
@@ -458,13 +402,13 @@ Termination condition :
 Sample Input & Output
 
 Sample Input
-Expert length = 100 frames
-User length   = 120 frames
+	Expert length = 100 frames
+	User length   = 120 frames
 
 Sample Output
-Aligned length = 115 frames
-path_expert = [0,1,1,2,3,3,4,...]
-path_user   = [0,1,2,3,4,5,5,...]
+	Aligned length = 115 frames
+	path_expert = [0,1,1,2,3,3,4,...]
+	path_user   = [0,1,2,3,4,5,5,...]
 
 
 
@@ -476,15 +420,6 @@ SUB-Module:
 	Index-Based Aligned Pose Sequence Generation
 
 Block Diagram: 
-Expert Pose Sequence (T_e × 17 × 2)
-                │
-                ├──→ DTW Alignment Indices
-                │
-User Pose Sequence (T_u × 17 × 2)
-                ↓
-     Index-Based Pose Extraction
-                ↓
-Aligned Expert & User Pose Sequences
 
 
 ========== SLIDE 31 ==========
@@ -538,14 +473,6 @@ SUB-Module:
 
 Block Diagram: 
 
-Aligned Expert Pose (T × 17 × 2)
-                │
-               ├──→ Euclidean Distance Computation
-                │
-Aligned User Pose (T × 17 × 2)
-                ↓
-          Error Matrix (T × 17)
-
 
 ========== SLIDE 35 ==========
 
@@ -554,11 +481,11 @@ Algorithm Type
 	Deterministic Euclidean Distance Computation
 Frame-wise Joint Error Formula
 For frame t and joint j:
-error(t, j) = || expert(t, j) − user(t, j) ||₂
-error(t, j) = sqrt( (x_e − x_u)² + (y_e − y_u)² )
-Where:
-	(x_e, y_e) → expert joint coordinates
-	(x_u, y_u) → user joint coordinates
+	error(t, j) = || expert(t, j) − user(t, j) ||₂
+	error(t, j) = sqrt( (x_e − x_u)² + (y_e − y_u)² )
+	Where:
+		(x_e, y_e) → expert joint coordinates
+		(x_u, y_u) → user joint coordinates
 
 
 ========== SLIDE 36 ==========
@@ -574,7 +501,7 @@ Sample Output
 error = sqrt((0.45−0.52)² + (0.78−0.71)²)
       ≈ 0.099
 Stored at:
-error_matrix[25][left_knee]
+	error_matrix[25][left_knee]
 
 
 
@@ -586,13 +513,6 @@ SUB-Module:
 
 Block Diagram: 
 
-Joint Error Matrix (T × 17)
-            ↓
-Statistical Aggregation
-         ↓ ↓ ↓
-Joint Statistics
-Frame Statistics
-Phase Statistics
 
 
 ========== SLIDE 38 ==========
@@ -603,12 +523,12 @@ Deterministic Statistical Aggregation
 
 1. Joint-wise Temporal Aggregation
 	Statistics Computed (per joint)
-For joint j:
-	mean_error(j) = (1/T) Σ error(t, j)
-	max_error(j)  = max(error(t, j))
-	std_error(j)  = standard deviation(error(t, j))
-Output
-	17 joints → {mean, max, std}
+	For joint j:
+		mean_error(j) = (1/T) Σ error(t, j)
+		max_error(j)  = max(error(t, j))
+		std_error(j)  = standard deviation(error(t, j))
+	Output
+		17 joints → {mean, max, std}
 
 
 
@@ -639,7 +559,7 @@ Late phase:  frames [2T/3, T)
 
 Phase Statistics
 	For each phase p and joint j:
-	phase_error(p, j) = mean(error(t, j)) for t ∈ phase p
+		phase_error(p, j) = mean(error(t, j)) for t ∈ phase p
 	Output
 		3 phases × 17 joints
 
@@ -673,19 +593,11 @@ SUB-Module:
 	 DATA SERIALIZATION
 	
 Block Diagram:
-Joint Error Matrix
-Joint Statistics
-Frame Statistics
-Phase Statistics
-            ↓
-Structured Data Packaging
-            ↓
-joint_errors.json
 
 
 ========== SLIDE 43 ==========
 
-6C (iii) Algorithms Details
+6C (iii) Algorithm Details
 Algorithm Type
 	Deterministic Data Packaging & Export
 JSON Structure
@@ -758,16 +670,7 @@ SIMILARITY SCORE ENGINE
 Module Name
 SIMILARITY SCORE ENGINE
 
-Block Diagram (What to Draw)
-joint_errors.json
-        ↓
-Structural Similarity Computation
-Temporal Similarity Computation
-        ↓
-Weighted Score Aggregation
-        ↓
-Similarity Scores (0–100%)
-
+Block Diagram
 
 
 ========== SLIDE 47 ==========
@@ -775,23 +678,39 @@ Similarity Scores (0–100%)
 6D (i) Scoring Algorithms
 Algorithm Type
 	Deterministic Score Aggregation
-
 1. Structural Similarity Score
 	Extract mean joint errors: mean_errors = { mean_error(j) for all 17 joints }
 	Compute overall mean joint error: mean_joint_error = nanmean(mean_errors)
 	Normalize using fixed threshold: structural_similarity = (1 − mean_joint_error / MAX_ERROR_THRESHOLD) × 100
-Where:	MAX_ERROR_THRESHOLD = 1.5 Clamp result to [0, 100].
+	Where:	MAX_ERROR_THRESHOLD = 1.5 Clamp result to [0, 100].
 
 
 2. Temporal Similarity Score
 Extract aligned frame count: T_aligned
-Compare with baseline:
-BASELINE_FRAMES = 115
-Compute deviation:
-frame_deviation = |T_aligned − BASELINE_FRAMES|
-Normalize deviation:
-temporal_quality =
-1 − (frame_deviation / (BASELINE_FRAMES × 0.5))
-Scale to score range:
-temporal_similarity = 70 + (temporal_quality × 30)
+Compare with baseline: BASELINE_FRAMES = 115
+Compute deviation: frame_deviation = |T_aligned − BASELINE_FRAMES|
+Normalize deviation: temporal_quality = 1 − (frame_deviation / (BASELINE_FRAMES × 0.5))
+Scale to score range: temporal_similarity = 70 + (temporal_quality × 30)
 
+
+
+========== SLIDE 48 ==========
+
+6D (i) Scoring Algorithms (cont)
+3. Overall Similarity Score
+Weighted Aggregation
+overall_score = 0.6 × structural_similarity + 0.4 × temporal_similarity
+Sample Input & Output
+Sample Input
+mean_joint_error = 0.48
+T_aligned = 103
+Sample Output
+structural_similarity ≈ 68%
+temporal_similarity   ≈ 93.7%
+overall_score         ≈ 78.3%
+
+
+
+========== SLIDE 49 ==========
+
+THANK YOU

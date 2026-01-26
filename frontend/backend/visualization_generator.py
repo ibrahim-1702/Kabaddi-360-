@@ -118,7 +118,8 @@ def create_level3_visualization(aligned_expert: np.ndarray, aligned_user: np.nda
     # Extract joint errors
     joint_stats = error_data['joint_statistics']
     mean_errors = {name: stats['mean'] for name, stats in joint_stats.items()}
-    max_error = max(mean_errors.values()) if mean_errors else 1.0
+    max_val = max(mean_errors.values()) if mean_errors else 1.0
+    max_error = max_val if max_val > 0 else 1.0
     
     # Video writer - use H.264 codec for browser compatibility
     fourcc = cv2.VideoWriter_fourcc(*'avc1')  # H.264 codec

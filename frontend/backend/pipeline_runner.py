@@ -309,11 +309,13 @@ def compute_temporal_similarity(error_data: Dict) -> float:
     metadata = error_data.get('metadata', {})
     num_frames = metadata.get('num_frames')
     
+    reference_duration = metadata.get('reference_duration', BASELINE_FRAMES)
+    
     if not num_frames:
         return TEMPORAL_BASELINE
     
-    frame_deviation = abs(num_frames - BASELINE_FRAMES)
-    max_acceptable_deviation = BASELINE_FRAMES * 0.5
+    frame_deviation = abs(num_frames - reference_duration)
+    max_acceptable_deviation = reference_duration * 0.5
     
     if frame_deviation >= max_acceptable_deviation:
         temporal_quality = 0.0
@@ -401,7 +403,7 @@ def extract_user_pose(user_video_path: Path, output_path: Path) -> Path:
         raise RuntimeError(f"User pose extraction failed: {e}")
 
 
-def run_level3_errors(aligned_expert: np.ndarray, aligned_user: np.ndarray) -> Dict:
+def run_level3_errors(aligned_expert: np.ndarray, aligned_user: np.ndarray, reference_duration: int = 115) -> Dict:
     """
     Run Level-3 error computation
     
@@ -428,6 +430,7 @@ def run_level3_errors(aligned_expert: np.ndarray, aligned_user: np.ndarray) -> D
     error_data = {
         'metadata': {
             'num_frames': int(T),
+            'reference_duration': int(reference_duration),
             'num_joints': 17,
             'alignment': 'DTW_pelvis_based'
         },
@@ -561,7 +564,8 @@ def run_demo_pipeline(session_id: str, pose_id: str, user_video_path: str) -> Di
         # ====================================================================
         print("[Step 4/5] Error computation (Level-3)...")
         
-        error_data = run_level3_errors(aligned_expert, aligned_user)
+        reference_duration = expert_poses.shape[0]
+        error_data = run_level3_errors(aligned_expert, aligned_user, reference_duration=reference_duration)
         
         # Save error data (sanitize NaN values first)
         error_json_path = session_dir / 'joint_errors.json'
