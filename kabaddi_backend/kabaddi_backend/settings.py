@@ -1,7 +1,12 @@
 import os
+import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Add parent directory to Python path for llm_feedback module
+PROJECT_ROOT = BASE_DIR.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 
 SECRET_KEY = 'django-insecure-kabaddi-trainer-dev-key'
 DEBUG = True
@@ -11,6 +16,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.auth',
     'api',
+    'llm_feedback',
 ]
 
 MIDDLEWARE = [
@@ -18,6 +24,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
 ]
+
 
 ROOT_URLCONF = 'kabaddi_backend.urls'
 

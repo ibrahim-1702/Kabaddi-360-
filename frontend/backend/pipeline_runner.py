@@ -644,11 +644,24 @@ def run_demo_pipeline(session_id: str, pose_id: str, user_video_path: str) -> Di
             }
         }
         
-        # Save complete results (sanitize NaN values)
+        # Save complete results        
+        # Save results.json
         results_file = session_dir / 'results.json'
         with open(results_file, 'w') as f:
             clean_results = sanitize_for_json(results)
             json.dump(clean_results, f, indent=2)
+        
+        # Generate context.json for LLM Feedback
+        try:
+            from llm_feedback import generate_context, save_context
+            print(f"[CONTEXT] Generating LLM context...")
+            context = generate_context(results)
+            context_file = session_dir / 'context.json'
+            save_context(context, context_file)
+            print(f"[CONTEXT] ✓ Context saved: {context_file.relative_to(BASE_DIR)}")
+        except Exception as e:
+            print(f"[CONTEXT] ⚠ Warning: Failed to generate context: {e}")
+            # Don't fail the pipeline if context generation fails
         
         print(f"{'=' * 70}")
         print(f"PIPELINE COMPLETE ✓")

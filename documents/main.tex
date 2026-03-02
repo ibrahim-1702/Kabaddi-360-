@@ -1,0 +1,276 @@
+\documentclass[12pt, a4paper]{report}
+
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}         % Times New Roman-like font
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{amsmath}           % Math equations
+\usepackage{amssymb}           % Math symbols
+\usepackage{enumitem}          % List customization
+\usepackage{geometry}         % Margins
+\geometry{left=1.25in, right=1in, top=1in, bottom=1in}
+
+\usepackage{setspace}         % Line spacing
+\onehalfspacing               % 1.5 spacing
+
+% --- Paragraph Formatting (Anna University PG Thesis Style) ---
+% First-line indentation with minimal inter-paragraph spacing
+\usepackage{indentfirst}      % Indent first paragraph after headings too
+\setlength{\parindent}{1.27cm}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+
+\usepackage{titlesec}         % Custom Headings
+\usepackage[numbers]{natbib}  % Bibliography management
+\usepackage[hidelinks]{hyperref}  % Clickable TOC links (no colored borders)
+
+% --- Heading Spacing Configuration ---
+% Format: \titlespacing*{command}{left}{before}{after}
+
+% CHAPTER HEADINGS
+\titleformat{\chapter}[display]
+  {\normalfont\bfseries\Large\centering} 
+  {\chaptertitlename\ \thechapter}      
+  {12pt}                                
+  {\Large}                               
+\titlespacing*{\chapter}{0pt}{-30pt}{20pt}
+
+% SECTION HEADINGS (1.1, 1.2, etc.)
+\titlespacing*{\section}{0pt}{24pt}{12pt}
+
+% SUBSECTION HEADINGS (3.1.1, 3.1.2, etc.)
+\titlespacing*{\subsection}{0pt}{18pt}{8pt}
+
+\begin{document}
+
+% -------------------------
+% COVER PAGE / TITLE PAGE
+% -------------------------
+\begin{titlepage}
+    \centering
+    \vspace*{1mm}
+    
+    {\fontsize{18pt}{21.6pt}\selectfont \textbf{AN AR-BASED COACHING SYSTEM FOR KABADDI}}\\[0.5cm]
+    {\fontsize{18pt}{21.6pt}\selectfont \textbf{USING POSE ESTIMATION AND LLM FEEDBACK}}\\[1.5cm]
+    
+    {\fontsize{14pt}{16.8pt}\selectfont \textbf{A PROJECT REPORT}}\\[1.5cm] % Choose the correct one
+    
+    {\fontsize{14pt}{16.8pt}\selectfont \textit{Submitted by}}\\[1.5cm]
+    
+    {\fontsize{16pt}{19.2pt}\selectfont \textbf{MOHAMED IBRAHIM MS (2024178011)}}\\[1cm]
+    
+    {\fontsize{14pt}{16.8pt}\selectfont \textit{in partial fulfillment for the award of the degree of}}\\[1.5cm]
+    
+    {\fontsize{16pt}{19.2pt}\selectfont \textbf{MASTER OF COMPUTER APPLICATION}}\\[1.5cm]
+   
+    
+    % Ensure you have a logo.png in your Overleaf files
+    \includegraphics[width=3cm]{logo.png}\\[1cm] 
+    
+    {\fontsize{16pt}{10.2pt}\selectfont \textbf{DEPARTMENT OF INFORMATION SCIENCE AND TECHNOLOGY}}\\[0.2cm]
+    {\fontsize{16pt}{19.2pt}\selectfont \textbf{COLLEGE OF ENGINEERING, GUINDY}}\\[0.2cm]
+    {\fontsize{16pt}{19.2pt}\selectfont \textbf{ANNA UNIVERSITY}}\\[0.2cm]
+    {\fontsize{16pt}{19.2pt}\selectfont \textbf{CHENNAI 600 025}}\\[1.5cm]
+    
+    {\fontsize{14pt}{16.8pt}\selectfont \textbf{MARCH 2026}}
+    
+\end{titlepage}
+
+% -------------------------
+% BONAFIDE CERTIFICATE
+% -------------------------
+\newpage
+\begin{center}
+    {\fontsize{18pt}{21.6pt}\selectfont \textbf{ANNA UNIVERSITY, CHENNAI}}\\[1.5cm]
+    {\fontsize{16pt}{19.2pt}\selectfont \textbf{BONAFIDE CERTIFICATE}}\\[1.5cm]
+\end{center}
+
+\begin{spacing}{1.5} % 1.5 line spacing as per guidelines
+{\fontsize{13pt}{15.6pt}\selectfont
+\hyphenpenalty=10000 %
+\exhyphenpenalty=10000
+\sloppy %
+Certified that this Report titled \textbf{"AN AR-BASED COACHING SYSTEM FOR KABADDI USING POSE ESTIMATION AND LLM FEEDBACK"} is the bonafide work of \textbf{MOHAMED IBRAHIM MS (2024178011)} who carried out the work under my supervision. Certified further that to the best of my knowledge the work reported herein does not form part of any other thesis or dissertation on the basis of which a degree or award was conferred on an earlier occasion on this or any other candidate.
+\par}
+\end{spacing}
+
+\vspace{5cm}
+
+\noindent
+\begin{minipage}[t]{0.45\textwidth}
+\flushleft
+Dr. S. SWAMYNATHAN\\
+Professor and Head\\
+Department of Information Science And Technology\\
+Anna University\\
+Chennai - 600 025
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.45\textwidth}
+\flushleft
+Dr. T. MALA\\
+Professor\\
+Department of Information Science And Technology\\
+Anna University\\
+Chennai - 600 025
+\end{minipage}
+
+
+
+
+% -------------------------------------------------------------------
+% ABSTRACT
+% -------------------------------------------------------------------
+\renewcommand{\abstractname}{\Large Abstract}
+\begin{abstract}
+    \addcontentsline{toc}{chapter}{Abstract}
+    Many Kabaddi players, particularly beginners, often practice without direct supervision from a coach. In such settings, it becomes difficult to judge whether body posture, balance, and movement timing are being executed correctly. Minor errors in joint alignment or movement coordination may go unnoticed during self-practice and can negatively affect skill development over time.
+
+    To support learners in these situations, this project proposes an AR-based Kabaddi Ghost Trainer that visually demonstrates correct techniques and provides automated feedback. The system begins by extracting human body poses from recorded videos of expert Kabaddi players using deep learning–based pose estimation methods. These raw pose outputs are then cleaned, normalized, and organized to form a reference movement sequence, referred to as the ``ghost'' motion.
+
+    During training sessions, the ghost motion is displayed within an augmented reality environment, allowing learners to observe and follow the expert movement while practicing. User-performed movements are recorded and analyzed offline by comparing joint alignment, posture consistency, and temporal execution against the reference sequence. Instead of relying solely on numeric similarity scores, the system interprets structured pose error metrics to generate understandable feedback through an LLM-based module. This design choice enables flexible and contextual feedback generation without embedding heuristic rules directly into the evaluation pipeline.
+
+    Overall, the project integrates pose estimation, temporal alignment, augmented reality visualization, and data-driven feedback generation to assist independent Kabaddi practice and technique improvement.
+
+\end{abstract}
+
+% -------------------------------------------------------------------
+% TABLE OF CONTENTS
+% -------------------------------------------------------------------
+\newpage
+\pagenumbering{roman}
+\setcounter{page}{3}
+\renewcommand{\contentsname}{\centering TABLE OF CONTENTS}
+\tableofcontents
+
+% -------------------------------------------------------------------
+% LIST OF ABBREVIATIONS
+% -------------------------------------------------------------------
+\newpage
+\chapter*{List of Abbreviations}
+\addcontentsline{toc}{chapter}{List of Abbreviations}
+
+\begin{tabbing}
+\hspace{4cm} \= \kill
+API \> Application Programming Interface \\[6pt]
+AR \> Augmented Reality \\[6pt]
+COCO \> Common Objects in Context \\[6pt]
+CNN \> Convolutional Neural Network \\[6pt]
+DTW \> Dynamic Time Warping \\[6pt]
+EMA \> Exponential Moving Average \\[6pt]
+HTTP \> Hypertext Transfer Protocol \\[6pt]
+JSON \> JavaScript Object Notation \\[6pt]
+LLM \> Large Language Model \\[6pt]
+MP \> MediaPipe \\[6pt]
+NPY \> NumPy Array File Format \\[6pt]
+TTS \> Text-to-Speech \\[6pt]
+YOLO \> You Only Look Once \\
+\end{tabbing}
+
+% -------------------------------------------------------------------
+% CHAPTER 1
+% -------------------------------------------------------------------
+\newpage
+\pagenumbering{arabic}
+\chapter{Introduction}
+
+\section{Overview}
+Kabaddi is a physically demanding sport that requires precise coordination between body posture, timing, balance, and spatial awareness. Effective execution of techniques such as raids, touches, and evasive movements depends not only on physical strength but also on accurate replication of expert movement patterns. Traditional training methods largely rely on in-person coaching, verbal instructions, and repeated observation of demonstrations, which may not always provide objective or measurable feedback on performance quality.
+
+In situations where direct supervision is limited, learners often struggle to identify subtle posture deviations or timing errors during practice sessions. This project addresses the need for an intelligent training support system by integrating computer vision, pose analysis, and augmented reality technologies. The core idea is to provide a structured and measurable training environment where expert movements can be visualized and compared against user-performed actions. 
+
+By focusing on pose-level analysis rather than raw video comparison, this work emphasizes explainability and consistency in performance evaluation. The system is designed to function as a virtual training aid that assists learners in understanding movement accuracy, identifying deviations, and improving technique execution in a systematic and data-driven manner.
+
+\section{Problem Statement}
+Learning and refining Kabaddi techniques requires continuous feedback on body posture, joint coordination, and temporal execution of movements. Existing training practices depend heavily on subjective observation by coaches or self-assessment through video playback, both of which lack quantitative evaluation. These approaches make it difficult to consistently identify precise movement errors, especially minor joint-level deviations that significantly impact technique effectiveness and balance during gameplay.
+
+There is a clear need for a training system that can objectively analyze human movement and compare it against expert-defined standards without requiring constant human supervision. A key technical challenge lies in handling variations in execution speed and movement pacing, where the same technique may be performed faster or slower while preserving its structural order. Additionally, small joint-level deviations are often difficult to detect through video replay alone, making manual self-assessment unreliable. The absence of a pose-driven, temporally aligned feedback mechanism limits effective independent practice and slows skill acquisition, particularly for technique-focused sports such as Kabaddi.
+
+
+\section{Objectives}
+The primary objective of this project is to design and develop an intelligent Kabaddi training system that enables objective evaluation of player movements using pose-based analysis. Specifically, the objectives are:
+
+To capture and process user-performed Kabaddi actions in a structured manner suitable for computational analysis.
+
+To normalize and align human pose data in order to handle variations in execution speed, body proportions, and camera perspectives.
+
+To quantitatively measure deviations between expert reference movements and user executions at both joint and temporal levels.
+
+To localize movement errors across different phases of a technique, enabling precise identification of incorrect posture or timing.
+
+To generate interpretable performance metrics that can support meaningful LLM-based feedback, while intentionally avoiding rule-based coaching heuristics to preserve flexibility and extensibility.
+
+
+\section{Solution Overview}
+The proposed solution is an augmented reality–assisted training system that evaluates Kabaddi techniques through structured pose analysis rather than direct video comparison. The system is designed to separate visual demonstration, movement capture, and performance evaluation into well-defined stages, ensuring clarity and consistency in assessment. Expert movements are represented as reference pose sequences, which serve as standardized benchmarks for evaluating user-performed actions.
+
+At the input level, user practice sessions are recorded using a mobile device, and the captured video is treated solely as a source for pose extraction. Raw video frames are not used directly for comparison or scoring. Instead, pose estimation outputs are converted into a normalized skeletal representation, enabling stable analysis independent of lighting conditions, background variations, or camera placement.
+
+To address differences in execution speed and motion pacing, the solution incorporates temporal alignment techniques that synchronize user movements with expert reference sequences. This alignment ensures that fast or slow executions are evaluated fairly by comparing corresponding motion phases rather than absolute time frames. As a result, performance evaluation focuses on movement quality instead of execution duration.
+
+Following temporal alignment, the system performs joint-wise and frame-wise error computation to quantify deviations between user and expert poses. These errors are aggregated into structured metrics that highlight spatial inaccuracies and temporal inconsistencies across different phases of a technique. While evaluation and feedback generation are separated conceptually, both stages rely on shared error representations to ensure consistency. The final output consists of quantitative performance scores and interpretable error indicators that serve as inputs for feedback generation. This design balances modularity with practical integration, enabling explainable and extensible system behavior grounded in measurable data.
+
+Overall, the proposed approach provides a systematic and objective framework for skill assessment and improvement in Kabaddi training.
+
+\section{Organization of the Report}
+The report is organized into six chapters, each addressing a specific aspect of the project in a structured and logical manner, supported by appropriate system diagrams and technical explanations. The chapters are outlined as follows:
+
+\textbf{Chapter 1} introduces the context and motivation behind the proposed AR-based Kabaddi training system. It presents the problem statement, clearly defining the limitations of existing training approaches, and outlines the objectives of the project. This chapter also provides a high-level overview of the proposed solution and establishes the scope and direction of the work.
+
+\textbf{Chapter 2} presents a comprehensive literature survey of existing research related to human pose estimation, motion analysis, temporal alignment techniques, and technology-assisted sports training systems. It reviews prior methodologies, highlights key observations drawn from existing work, discusses their limitations, and identifies the research gap that motivates the proposed approach.
+
+% -------------------------------------------------------------------
+% CHAPTER 2
+% -------------------------------------------------------------------
+\chapter{Literature Survey}
+
+This chapter presents a focused review of existing research related to human movement analysis, pose estimation, and intelligent feedback systems in sports and activity training contexts. The surveyed literature highlights the progression from traditional video-based analysis methods to structured pose-driven and learning-based approaches, emphasizing objective evaluation and quantitative assessment of movement quality. By examining relevant studies, this chapter establishes the technical foundation upon which this project is built and identifies how prior work has addressed similar challenges in motion comparison and feedback generation. The insights derived from these studies help position the proposed system within the broader research landscape while clarifying the specific gaps that motivate this work.
+
+\section{Existing Work}
+Human motion analysis has been extensively studied across biomechanics, activity recognition, and sports performance evaluation, with increasing emphasis on markerless and pose-based representations. Aleksić et al. \cite{aleksic} conducted a detailed validation of markerless pose estimation by comparing it against gold-standard 3D marker-based motion capture systems for biomechanical temporal analysis. Their work demonstrates strong agreement between the two approaches, indicating that skeletal joint trajectories derived from markerless systems are sufficiently accurate for quantitative motion analysis. However, the study is restricted to controlled jump-based tasks and relies on multi-camera setups, limiting its applicability to unconstrained, sport-specific movements performed in real-world environments.
+
+Pose estimation combined with machine learning techniques has also been applied to temporal activity analysis. Lin et al. \cite{lin} proposed a pipeline integrating OpenPose with recurrent neural network models for fall detection from video sequences. The study confirms that pose-derived temporal features can effectively capture human motion dynamics and achieve high classification accuracy. While this work validates the robustness of pose-based temporal modeling, it focuses on event detection rather than detailed evaluation of movement quality or comparison against expert reference executions, which are essential for technique-oriented sports training systems.
+
+Skeleton-based action recognition has further advanced the use of structured skeletal representations. Devzel et al. \cite{devzel} introduced a one-shot skeleton-based action recognition framework using graph convolutional networks for strength and conditioning exercises. Their approach demonstrates that skeletal motion patterns can be discriminative even with limited training data. Despite its effectiveness in recognizing action categories, the framework emphasizes classification outcomes and does not address continuous similarity measurement, temporal alignment, or joint-level error localization required for movement correction and coaching applications.
+
+Real-time sports performance analysis has been explored by Long Liu et al. \cite{liu}, who integrated OpenPose with DeepSORT to enable multi-person pose estimation and tracking in volleyball scenarios. The system handles occlusion and player interaction while maintaining real-time performance, supporting the feasibility of pose-based pipelines in dynamic sports environments. However, the primary focus remains on tracking and performance statistics rather than individualized comparison of player movements against expert-defined standards.
+
+Mixed reality–based instructional systems have also leveraged pose and motion data to enhance physical training. Ihara et al. \cite{ihara} proposed a framework that converts 2D instructional videos into three-dimensional mixed reality avatars by extracting motion trajectories and rendering them in an immersive environment. This approach highlights the effectiveness of visual augmentation for learning physical skills. Nevertheless, it requires specialized hardware and does not provide automated, quantitative evaluation or personalized corrective feedback based on skeletal similarity metrics.
+
+A critical methodological component across motion comparison studies is temporal alignment of movement sequences. Human actions are often performed at varying speeds while preserving their structural order, making direct frame-to-frame comparison unreliable. Dynamic Time Warping (DTW) has been established as a standard non-linear temporal alignment technique for such scenarios. Müller \cite{muller} formally presented DTW as a robust method for aligning motion and gesture sequences with different temporal rates, and it has since been widely adopted in motion analysis, gait studies, and biomechanics. Keogh and Ratanamahatana \cite{keogh} further reinforced DTW's theoretical foundation for exact alignment of time-series data with temporal distortions.
+
+In biomechanics and pose-based motion analysis, DTW is frequently used either explicitly or implicitly to establish temporal correspondence between joint trajectory sequences prior to comparison. Studies such as Aleksić et al. \cite{aleksic}, which compare time-series joint data across different measurement systems, inherently require temporal normalization to ensure meaningful correspondence. DTW represents the standard non-linear solution for this requirement in motion analysis literature. Following temporal alignment, spatial similarity between poses is commonly quantified using Euclidean distance between corresponding joint positions or angles. This combination of DTW for temporal alignment and Euclidean distance for spatial comparison is a well-established and interpretable strategy in human motion analysis and action comparison tasks \cite{muller, generic_dtw}. It enables objective evaluation of movement quality by separating timing variability from structural pose deviation, thereby forming a reliable basis for pose-driven training and assessment systems.
+
+Despite these advances, none of the reviewed systems provide a unified framework that combines temporal alignment, joint-level error localization, and interpretable feedback specifically tailored for corrective sports training.
+
+
+\section{Observations from Existing Work}
+The reviewed literature consistently demonstrates that pose-based representations are effective for modelling human motion across a wide range of applications, including biomechanics, activity recognition, and sports performance analysis. Markerless pose estimation systems have been shown to provide sufficiently accurate skeletal data for quantitative analysis when compared against traditional motion capture setups. This establishes skeletal joint trajectories as a reliable abstraction for movement evaluation, particularly in scenarios where intrusive sensors or multi-camera installations are impractical.
+
+Another key observation is the widespread reliance on temporal modelling to handle variability in human motion execution. Studies involving action recognition, performance monitoring, and biomechanical comparison implicitly or explicitly account for differences in execution speed through temporal normalization or alignment techniques. Dynamic Time Warping emerges as a recurring methodological choice in classical motion analysis literature for synchronizing time-series data, enabling fair comparison of motion phases rather than absolute time indices.
+
+\section{Limitations of Existing Work}
+Despite significant progress in pose estimation and motion analysis, several limitations remain evident in existing research. Many pose-based systems are evaluated under controlled conditions or rely on constrained datasets, which limits their robustness when applied to unconstrained, real-world sports movements. Variations in camera placement, execution style, and environmental factors often degrade performance, making it difficult to generalize these systems for independent training scenarios without careful adaptation.
+
+Another notable limitation is the predominant focus on action recognition and event detection rather than movement quality assessment. Most existing approaches are designed to classify actions or detect anomalies, offering binary or categorical outputs. Such formulations do not support fine-grained evaluation of technique execution, nor do they provide detailed insights into joint-level deviations or phase-wise errors that are essential for corrective sports training.
+
+\section{Summary of Literature Survey}
+The literature survey highlights a clear evolution from traditional video-based observation methods toward pose-driven and learning-based approaches for human motion analysis. Prior research confirms that markerless pose estimation can reliably capture skeletal joint trajectories suitable for quantitative evaluation, providing a practical alternative to sensor-based motion capture systems. Temporal modeling and alignment have been identified as essential components for handling natural variability in human movement, with Dynamic Time Warping emerging as a well-established solution for synchronizing motion sequences executed at different speeds.
+
+% -------------------------------------------------------------------
+% CHAPTER 3 — System Architecture
+% -------------------------------------------------------------------
+\input{chapter3}
+
+% -------------------------------------------------------------------
+% CHAPTER 4 — Module Description
+% -------------------------------------------------------------------
+\input{chapter4}
+
+% --- Bibliography Printout ---
+\bibliographystyle{plainnat}
+\bibliography{references} 
+
+\end{document}

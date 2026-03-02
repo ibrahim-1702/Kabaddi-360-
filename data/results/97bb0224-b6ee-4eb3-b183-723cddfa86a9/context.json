@@ -1,0 +1,199 @@
+{
+  "metadata": {
+    "session_id": "97bb0224-b6ee-4eb3-b183-723cddfa86a9",
+    "pose_id": "039fc84f-6e7f-4bd6-85ed-7c49abb8766b",
+    "num_frames": 78,
+    "reference_duration": 78,
+    "pipeline_version": "production_v1"
+  },
+  "summary": {
+    "overall_score": 100.0,
+    "overall_assessment": "Excellent",
+    "structural_score": 100,
+    "structural_assessment": "Excellent",
+    "temporal_score": 100.0,
+    "temporal_assessment": "Excellent"
+  },
+  "joint_deviations": {
+    "major": [],
+    "moderate": [],
+    "minor": [
+      {
+        "joint": "nose",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "left_eye",
+        "mean_error": NaN,
+        "max_error": NaN,
+        "severity": "minor"
+      },
+      {
+        "joint": "right_eye",
+        "mean_error": NaN,
+        "max_error": NaN,
+        "severity": "minor"
+      },
+      {
+        "joint": "left_ear",
+        "mean_error": NaN,
+        "max_error": NaN,
+        "severity": "minor"
+      },
+      {
+        "joint": "right_ear",
+        "mean_error": NaN,
+        "max_error": NaN,
+        "severity": "minor"
+      },
+      {
+        "joint": "left_shoulder",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "right_shoulder",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "left_elbow",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "right_elbow",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "left_wrist",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "right_wrist",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "left_hip",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "right_hip",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "left_knee",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "right_knee",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "left_ankle",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      },
+      {
+        "joint": "right_ankle",
+        "mean_error": 0.0,
+        "max_error": 0.0,
+        "severity": "minor"
+      }
+    ]
+  },
+  "phase_analysis": {
+    "early": {
+      "quality": "Poor",
+      "mean_error": NaN,
+      "dominant_joints": [
+        {
+          "joint": "nose",
+          "error": 0.0
+        },
+        {
+          "joint": "left_eye",
+          "error": NaN
+        },
+        {
+          "joint": "right_eye",
+          "error": NaN
+        }
+      ]
+    },
+    "mid": {
+      "quality": "Poor",
+      "mean_error": NaN,
+      "dominant_joints": [
+        {
+          "joint": "nose",
+          "error": 0.0
+        },
+        {
+          "joint": "left_eye",
+          "error": NaN
+        },
+        {
+          "joint": "right_eye",
+          "error": NaN
+        }
+      ]
+    },
+    "late": {
+      "quality": "Poor",
+      "mean_error": NaN,
+      "dominant_joints": [
+        {
+          "joint": "nose",
+          "error": 0.0
+        },
+        {
+          "joint": "left_eye",
+          "error": NaN
+        },
+        {
+          "joint": "right_eye",
+          "error": NaN
+        }
+      ]
+    }
+  },
+  "temporal_trend": {
+    "pattern": "degrading",
+    "early_mean_error": NaN,
+    "mid_mean_error": NaN,
+    "late_mean_error": NaN
+  },
+  "thresholds_used": {
+    "joint_tier_high": 0.7,
+    "joint_tier_medium": 0.3,
+    "phase_excellent": 0.3,
+    "phase_good": 0.5,
+    "phase_fair": 0.8,
+    "stability_threshold": 0.1,
+    "score_excellent": 90,
+    "score_good": 75,
+    "score_fair": 60,
+    "top_n_joints_per_phase": 3
+  }
+}

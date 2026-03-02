@@ -1,0 +1,97 @@
+% -------------------------------------------------------------------
+% CHAPTER 3 — SYSTEM ARCHITECTURE
+% -------------------------------------------------------------------
+\chapter{System Architecture}
+
+This chapter presents the high-level architecture of the AR-Based Kabaddi Ghost Trainer. The design philosophy, pipeline structure, data flow, and the separation of concerns that govern the modular organisation of the system are described.
+
+
+% ===================================================================
+\section{Architectural Overview}
+% ===================================================================
+
+\subsection{System Design Philosophy}
+
+The system follows a modular, pipeline-driven processing model where each stage operates as an independent module with well-defined inputs and outputs, connected through a sequential data flow. The architecture is built on four core principles.
+
+The first principle is ``pose-first abstraction,'' where all evaluation is performed on extracted skeletal keypoints, thereby eliminating dependencies on lighting, background, or subject appearance. The second principle is ``deterministic processing,'' meaning every metric computation is deterministic and identical inputs always produce identical outputs. The third principle is the ``separation of evaluation and coaching,'' which ensures that numerical pose evaluation remains strictly separated from human-readable feedback generation. The fourth principle is ``offline-first design,'' where the system defaults to offline batch processing and real-time modes are explicitly opt-in through configuration flags.
+
+
+\subsection{High-Level System Pipeline}
+
+The end-to-end pipeline comprises eight sequential stages. The first stage is the ``input layer,'' which handles video recording of expert and user Kabaddi movements. The second stage, ``pose extraction'' (Level-1), performs person detection using YOLOv8 and keypoint estimation using MediaPipe, followed by MP33-to-COCO-17 format conversion. The third stage, ``pose preprocessing,'' applies missing joint interpolation, pelvis centering, torso-based scale normalisation, outlier suppression, and EMA smoothing. The fourth stage, ``temporal alignment'' (Level-2), uses Dynamic Time Warping on pelvis trajectories to synchronise user and expert sequences. The fifth stage, ``error localization'' (Level-3), computes frame-wise Euclidean errors to produce joint-level error aggregates and phase decomposition. The sixth stage, ``similarity scoring'' (Level-4), combines structural and temporal similarity scores into an overall 0--100 score. The seventh stage, ``feedback generation,'' serializes error metrics into JSON, transforms them into LLM prompts, and sends them to a local LLM for coaching feedback. The eighth and final stage, ``AR visualization,'' renders ghost and user skeletons as video overlays.
+
+
+\subsection{Architectural Boundaries and Assumptions}
+
+The system operates on pre-recorded video, and live capture falls outside the default scope. Pose estimation relies on external pre-trained models, namely YOLOv8 and MediaPipe, and no model training is performed within the system. All evaluation operates on 2D skeletal keypoints, and 3D reconstruction is not performed. A single subject per video is assumed, while multi-person scenes employ a motion-based raider selection heuristic to identify the primary subject.
+
+
+\subsection{Separation of Visual, Analytical, and Feedback Layers}
+
+The architecture enforces a strict three-layer separation. The ``visual layer'' handles AR rendering of ghost and user skeletons, producing video output without performing any evaluation. The ``analytical layer'' encompasses temporal alignment, error localization, and similarity scoring, operating on numerical pose arrays and producing structured metric dictionaries. The ``feedback layer'' transforms structured metrics into LLM-ready context, constructs prompts, and generates coaching feedback without directly accessing raw pose data.
+
+
+% ===================================================================
+\section{Overall Technical Architecture}
+% ===================================================================
+
+\subsection{System Architecture Diagram}
+
+Figure~\ref{fig:system_arch} presents the complete system architecture, showing all major modules and their data flow relationships.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/system_architecture_overview.png}
+    \caption{High-level system architecture of the AR-Based Kabaddi Ghost Trainer}
+    \label{fig:system_arch}
+\end{figure}
+
+The system comprises several principal components. The ``Pipeline Runner'' (\texttt{run\_pipeline.py}) serves as the central orchestrator managing execution flow and output serialization. The ``Pipeline Configuration'' (\texttt{pipeline\_config.py}) provides a centralized dataclass with configurable parameters. The ``Pose Extraction Module'' (\texttt{pose\_extract\_cli.py}) handles video ingestion, detection, estimation, format conversion, and cleaning. The ``Temporal Alignment'' module (\texttt{temporal\_alignment.py}) performs pelvis-based DTW alignment. The ``Error Localization'' module (\texttt{error\_localization.py}) computes frame-wise joint errors. The ``Pose Validation Metrics'' module (\texttt{pose\_validation\_metrics.py}) calculates structural and temporal scores. The ``LLM Feedback System'' (\texttt{llm\_feedback/}) comprises the Context Engine, Prompt Builder, and LLM Client. Finally, the ``AR Renderer'' (\texttt{ar\_pose\_renderer.py}) generates skeletal visualizations.
+
+
+\subsection{Data Flow Between Modules}
+
+Data flows in a strictly forward-propagating pattern with no cyclic dependencies. Video frames pass through person detection and pose estimation to produce raw poses of shape $(T, 33, 2)$. These are converted to COCO-17 format with shape $(T, 17, 2)$ and then processed through Level-1 cleaning. Expert and user cleaned poses are aligned through DTW to produce alignment indices. The aligned poses pass through error localization to produce error metrics, and then through similarity scoring to produce scores. Finally, scores flow through the Context Engine and Prompt Builder to the LLM, which generates feedback text. All pose data is communicated as NumPy arrays of shape $(T, 17, 2)$, and evaluation results are communicated as Python dictionaries.
+
+
+\subsection{Offline vs Online Processing}
+
+The default execution mode is offline batch processing. Configuration flags control optional features: \texttt{enable\_viz} controls AR visualization generation (enabled by default), \texttt{enable\_tts} controls text-to-speech audio from feedback (disabled by default), and \texttt{verbose} controls logging verbosity.
+
+
+% ===================================================================
+\section{System Modularity and Extensibility}
+% ===================================================================
+
+\subsection{Plug-and-Play Pose Estimator}
+
+The pose extraction module accepts output from any pose estimation model, provided the output maps to COCO-17 format. The current implementation uses MediaPipe with a 33-to-17 mapping via \texttt{mp33\_to\_coco17.py}, but alternative models such as MoveNet or OpenPose can be integrated by implementing a corresponding format conversion module.
+
+\subsection{Replaceable Alignment Strategy}
+
+The temporal alignment module exposes a well-defined interface: it accepts two pose sequences and returns aligned frame indices. Alternative strategies such as Canonical Time Warping, Soft-DTW, or fixed-rate interpolation can replace DTW by conforming to this interface.
+
+\subsection{LLM Model Interchangeability}
+
+The LLM model name, endpoint URL, and generation parameters are externalized in configuration. Switching between models such as Llama 3, Mistral, Gemma, or Qwen requires only a configuration change, as the prompt builder and context engine are model-agnostic.
+
+
+% ===================================================================
+\section{Computational Considerations}
+% ===================================================================
+
+\subsection{Time Complexity}
+
+The pose extraction stage has a time complexity of $O(T \times F)$ and represents the most expensive stage, involving YOLOv8 and MediaPipe inference per frame. DTW alignment requires $O(T_{\text{user}} \times T_{\text{ghost}})$ for distance and cost matrix computation. Error localization and similarity scoring both operate at $O(T \times J)$ using vectorised Euclidean distance, where $J = 17$. LLM inference time is variable and dominated by autoregressive decoding time.
+
+\subsection{Space Complexity}
+
+The two pose arrays of shape $(T, 17, 2)$ contribute $O(T)$ space. The DTW cost and distance matrices of shape $(T_{\text{user}}, T_{\text{ghost}})$ require $O(T_{\text{user}} \times T_{\text{ghost}})$ space. The error matrix of shape $(T, 17)$ contributes $O(T)$ space. For typical video lengths of 100 to 300 frames, total memory usage remains well within standard hardware capacity.
+
+
+% ===================================================================
+\section{Design Limitations}
+% ===================================================================
+
+The system has several inherent design limitations. First, all evaluation is restricted to 2D pose data, meaning depth information is unavailable and movements with significant depth variation may not be accurately captured. Second, pose quality depends on camera placement, resolution, and viewing angle, and a roughly frontal or lateral view with the full body visible is assumed. Third, the raider selection heuristic selects the most dynamically active person, and scenarios with multiple equally active subjects may result in incorrect selection. Fourth, the system evaluates structural and temporal similarity of body postures only, and tactical decision-making, reaction time, and contact force fall outside the evaluation scope.
