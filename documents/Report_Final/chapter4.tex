@@ -1,0 +1,348 @@
+% -------------------------------------------------------------------
+% CHAPTER 4 — IMPLEMENTATION OF THE SYSTEM
+% -------------------------------------------------------------------
+\chapter{Implementation of the System}
+\begin{sloppypar}
+\newcommand{\algoheader}[2]{\par\vspace{0.15em}\noindent\rule{\textwidth}{0.4pt}\\[-0.45em]\textbf{Algorithm #1} #2\\[-0.45em]\noindent\rule{\textwidth}{0.4pt}\\[-0.05em]}
+\newcommand{\algofooter}{\par\noindent\rule{\textwidth}{0.4pt}\\[0.25em]}
+
+This chapter presents the implementation of the AR-Based Kabaddi Ghost Trainer. The system utilizes a hybrid, asynchronous processing pipeline running Python backends for computer vision and mathematical validation, accompanied by a Flutter frontend for video input and AR rendering.
+
+The backend performs video sanitization using FFmpeg and subsequently executes YOLOv8 object detection algorithms \cite{yolov8_ultralytics} and MediaPipe Pose \cite{mediapipe_pose} inference models. These extract spatial vectors into the COCO keypoint format \cite{lin_coco}. Following scaling and cleaning protocols, numerical comparisons are evaluated through Dynamic Time Warping (DTW) algorithms \cite{dtw_sakoe}. Finally, LLaMA 3 architectures \cite{llama3_touvron} act as the interpreter for semantic feedback loops.
+
+Each subsystem relies on deterministic formulas to abstract variable human environments into strict mathematical bounds, allowing highly adaptable training without requiring enormous computational overhead.
+
+\section{Pose Extraction and Preprocessing Implementation}
+
+Both expert and user Kabaddi movements are recorded natively. The analysis pipeline initiates with YOLOv8 performing dynamic detection. To resolve multi-actor complexity within a single camera capture, the ByteTrack algorithm maintains persistent IDs across frames, filtering out bystanders by detecting the athlete generating the highest magnitude of motion.
+
+\subsection{ByteTrack Multi-Object Tracking}
+
+ByteTrack maintains a state vector $\mathbf{s} = (x, y, w, h, v_x, v_y)$ for each tracked person, where $(x, y)$ is the bounding box centre, $(w, h)$ are dimensions, and $(v_x, v_y)$ are velocity components estimated by a Kalman filter. Association between detections and existing tracks is performed using Intersection over Union (IoU):
+
+\textbf{Equation 4.1 -- ByteTrack Intersection over Union:}
+\begin{equation}
+\text{IoU}(A, B) = \frac{\text{Area}(A \cap B)}{\text{Area}(A \cup B)}
+\tag{4.1}
+\end{equation}
+
+High-confidence detections are matched first, followed by a second pass for low-confidence detections. This two-pass strategy ensures that partially occluded players are not lost during tracking.
+
+\subsection{Motion-Based Raider Selection}
+
+Once tracks are established, the raider is identified using a cumulative displacement heuristic. For each track $i$ with trajectory $\{(x_t, y_t)\}$, the cumulative motion is:
+
+\textbf{Equation 4.2 -- Cumulative Motion for Raider Selection:}
+\begin{equation}
+M_i = \sum_{t=1}^{T} \left\| \mathbf{p}_t^{(i)} - \mathbf{p}_{t-1}^{(i)} \right\|_2
+\tag{4.2}
+\end{equation}
+
+The raider is selected as $\text{raider} = \arg\max_i M_i$ after a minimum of five frames, exploiting the fact that the active raider exhibits significantly more motion than spectators or defensive players.
+
+The selected entity is cropped with 40-pixel padding and passed to the MediaPipe Pose model \cite{mediapipe_pose}, configured with a minimum tracking confidence of $0.70$. MediaPipe derives a normalized coordinate tensor of shape $(T, 33, 2)$.
+
+\subsection{MP33 to COCO-17 Joint Mapping}
+
+MediaPipe outputs 33 landmarks while the system uses the COCO-17 standard. The conversion applies a direct index mapping, selecting 17 anatomically corresponding joints. Table~\ref{tab:joint_mapping} shows the mapping.
+
+\begin{table}[H]
+\centering
+\caption{MediaPipe MP33 to COCO-17 Joint Index Mapping}
+\label{tab:joint_mapping}
+\begin{tabular}{|c|l|c|l|}
+\hline
+\textbf{COCO-17 Idx} & \textbf{Joint Name} & \textbf{MP33 Idx} & \textbf{MP Landmark} \\
+\hline
+0 & Nose & 0 & nose \\
+1 & Left Eye & 2 & left\_eye \\
+2 & Right Eye & 5 & right\_eye \\
+3 & Left Ear & 7 & left\_ear \\
+4 & Right Ear & 8 & right\_ear \\
+5 & Left Shoulder & 11 & left\_shoulder \\
+6 & Right Shoulder & 12 & right\_shoulder \\
+7 & Left Elbow & 13 & left\_elbow \\
+8 & Right Elbow & 14 & right\_elbow \\
+9 & Left Wrist & 15 & left\_wrist \\
+10 & Right Wrist & 16 & right\_wrist \\
+11 & Left Hip & 23 & left\_hip \\
+12 & Right Hip & 24 & right\_hip \\
+13 & Left Knee & 25 & left\_knee \\
+14 & Right Knee & 26 & right\_knee \\
+15 & Left Ankle & 27 & left\_ankle \\
+16 & Right Ankle & 28 & right\_ankle \\
+\hline
+\end{tabular}
+\end{table}
+
+Joints with MediaPipe visibility score below 0.5 are assigned NaN values and handled by the subsequent interpolation stage.
+
+\subsection{Level-1 Cleaning Pipeline}
+
+The cleaning pipeline applies five deterministic transformations in strict sequential order to produce a stable, scale-invariant pose representation.
+
+\textbf{Stage 1 -- Temporal Interpolation.} Missing joints (NaN values) are filled using linear interpolation between the nearest valid observations. For joint $j$ and coordinate $c$, given valid observations at times $t_1, t_2$:
+
+\textbf{Equation 4.3 -- Linear Interpolation for Missing Joints:}
+\begin{equation}
+\text{value}(t) = \text{value}(t_1) + \frac{\text{value}(t_2) - \text{value}(t_1)}{t_2 - t_1} \times (t - t_1)
+\tag{4.3}
+\end{equation}
+
+A minimum of two valid anchor points is required. Joints with no valid observations across the entire sequence are set to zero.
+
+\textbf{Stage 2 -- Pelvis Centering.} The pelvis midpoint is computed as the average of the left and right hip positions and subtracted from all joints at each frame $t$:
+
+\textbf{Equation 4.4 -- Pelvis Midpoint Computation:}
+\begin{equation}
+\mathbf{p}_{\text{pelvis}}(t) = \frac{\mathbf{p}_{\text{left hip}}(t) + \mathbf{p}_{\text{right hip}}(t)}{2}
+\tag{4.4}
+\end{equation}
+
+\textbf{Equation 4.5 -- Pelvis Centering Translation:}
+\begin{equation}
+\mathbf{p}_{j}^{\text{centered}}(t) = \mathbf{p}_{j}(t) - \mathbf{p}_{\text{pelvis}}(t)
+\tag{4.5}
+\end{equation}
+
+This achieves translation invariance, removing the effect of the athlete's position within the camera frame.
+
+\textbf{Stage 3 -- Scale Normalisation.} All joint coordinates are divided by the torso height, defined as the Euclidean distance between the shoulder midpoint and the hip midpoint:
+
+\textbf{Equation 4.6 -- Torso Height for Scale Normalisation:}
+\begin{equation}
+\ell_{\text{torso}}(t) = \left\| \mathbf{p}_{\text{shoulder mid}}(t) - \mathbf{p}_{\text{hip mid}}(t) \right\|_2 + \varepsilon
+\tag{4.6}
+\end{equation}
+
+\textbf{Equation 4.7 -- Scale Normalisation by Torso Height:}
+\begin{equation}
+\mathbf{p}_{j}^{\text{norm}}(t) = \frac{\mathbf{p}_{j}^{\text{centered}}(t)}{\ell_{\text{torso}}(t)}
+\tag{4.7}
+\end{equation}
+
+where $\varepsilon = 10^{-6}$ prevents division by zero. This achieves scale invariance, removing the effect of the athlete's distance from the camera.
+
+\textbf{Stage 4 -- Outlier Suppression.} Frames with unrealistically large inter-frame velocity are replaced with the previous frame's data. The velocity at frame $t$ is computed as the Frobenius norm of the pose difference:
+
+\textbf{Equation 4.8 -- Inter-frame Velocity for Outlier Detection:}
+\begin{equation}
+v(t) = \left\| \mathbf{P}(t) - \mathbf{P}(t-1) \right\|_F
+\tag{4.8}
+\end{equation}
+
+Frames where the z-score of $v(t)$ exceeds 3.0 standard deviations are classified as outliers and replaced with $\mathbf{P}(t-1)$.
+
+\textbf{Stage 5 -- EMA Smoothing.} An Exponential Moving Average filter with $\alpha = 0.75$ is applied to attenuate high-frequency jitter while preserving motion dynamics:
+
+\textbf{Equation 4.9 -- Exponential Moving Average Smoothing:}
+\begin{equation}
+\mathbf{P}^{\text{smooth}}(t) = \alpha \cdot \mathbf{P}^{\text{smooth}}(t-1) + (1 - \alpha) \cdot \mathbf{P}(t)
+\tag{4.9}
+\end{equation}
+
+The output of the Level-1 pipeline is a pose array of shape $(T, 17, 2)$ that is translation-invariant, scale-invariant, gap-filled, outlier-suppressed, and temporally smooth.
+
+\subsection{Standard Coordinates and Center Translation}
+The translation centers the pelvis origin to coordinates $(0, 0)$ dynamically for every frame $t$, as described in Equation~(4.4) and Equation~(4.5) above.
+
+\subsection{Pseudocode for Pose Extraction}
+
+\algoheader{4.1}{Pose Cleansing and Formatting Pipeline}
+1: \textbf{function} PROCESSVIDEOPOSE(videoFrames)\\
+2: \quad RAW\_POSES $\leftarrow$ []\\
+3: \quad \textbf{for} each frame IN videoFrames \textbf{do}\\
+4: \qquad targetBox $\leftarrow$ YOLOv8.DetectSubject(frame)\\
+5: \qquad rawNodes $\leftarrow$ MediaPipe.Extract33Joints(targetBox)\\
+6: \qquad \textbf{if} ValidateNodes(rawNodes) = TRUE \textbf{then}\\
+7: \qquad\quad APPEND(RAW\_POSES, rawNodes)\\
+8: \qquad \textbf{end if}\\
+9: \quad \textbf{\textbf{end for}}\\
+10: \quad COCO\_FORMAT $\leftarrow$ Convert33To17(RAW\_POSES)\\
+11: \quad CLEANED\_TENSOR $\leftarrow$ Interpolate(COCO\_FORMAT)\\
+12: \quad CLEANED\_TENSOR $\leftarrow$ PelvisCenter(CLEANED\_TENSOR)\\
+13: \quad CLEANED\_TENSOR $\leftarrow$ ScaleNormalize(CLEANED\_TENSOR)\\
+14: \quad CLEANED\_TENSOR $\leftarrow$ SuppressOutliers(CLEANED\_TENSOR)\\
+15: \quad CLEANED\_TENSOR $\leftarrow$ EMASmooth(CLEANED\_TENSOR)\\
+16: \quad \textbf{return} CLEANED\_TENSOR\\
+17: \textbf{end function}
+\algofooter
+
+
+\section{Temporal Alignment Implementation}
+
+Given variations in athlete speed and stamina, execution times inherently differ. The system utilizes Dynamic Time Warping (DTW) \cite{dtw_sakoe} to establish phase-to-phase equivalents. The primary anchor variable $P(t)$ focuses sequentially on the pelvis, providing the most robust reference curve unaffected by limb tremors.
+
+The synchronization builds an Accumulated Cost Matrix $C[i,j]$. A distance metric is repeatedly computed mapping User frame $i$ against Expert frame $j$.  
+
+\subsection{Euclidean Distance Metric}
+\textbf{Equation 4.10 -- Euclidean Distance for DTW Cost Matrix:}
+\begin{equation}
+D[i, j] = \sqrt{(x^{\text{user}}_i - x^{\text{ghost}}_j)^2 + (y^{\text{user}}_i - y^{\text{ghost}}_j)^2}
+\tag{4.10}
+\end{equation}
+
+\subsection{Accumulative Cost Equation}
+Utilizing principles of dynamic programming \cite{dtw_sakoe}, the warping matrix derives its optimal path using:
+\textbf{Equation 4.11 -- DTW Accumulated Cost Recurrence:}
+\begin{equation}
+C[i, j] = D[i, j] + \min\big(C[i-1, j],\ C[i, j-1],\ C[i-1, j-1]\big)
+\tag{4.11}
+\end{equation}
+
+Following optimization, the system extracts uniform vectors where $[USER_{warp}, EXPERT_{warp}]$ hold matching timeline frames representing identical stroke phases.
+
+\subsection{Pseudocode for Temporal Alignment}
+
+\algoheader{4.2}{Dynamic Time Warping Algorithm}
+1: \textbf{function} ALIGNSEQUENCE(UserTensor, GhostTensor)\\
+2: \quad T\_u $\leftarrow$ LENGTH(UserTensor)\\
+3: \quad T\_g $\leftarrow$ LENGTH(GhostTensor)\\
+4: \quad Initialize C as Infinity Matrix(T\_u, T\_g)\\
+5: \quad C[0, 0] $\leftarrow$ 0\\
+6: \quad \textbf{for} i = 1 TO T\_u \textbf{do}\\
+7: \qquad \textbf{for} j = 1 TO T\_g \textbf{do}\\
+8: \qquad\quad cost $\leftarrow$ Distance(UserTensor[i], GhostTensor[j])\\
+9: \qquad\quad C[i,j] $\leftarrow$ cost + MIN(C[i-1,j], C[i,j-1], C[i-1,j-1])\\
+10: \qquad \textbf{end for}\\
+11: \quad \textbf{end for}\\
+12: \quad alignmentPath $\leftarrow$ BacktrackPath(C)\\
+13: \quad \textbf{return} EvaluatePathTensors(alignmentPath)\\
+14: \textbf{end function}
+\algofooter
+
+
+\section{Joint-Level Error Computation Implementation}
+
+The Error Computation operates locally on every synchronized frame pairing $t$. By comparing matrices, local anomalies—such as a misplaced ankle step or lagging shoulder swing—are isolated. Note that biological weighting multipliers are utilized here.
+
+\subsection{Spatial Frame Deviation Error}
+The specific vector displacement recorded for any specific anatomical joint $j$ across any synced frame $t$:
+
+\textbf{Equation 4.12 -- Frame-wise Joint Euclidean Error:}
+\begin{equation}
+e_{t,j} = \left\| \mathbf{p}^{\text{user}}_{t,j} - \mathbf{p}^{\text{expert}}_{t,j} \right\|_2
+\tag{4.12}
+\end{equation}
+
+These base differentials combine hierarchically per phase, tagging critical limbs exceeding 0.7 thresholds as ``Major'' deviations, identifying priority targets for subsequent training repetition.
+
+
+\section{Similarity Scoring Implementation}
+
+With spatial anomalies collected, the mathematical implementation packages outcomes into legible structural and temporal metrics.
+
+\subsection{Structural Similarity Score}
+Calculated by weighting physical displacement against angular torsion of combined skeletal relationships (70\% spatial magnitude vs 30\% angular variance).
+
+\textbf{Equation 4.13 -- Structural Similarity Score:}
+\begin{equation}
+S_{\text{structural}} = 0.7 \times S_{\text{spatial}} + 0.3 \times S_{\text{angular}}
+\tag{4.13}
+\end{equation}
+
+\subsection{Temporal Similarity Score}
+The overall rhythmic fidelity is validated against maximum threshold tolerances ($T_{max}$) normalized using the mean execution delays.
+
+\textbf{Equation 4.14 -- Temporal Similarity Score:}
+\begin{equation}
+S_{\text{temporal}} = \max\left(0,\ 100 \times \left(1 - \frac{\bar{e}_{\text{joint}}}{T_{\text{max}}}\right)\right)
+\tag{4.14}
+\end{equation}
+
+\subsection{Overall Training Grade}
+The unified score relies more heavily on structural mechanics to ensure safe and reliable physical combat progression.
+
+\textbf{Equation 4.15 -- Overall Similarity Score:}
+\begin{equation}
+S_{\text{overall}} = 0.6 \times S_{\text{structural}} + 0.4 \times S_{\text{temporal}}
+\tag{4.15}
+\end{equation}
+
+
+\section{LLM-Based Mentor Module Implementation}
+
+This implementation dictates communication to the locally-deployed LLM instances \cite{llama3_touvron}. Rather than free-form chatting, the Context Builder constructs a deterministic JSON-laden prompt carrying the phase metrics, severity warnings, and anatomical targets. The Local Node APIs serve the completed pipeline via streaming responses backward to the mobile app for TTS playback.
+
+\subsection{Feedback Synthesis Evaluator}
+
+Evaluations are graded across five axes: Groundedness ($G$), Hallucination inversions ($H$), Specificity ($S$), Relevance ($R$), and Technique Awareness ($T$). A custom Composite Formula \cite{llama3_touvron} scales to 100\%.
+
+\textbf{Equation 4.16 -- Composite Feedback Quality Score:}
+\begin{equation}
+Q = \left( \frac{G + (6 - H) + S + R + T}{25} \right) \times 100
+\tag{4.16}
+\end{equation}
+
+
+\subsection{Pseudocode for LLM Instruction Logic}
+
+\algoheader{4.3}{Execute Contextual Feedback Request}
+1: \textbf{function} PROCESSMENTOR(Scores, ErrorTree)\\
+2: \quad PromptPayload $\leftarrow$ InitializePrompt()\\
+3: \quad PromptPayload.Score $\leftarrow$ Scores.Overall\\
+4: \quad \textbf{for} each joint IN ErrorTree.Major \textbf{do}\\
+5: \qquad APPEND(PromptPayload.Focus, joint)\\
+6: \quad \textbf{end for}\\
+7: \quad InstructionSequence $\leftarrow$ CompileTemplate(PromptPayload)\\
+8: \quad ModelResponse $\leftarrow$ Ollama.InvokeLLaMA(InstructionSequence)\\
+9: \quad AudioPayload $\leftarrow$ TTS.SynthesizeSpeech(ModelResponse)\\
+10: \quad \textbf{return} AudioPayload\\
+11: \textbf{end function}
+\algofooter
+
+
+\section{Backend Pipeline Orchestration}
+
+The Django backend orchestrates the complete four-level pipeline through an asynchronous task function executed in a background thread. This design prevents HTTP timeout on the mobile client during the long-running LLM inference stage.
+
+\subsection{Video Preprocessing}
+
+Before pose extraction, the user-uploaded video is slowed to 50\% speed using FFmpeg to match the temporal domain of the expert reference data, which was originally extracted from slowed recordings:
+
+\algoheader{4.4}{Video Preprocessing and Pipeline Orchestration}
+1: \textbf{function} PROCESSPIPELINE(sessionId)\\
+2: \quad videoPath $\leftarrow$ FetchUploadedVideo(sessionId)\\
+3: \quad slowedPath $\leftarrow$ FFmpeg.SlowVideo(videoPath, factor=2.0)\\
+4: \quad userPose $\leftarrow$ ExtractPose(slowedPath)\\
+5: \quad expertPose $\leftarrow$ LoadExpertPose(session.tutorial.name)\\
+6: \quad alignedExpert, alignedUser $\leftarrow$ DTW\_Align(expertPose, userPose)\\
+7: \quad errorMetrics $\leftarrow$ ComputeJointErrors(alignedExpert, alignedUser)\\
+8: \quad scores $\leftarrow$ ComputeSimilarityScores(errorMetrics)\\
+9: \quad SaveResults(sessionId, scores, errorMetrics)\\
+10: \quad UpdateStatus(sessionId, ``scoring\_complete'')\\
+11: \quad context $\leftarrow$ ContextEngine.Generate(scores, errorMetrics)\\
+12: \quad prompts $\leftarrow$ PromptBuilder.Build(context, session.tutorial.name)\\
+13: \quad feedbackText $\leftarrow$ OllamaClient.Generate(prompts)\\
+14: \quad audioPath $\leftarrow$ TTSEngine.SaveToFile(feedbackText)\\
+15: \quad SaveFeedback(sessionId, feedbackText, audioPath)\\
+16: \quad UpdateStatus(sessionId, ``feedback\_generated'')\\
+17: \textbf{end function}
+\algofooter
+
+The function updates the session status at each stage, enabling the mobile application to display meaningful progress messages during polling. The scoring stage (steps 6--9) completes in approximately 55 seconds, after which the mobile application can display scores while the LLM feedback generation (steps 11--14) continues in the background.
+
+\subsection{Context Engine Implementation}
+
+The Context Engine transforms raw pipeline output into a canonical JSON structure suitable for LLM prompt injection. It performs four deterministic aggregation operations.
+
+First, scores are classified into qualitative bands: ``Excellent'' ($\geq 90$), ``Good'' ($\geq 75$), ``Fair'' ($\geq 60$), and ``Needs Improvement'' ($< 60$).
+
+Second, joints are classified into severity tiers based on mean error: ``Major'' (mean error $> 0.7$), ``Moderate'' ($0.3 < $ mean error $\leq 0.7$), and ``Minor'' (mean error $\leq 0.3$).
+
+Third, each temporal phase (early, mid, late) is assessed for quality based on mean phase error, and the top three dominant joints per phase are identified.
+
+Fourth, the temporal trend is classified as ``improving'' if late-phase error is more than 0.1 below early-phase error, ``degrading'' if it exceeds by more than 0.1, or ``stable'' otherwise.
+
+\subsection{Prompt Builder Implementation}
+
+The Prompt Builder constructs the LLM instruction prompt by injecting context fields into a template. Field consumption rules enforce that all major deviations are included, at most three moderate deviations are reported, and minor deviations are excluded entirely. This constraint prevents the LLM from generating overly long feedback that overwhelms the user.
+
+The system prompt defines the LLM role as a Kabaddi technique coach and enforces output constraints including plain text only (no markdown), a maximum of four paragraphs, and strict grounding in the provided context data.
+
+
+\section{Summary}
+
+This chapter explored the rigorous backend implementations that power the evaluation sequence. By leveraging MediaPipe \cite{mediapipe_pose} scaling coordinates and Sakoe-Chiba DTW algorithmic pathing \cite{dtw_sakoe}, the architecture systematically deconstructs highly volatile movement patterns into quantifiable scores ($S_{\text{overall}}$). Using tightly constrained logic flows and specialized weighted models instead of generic pattern recognition guarantees that technical coaching remains grounded and consistent across all mobile application sessions.
+
+\end{sloppypar}

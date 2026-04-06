@@ -267,14 +267,35 @@ def run_validation(
         
         logger.log_input("Expert pose", f"{expert_pose_aligned.shape}")
         logger.log_input("User pose", f"{user_pose_aligned.shape}")
+
+        def clean_nan_pose(pose: np.ndarray) -> np.ndarray:
+            """Replace NaN keypoints with forward-filled or zero values.
+            Undetected face joints (eyes/ears) produce NaN that propagate
+            through normalize_by_torso and destroy all scores."""
+            pose = pose.copy()
+            T, J, C = pose.shape
+            for j in range(J):
+                for c in range(C):
+                    col = pose[:, j, c]
+                    nan_mask = np.isnan(col)
+                    if nan_mask.all():
+                        pose[:, j, c] = 0.0
+                    elif nan_mask.any():
+                        # Forward-fill
+                        idx = np.where(~nan_mask)[0]
+                        pose[:, j, c] = np.interp(np.arange(T), idx, col[idx])
+            return pose
+        
+        user_pose_clean = clean_nan_pose(user_pose_aligned)
+        expert_pose_clean = clean_nan_pose(expert_pose_aligned)
         
         # Initialize metrics
         metrics = PoseValidationMetrics()
         logger.debug("Initialized PoseValidationMetrics")
         
-        # Compute scores on aligned sequences
+        # Compute scores on aligned+cleaned sequences
         logger.info("Computing validation metrics...")
-        scores = metrics.user_evaluation_score(user_pose_aligned, expert_pose_aligned)
+        scores = metrics.user_evaluation_score(user_pose_clean, expert_pose_clean)
         
         logger.success("Validation complete")
         logger.log_output("Structural score", f"{scores['structural']:.2f}/100")

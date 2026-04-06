@@ -49,6 +49,7 @@ db.sqlite3
 *.jpeg
 *.png
 *.gif
+*.wav
 
 # Logs
 *.log
@@ -59,6 +60,7 @@ logs/
 *.pth
 *.h5
 *.pkl
+*.task
 
 # Output directories
 *_out/
@@ -71,6 +73,7 @@ preproc_out/
 # Temporary files
 *.tmp
 *.temp
+*.bak
 .cache/
 
 # Documentation builds
@@ -89,3 +92,17 @@ node_modules/
 # Specific to this project
 yolov8n.pt
 *.parquet
+
+# 3D Models
+*.fbx
+*.glb
+
+# Documents / archives / fonts (keep out of git history)
+*.pdf
+*.zip
+*.ttf
+*.otf
+
+# App/backend generated artifacts
+kabaddi_backend/media/
+outputs/

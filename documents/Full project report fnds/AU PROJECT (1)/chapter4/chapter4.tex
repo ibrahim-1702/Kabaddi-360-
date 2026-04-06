@@ -1,0 +1,559 @@
+\chapter{\MakeUppercase{IMPLEMENTATION OF THE SYSTEM}}
+\begin{sloppypar}
+\newcommand{\algoheader}[2]{\par\vspace{0.15em}\noindent\rule{\textwidth}{0.4pt}\\[-0.45em]\textbf{Algorithm #1} #2\\[-0.45em]\noindent\rule{\textwidth}{0.4pt}\\[-0.05em]}
+\newcommand{\algofooter}{\par\noindent\rule{\textwidth}{0.4pt}\\[0.25em]}
+
+This chapter presents the implementation of the Intelligent Competitive Exam Platform with Personalized Test Series. The system is developed using a hybrid architecture that combines Node.js for backend services and Python-based modules for AI and NLP processing, ensuring both scalability and computational efficiency.
+
+The backend is implemented using Node.js with the Express framework, chosen for its non-blocking I/O model and ability to handle concurrent requests efficiently. The system follows RESTful API design principles with a clear separation of concerns across routes, controllers, services, and data access layers, enabling modularity and maintainability.
+
+Semantic classification is performed using Sentence-BERT (SBERT), which is integrated through a Python bridge using child process execution. This allows efficient handling of embedding generation and similarity computation while maintaining seamless communication with the Node.js backend. Low-confidence cases are handled using a controlled LLM fallback mechanism.
+
+Difficulty modeling is initially based on Bloom's Taxonomy and is later refined using empirical recalibration after a sufficient number of student attempts. Test generation is implemented using ability-based distributions combined with subtopic balancing algorithms to ensure both personalization and syllabus coverage.
+
+Performance analytics are computed using a weighted rolling model that incorporates recent and historical performance. The recommendation engine uses these analytics to determine adaptive difficulty levels for future tests. The LLM-based mentor module is integrated via a local inference setup, ensuring privacy and reduced dependency on external APIs.
+
+The system also includes a study plan generator and a current affairs engine. The study planner uses deterministic scheduling logic combined with controlled LLM support for strategy generation, while the current affairs engine follows a pipeline-based architecture for fetching news, generating MCQs, validating outputs, and storing them in the database.
+
+MongoDB is used as the primary database due to its flexible schema design and efficient handling of nested data structures. Redis is utilized for caching frequently accessed data such as embeddings and session-related information, improving system performance and reducing latency.
+
+Overall, the implementation combines scalable backend architecture with AI-driven modules, ensuring efficient data processing, real-time responsiveness, and seamless integration of intelligent features.
+
+\section{\MakeUppercase{AUTHENTICATION AND USER MANAGEMENT IMPLEMENTATION}}
+
+The authentication system is implemented using a JWT-based stateless mechanism, with token expiration configured to 24 hours. The implementation utilizes the \textit{jsonwebtoken} library for secure token generation and verification. During login, user credentials are validated against stored records, and upon successful authentication, a signed token containing the user ID, role, and expiration timestamp is generated and returned to the client.
+
+User passwords are secured using the \textit{bcrypt} hashing algorithm with a salt factor of 10 rounds. During registration, plaintext passwords are hashed before being stored in the database. During login, the entered password is compared with the stored hash using bcrypt's secure comparison function, which ensures protection against timing attacks.
+
+All protected routes are secured באמצעות authentication middleware. This middleware extracts the JWT token from the Authorization header, verifies its signature using a secret key, checks for expiration, and attaches the decoded user information to the request object. This enables downstream services to access user identity and role information securely.
+
+The system enforces role-based access control (RBAC) to differentiate between Teacher and Student functionalities. Authorization middleware validates whether a user has the required permissions to access specific endpoints. Teachers are granted access to question management features such as uploading, classification review, verification, and deployment. Students are allowed to access test generation, submission, analytics, study plans, and current affairs modules, but are restricted from administrative functionalities. Unauthorized access attempts result in HTTP 403 Forbidden responses.
+
+\subsection{Pseudocode for Authentication}
+
+\algoheader{4.1}{User Login and Token Generation}
+1: \textbf{function} LOGINUSER(email, password)\\
+2: \quad user $\leftarrow$ FetchUserFromDatabase(email)\\
+3: \quad \textbf{if} user IS NULL OR user.status $\neq$ "active" \textbf{then}\\
+4: \qquad \textbf{return} Error("Invalid credentials")\\
+5: \quad \textbf{end if}\\
+6: \quad isMatch $\leftarrow$ ComparePassword(password, user.hashedPassword)\\
+7: \quad \textbf{if} isMatch = FALSE \textbf{then}\\
+8: \qquad \textbf{return} Error("Invalid credentials")\\
+9: \quad \textbf{end if}\\
+10: \quad token $\leftarrow$ GenerateJWT(\{user\_id, role, expires: 24h\}, SECRET\_KEY)\\
+11: \quad \textbf{return} Success(\{token, role\})\\
+12: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{QUESTION STRUCTURING MODULE IMPLEMENTATION}}
+
+The Question Structuring Module transforms Excel-based question banks into a standardized JSON format suitable for database storage and further processing. The backend validates required columns, including question text, four options, correct answer, and explanation. Additional optional fields such as hints, reference links, and estimated time can also be included.
+
+The implementation uses the \textit{xlsx} library to parse Excel files. Upon upload, the file is temporarily stored on the server, and the parser reads its contents, extracts rows and columns, and validates the structure. Required columns are verified, and data types are checked to ensure correctness (e.g., the answer must be one of A, B, C, or D).
+
+Input data is sanitized to prevent injection attacks and encoding issues. HTML tags are removed, special characters are escaped, and Unicode normalization is applied to maintain consistent text representation. Each question is assigned a unique identifier using UUID generation.
+
+Metadata fields are initialized for each question, including upload timestamp, uploader ID, current state (Unprocessed), classification confidence, difficulty level, attempt statistics, and verification status. The structured questions are stored in the database as documents with nested fields for options and metadata, enabling efficient retrieval and processing.
+
+The module supports batch uploads with progress tracking. Large files are processed in chunks to prevent memory overflow and ensure system stability. Robust error handling mechanisms capture validation failures and provide detailed feedback, including row numbers and error descriptions, allowing teachers to quickly identify and correct issues.
+
+The structured output generated by this module serves as the foundation for downstream processes such as semantic classification, difficulty tagging, and personalized test generation, ensuring a consistent and scalable data pipeline.
+
+\subsection{Pseudocode for Question Structuring}
+
+\algoheader{4.2}{Process Excel Upload}
+1: \textbf{function} PROCESSEXCELUPLOAD(filePath)\\
+2: \quad \textbf{if} FileExtension(filePath) $\neq$ ".xlsx" \textbf{then}\\
+3: \qquad \textbf{return} Error("Only .xlsx files accepted")\\
+4: \quad \textbf{end if}\\
+5: \quad rawData $\leftarrow$ ReadExcelFile(filePath)\\
+6: \quad requiredColumns $\leftarrow$ ["question", "option\_A", "option\_B", "option\_C", "option\_D", "answer", "explanation"]\\
+7: \quad \textbf{if} NOT AllColumnsPresent(rawData.headers, requiredColumns) \textbf{then}\\
+8: \qquad \textbf{return} Error("Missing required columns")\\
+9: \quad \textbf{end if}\\
+10: \quad questionList $\leftarrow$ []\\
+11: \quad \textbf{for} all row IN rawData \textbf{do}\\
+12: \qquad result $\leftarrow$ ValidateAndTransformRow(row)\\
+13: \qquad \textbf{if} result.isValid = TRUE \textbf{then}\\
+14: \qquad\quad questionList $\leftarrow$ APPEND(questionList, result.question)\\
+15: \qquad \textbf{end if}\\
+16: \quad \textbf{\textbf{end for}}\\
+17: \quad SaveBatchToDatabase(questionList)\\
+18: \quad \textbf{return} Success(\{imported: Length(questionList)\})\\
+19: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{TOPIC AND SUBTOPIC AUTO-TAGGING IMPLEMENTATION}}
+
+The Topic and Subtopic Auto-Tagging Module uses Sentence-BERT (SBERT) to generate semantic embeddings for both questions and syllabus topics. The implementation primarily uses the \textit{all-MiniLM-L6-v2} model, which produces 384-dimensional embeddings and provides a good balance between accuracy and computational efficiency. For higher accuracy requirements, larger models such as \textit{all-mpnet-base-v2} (768-dimensional embeddings) can be used.
+
+The system integrates SBERT through a Python-based microservice that exposes an HTTP API for embedding generation. The Node.js backend sends question text to this service via HTTP requests and receives embedding vectors in response. This architecture allows the machine learning components to be decoupled from the main application, enabling independent scaling and efficient resource utilization.
+
+Cosine similarity is computed between the question embedding and each syllabus topic embedding. This similarity score determines how closely a question matches a given topic. A predefined confidence threshold (0.75) is used to decide whether the classification is reliable.
+
+If the highest similarity score meets or exceeds the threshold, the question is automatically classified, and the corresponding topic and subtopic are assigned. The question state is updated to \textit{Classified}, and the confidence score is stored for auditing and analysis.
+
+If the similarity score falls below the threshold, the question is marked as \textit{Review Required}. In such cases, a controlled LLM-based fallback mechanism is invoked. The LLM receives the question along with the top candidate topics and their similarity scores, and returns a refined classification. This hybrid approach combines the efficiency of embedding-based methods with the reasoning capability of language models for handling ambiguous cases.
+
+To optimize performance, syllabus embeddings are precomputed and cached using Redis. When updates to the syllabus occur, embeddings are regenerated asynchronously through background jobs to avoid blocking the main application. Versioning mechanisms are maintained to ensure consistency during updates.
+
+This module ensures accurate, scalable, and efficient semantic classification, forming a critical component of the automated question processing pipeline.
+
+\subsection{Pseudocode for Topic Classification}
+
+\algoheader{4.3}{Classify Question Using SBERT}
+1: \textbf{function} CLASSIFYQUESTION(question)\\
+2: \quad CONFIDENCE\_THRESHOLD $\leftarrow$ 0.75\\
+3: \quad questionEmbedding $\leftarrow$ SBERTEncode(question.question\_text)\\
+4: \quad bestScore $\leftarrow$ 0, bestMatch $\leftarrow$ NULL\\
+5: \quad \textbf{for} all syllabusEntry IN SYLLABUS\_CACHE \textbf{do}\\
+6: \qquad score $\leftarrow$ CosineSimilarity(questionEmbedding, syllabusEntry.embedding)\\
+7: \qquad \textbf{if} score > bestScore \textbf{then}\\
+8: \qquad\quad bestScore $\leftarrow$ score, bestMatch $\leftarrow$ syllabusEntry\\
+9: \qquad \textbf{end if}\\
+10: \quad \textbf{\textbf{end for}}\\
+11: \quad \textbf{if} bestScore $\geq$ CONFIDENCE\_THRESHOLD \textbf{then}\\
+12: \qquad question.topic $\leftarrow$ bestMatch.topic\\
+13: \qquad question.subtopic $\leftarrow$ bestMatch.subtopic\\
+14: \qquad question.state $\leftarrow$ "Classified"\\
+15: \quad \textbf{else}\\
+16: \qquad question $\leftarrow$ InvokeFallbackClassifier(question, bestScore)\\
+17: \quad \textbf{end if}\\
+18: \quad UpdateQuestionInDatabase(question)\\
+19: \quad \textbf{return} question\\
+20: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{DIFFICULTY TAGGING AND RECALIBRATION IMPLEMENTATION}}
+
+The system assigns initial difficulty levels using Bloom's Taxonomy, which categorizes questions based on cognitive complexity. Questions requiring Remember or Understand levels are classified as Easy, Apply level as Medium, and Analyze, Evaluate, or Create levels as Hard. This provides a theoretical baseline for difficulty classification.
+
+The implementation uses keyword-based detection combined with basic natural language processing to identify cognitive indicators within question text. Keywords associated with different levels include:
+
+\begin{itemize}
+\item Remember: recall, define, list, identify, name, state
+\item Understand: explain, describe, summarize, interpret, classify
+\item Apply: calculate, solve, demonstrate, apply, use, implement
+\item Analyze: analyze, compare, contrast, differentiate, examine
+\item Evaluate: evaluate, assess, justify, critique, argue
+\item Create: design, create, develop, formulate, construct
+\end{itemize}
+
+The system scans the question text for these keywords and assigns the highest detected cognitive level. If no relevant keywords are found, the system defaults to Medium difficulty and flags the question for manual review to ensure accuracy.
+
+To align difficulty with real-world performance, the system performs empirical recalibration after a minimum of 20 student attempts. The Difficulty Index is calculated as the ratio of correct responses to total attempts. Based on this index, the difficulty level is updated as follows:
+
+\begin{itemize}
+\item $\geq$ 70\% correct $\rightarrow$ Easy
+\item 40\% to 69\% correct $\rightarrow$ Medium
+\item $<$ 40\% correct $\rightarrow$ Hard
+\end{itemize}
+
+This recalibration process is executed as a scheduled background job. It identifies eligible questions, computes the Difficulty Index, updates the difficulty level, and records the changes. A history log is maintained, capturing original difficulty, updated difficulty, attempt statistics, and timestamps for auditing and analysis.
+
+Teachers are provided with the ability to review recalibration results and manually override difficulty levels if necessary. Overrides are preserved and protected from automatic updates to maintain consistency and expert control.
+
+The recalibrated difficulty values are further used by the performance analytics and recommendation modules to ensure accurate ability estimation and adaptive test generation.
+
+\subsection{Pseudocode for Difficulty Recalibration}
+
+\algoheader{4.4}{Recalibrate Question Difficulty}
+1: \textbf{function} RECALIBRATEQUESTIONDIFFICULTY(question)\\
+2: \quad MIN\_ATTEMPTS $\leftarrow$ 20, EASY\_THRESHOLD $\leftarrow$ 0.70, HARD\_THRESHOLD $\leftarrow$ 0.40\\
+3: \quad stats $\leftarrow$ FetchQuestionStats(question.question\_id)\\
+4: \quad \textbf{if} stats.total\_attempts < MIN\_ATTEMPTS \textbf{then}\\
+5: \qquad \textbf{return}\\
+6: \quad \textbf{end if}\\
+7: \quad difficultyIndex $\leftarrow$ stats.correct\_responses / stats.total\_attempts\\
+8: \quad \textbf{if} difficultyIndex $\geq$ EASY\_THRESHOLD \textbf{then}\\
+9: \qquad suggestedDifficulty $\leftarrow$ "Easy"\\
+10: \quad \textbf{else} \textbf{if} difficultyIndex $\geq$ HARD\_THRESHOLD \textbf{then}\\
+11: \qquad suggestedDifficulty $\leftarrow$ "Medium"\\
+12: \quad \textbf{else}\\
+13: \qquad suggestedDifficulty $\leftarrow$ "Hard"\\
+14: \quad \textbf{end if}\\
+15: \quad question.difficulty $\leftarrow$ suggestedDifficulty\\
+16: \quad UpdateQuestionInDatabase(question)\\
+17: \quad \textbf{return} question\\
+18: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{CUSTOMIZED TEST GENERATION MODULE IMPLEMENTATION}}
+
+The Customized Test Generation Module retrieves Verified questions from the database and generates personalized tests based on ability-driven difficulty distributions. The system ensures that each test aligns with the recommended difficulty level while maintaining subtopic diversity and preventing repetition.
+
+For Low Ability students, the distribution is 60\% Easy, 30\% Medium, and 10\% Hard. For Moderate Ability students, it is 30\% Easy, 50\% Medium, and 20\% Hard. For High Ability students, the distribution is 10\% Easy, 40\% Medium, and 50\% Hard. These distributions are configurable through system parameters, allowing flexibility based on institutional or exam-specific requirements.
+
+The selection process begins by retrieving Verified questions corresponding to the selected topic. Questions are grouped based on difficulty level and subtopic. The system then calculates the required number of questions for each difficulty level based on the total question count and the target distribution.
+
+To ensure comprehensive syllabus coverage, a subtopic balancing strategy is applied. The algorithm prioritizes underrepresented subtopics during selection, preventing concentration of questions in a single area and promoting balanced assessment.
+
+To avoid repetition, the system implements controlled randomization by excluding questions that appeared in the student's recent test history (typically the last three tests). If sufficient unique questions are not available, the system dynamically relaxes the exclusion criteria or notifies the teacher to expand the question pool.
+
+After selection, questions are shuffled to ensure randomness, and options within each question are also randomized to prevent answer pattern memorization. The final test is stored as a test session document containing details such as student ID, topic, selected question IDs, difficulty distribution, ability band, generation timestamp, and expiration time.
+
+Test sessions are configured with an expiration period (default 24 hours) to prevent reuse of outdated tests. Expired sessions are archived for analytics but cannot be submitted for evaluation.
+
+The generated tests are directly influenced by the recommendation engine and are further used by the performance analytics and study planning modules, forming a continuous adaptive learning loop.
+
+\subsection{Pseudocode for Test Generation}
+
+\algoheader{4.5}{Generate Customized Test}
+1: \textbf{function} GENERATETEST(studentId, topic, questionCount)\\
+2: \quad abilityScore $\leftarrow$ FetchAbilityScore(studentId, topic)\\
+3: \quad abilityBand $\leftarrow$ ClassifyAbilityBand(abilityScore)\\
+4: \quad distribution $\leftarrow$ DISTRIBUTION\_MAP[abilityBand]\\
+5: \quad easyCount $\leftarrow$ ROUND(questionCount $\times$ distribution.Easy)\\
+6: \quad mediumCount $\leftarrow$ ROUND(questionCount $\times$ distribution.Medium)\\
+7: \quad hardCount $\leftarrow$ questionCount $-$ easyCount $-$ mediumCount\\
+8: \quad allQuestions $\leftarrow$ FetchVerifiedQuestions(topic)\\
+9: \quad selectedQuestions $\leftarrow$ SelectAndBalanceQuestions(allQuestions, easyCount, mediumCount, hardCount)\\
+10: \quad testSession $\leftarrow$ CreateTestSession(studentId, topic, selectedQuestions, abilityBand)\\
+11: \quad SaveTestSessionToDatabase(testSession)\\
+12: \quad \textbf{return} testSession\\
+13: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{PERFORMANCE ANALYTICS MODULE IMPLEMENTATION}}
+
+The Performance Analytics Module computes comprehensive metrics to evaluate student progress and support adaptive recommendations. The implementation processes test submission data and updates multiple analytics collections in the database in real time.
+
+Overall accuracy is calculated as the ratio of correct responses to total questions attempted across all tests. The system maintains cumulative counters for total attempts and correct responses, updating them atomically upon each submission to ensure data consistency.
+
+Topic-wise accuracy provides a detailed breakdown of performance across syllabus topics. The system maintains separate records for each topic, including total attempts, correct responses, accuracy percentage, average time per question, and performance trends. This enables precise identification of strengths and weaknesses.
+
+Difficulty-wise performance tracks accuracy separately for Easy, Medium, and Hard questions. This helps determine whether a student struggles with foundational concepts or advanced problem-solving. These metrics are computed both globally and at the topic level for fine-grained analysis.
+
+Time-based metrics include average time per question, total time spent, and time efficiency ratios. Optimal time thresholds are defined as 60 seconds for Easy, 90 seconds for Medium, and 120 seconds for Hard questions. Time efficiency is calculated based on the proportion of correctly answered questions within these optimal time limits, ensuring a balance between speed and accuracy.
+
+A key component of this module is the Weighted Rolling Ability Model, which dynamically computes a student's ability score. The test-level ability score is calculated using weighted difficulty-wise accuracies:
+
+\[
+\text{Test Ability Score} = 0.5 \times \text{Hard Accuracy} + 0.3 \times \text{Medium Accuracy} + 0.2 \times \text{Easy Accuracy}
+\]
+
+The overall ability score is then computed using a rolling model that combines recent and historical performance:
+
+\[
+\text{Ability Score} = 0.5 \times \text{Latest Test Score} + 0.3 \times \text{Average (Last 5 Tests)} + 0.2 \times \text{Cumulative Score}
+\]
+
+These weights are configurable, allowing flexibility in tuning the system.
+
+Based on the computed ability score, students are categorized into three ability bands: Low, Moderate, and High. These categories directly influence adaptive test generation and difficulty recommendation.
+
+The module also performs trend analysis by comparing current performance with historical data using a sliding window approach. Positive trends (improvement) and negative trends (decline) are identified and incorporated into feedback mechanisms.
+
+The outputs of this module serve as the foundation for multiple downstream components, including the recommendation engine, SWOT analysis, LLM-based mentor module, and study plan generator, forming the core of the adaptive learning system.
+
+\subsection{Pseudocode for Performance Analytics}
+
+\algoheader{4.6}{Update Ability Score}
+1: \textbf{function} UPDATEABILITYSCORE(studentId, topic, analytics)\\
+2: \quad W\_LT $\leftarrow$ 0.50, W\_L5 $\leftarrow$ 0.30, W\_CUM $\leftarrow$ 0.20\\
+3: \quad W\_HARD $\leftarrow$ 0.50, W\_MEDIUM $\leftarrow$ 0.30, W\_EASY $\leftarrow$ 0.20\\
+4: \quad history $\leftarrow$ FetchTestHistory(studentId, topic)\\
+5: \quad LT\_score $\leftarrow$ (W\_HARD $\times$ analytics.hard\_accuracy) + (W\_MEDIUM $\times$ analytics.medium\_accuracy) + (W\_EASY $\times$ analytics.easy\_accuracy)\\
+6: \quad last5 $\leftarrow$ Last5Records(history)\\
+7: \quad L5\_score $\leftarrow$ Average(last5.ability\_scores)\\
+8: \quad CUM\_score $\leftarrow$ ComputeCumulativeScore(history)\\
+9: \quad newAbilityScore $\leftarrow$ (W\_LT $\times$ LT\_score) + (W\_L5 $\times$ L5\_score) + (W\_CUM $\times$ CUM\_score)\\
+10: \quad SaveAbilityScore(studentId, topic, newAbilityScore)\\
+11: \quad \textbf{return} newAbilityScore\\
+12: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{SWOT ANALYSIS MODULE IMPLEMENTATION}}
+
+The SWOT Analysis Module transforms quantitative performance analytics into qualitative insights by categorizing student performance into Strengths, Weaknesses, Opportunities, and Threats. The implementation operates on analytics data generated by the performance module and produces structured, actionable reports for each student.
+
+Strengths are identified when topic-wise or difficulty-wise accuracy exceeds 70\%. The system filters analytics records based on this threshold and compiles a list of consistently strong areas. Each strength entry includes the topic name, accuracy percentage, number of attempts, and a consistency indicator that verifies whether performance has remained above the threshold across recent tests.
+
+Weaknesses are identified when accuracy falls below 50\%, indicating critical knowledge gaps. The system ranks weaknesses based on severity by prioritizing topics with the lowest accuracy. Each weakness entry includes the topic name, accuracy percentage, number of attempts, and a decline indicator showing whether performance is deteriorating over time.
+
+Opportunities are detected using positive performance trends. If a student's accuracy improves by 5\% or more compared to the average of the previous tests, the system marks it as an opportunity. These represent areas where the student is gaining mastery. Each opportunity entry includes the topic name, current accuracy, previous average accuracy, improvement percentage, and a momentum indicator.
+
+Threats are identified through negative performance trends or inefficiency indicators. If accuracy declines by 10\% or more, it is flagged as a knowledge decay threat. Additionally, if the average time per question exceeds predefined limits consistently, it is classified as an efficiency threat. Each threat entry includes the topic name, accuracy decline percentage, average time, and threat type.
+
+The SWOT output is generated in a structured JSON format containing four categories: strengths, weaknesses, opportunities, and threats. This data is visualized in the frontend using color-coded dashboards, enabling students to quickly understand their performance patterns and focus on targeted improvement strategies.
+
+The results of this module are further utilized by the LLM-based mentor and study plan generator to provide personalized guidance and structured preparation strategies.
+
+\subsection{Pseudocode for SWOT Analysis}
+
+\algoheader{4.7}{Generate SWOT Report}
+1: \textbf{function} GENERATESWOT(studentId, topicAnalytics)\\
+2: \quad STRENGTH\_THRESHOLD $\leftarrow$ 0.70\\
+3: \quad WEAKNESS\_THRESHOLD $\leftarrow$ 0.50\\
+4: \quad OPPORTUNITY\_THRESHOLD $\leftarrow$ +0.05\\
+5: \quad THREAT\_THRESHOLD $\leftarrow$ -0.10\\
+6: \quad TIME\_LIMIT $\leftarrow$ 90\\
+7: \quad strengths $\leftarrow$ []\\
+8: \quad weaknesses $\leftarrow$ []\\
+9: \quad opportunities $\leftarrow$ []\\
+10: \quad threats $\leftarrow$ []\\
+11: \quad \textbf{for} each topic IN topicAnalytics \textbf{do}\\
+12: \qquad currentAcc $\leftarrow$ topic.current\_accuracy\\
+13: \qquad prevAvg $\leftarrow$ topic.previous\_avg\_accuracy\\
+14: \qquad time $\leftarrow$ topic.avg\_time\\
+15: \qquad \textbf{if} currentAcc $\geq$ STRENGTH\_THRESHOLD \textbf{then}\\
+16: \qquad\quad Append(strengths, topic)\\
+17: \qquad \textbf{end if}\\
+18: \qquad \textbf{if} currentAcc < WEAKNESS\_THRESHOLD \textbf{then}\\
+19: \qquad\quad Append(weaknesses, topic)\\
+20: \qquad \textbf{end if}\\
+21: \qquad improvement $\leftarrow$ currentAcc $-$ prevAvg\\
+22: \qquad \textbf{if} improvement $\geq$ OPPORTUNITY\_THRESHOLD \textbf{then}\\
+23: \qquad\quad Append(opportunities, topic)\\
+24: \qquad \textbf{end if}\\
+25: \qquad decline $\leftarrow$ prevAvg $-$ currentAcc\\
+26: \qquad \textbf{if} decline $\geq$ abs(THREAT\_THRESHOLD) OR time > TIME\_LIMIT \textbf{then}\\
+27: \qquad\quad Append(threats, topic)\\
+28: \qquad \textbf{end if}\\
+29: \quad \textbf{\textbf{end for}}\\
+30: \quad SWOT $\leftarrow$ \{"strengths": strengths, "weaknesses": weaknesses, "opportunities": opportunities, "threats": threats\}\\
+31: \quad \textbf{return} SWOT\\
+32: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{INTELLIGENT DIFFICULTY RECOMMENDATION MODULE IMPLEMENTATION}}
+
+The Intelligent Difficulty Recommendation Module determines the optimal difficulty distribution for subsequent tests based on a student's ability score and recent performance trends. The implementation ensures adaptive learning by aligning question difficulty with the student's current competence level.
+
+The ability score is computed using the weighted rolling model described in the performance analytics module. The score ranges from 0 to 100, and students are classified into three ability bands: Low (score < 50), Moderate (50 $\leq$ score < 75), and High (score $\geq$ 75).
+
+Based on the ability band, the system applies predefined difficulty distributions:
+
+\begin{itemize}
+\item High Ability: 10\% Easy, 40\% Medium, 50\% Hard
+\item Moderate Ability: 30\% Easy, 50\% Medium, 20\% Hard
+\item Low Ability: 60\% Easy, 30\% Medium, 10\% Hard
+\end{itemize}
+
+For new students with no prior test history, a diagnostic distribution of 40\% Easy, 40\% Medium, and 20\% Hard is used. This initial assessment helps establish a baseline ability score for future recommendations.
+
+The module incorporates trend-based adjustments to refine recommendations further. If a student demonstrates consistent improvement (accuracy increase of $\geq$ 5\% across recent tests), the system shifts the distribution toward higher difficulty levels within the same ability band. Conversely, if performance declines (accuracy drop of $\geq$ 10\%), the system temporarily increases the proportion of easier questions to reinforce foundational understanding and rebuild confidence.
+
+Recommendations are generated at the topic level, meaning each topic maintains a separate ability score and difficulty profile. This ensures that the system provides granular, personalized guidance based on topic-specific strengths and weaknesses rather than applying a uniform strategy.
+
+To enhance transparency, the system generates explanatory metadata along with the recommendation. This includes the ability score, detected performance trends, and reasoning behind the selected distribution. This improves user trust and helps students understand their learning progression.
+
+The output of this module directly drives the customized test generation process and also supports feedback generation in the LLM-based mentor module.
+
+\subsection{Pseudocode for Difficulty Recommendation}
+
+\algoheader{4.8}{Generate Difficulty Recommendation}
+1: \textbf{function} GENERATEDIFFICULTYRECOMMENDATION(studentId, topic)\\
+2: \quad history $\leftarrow$ FetchTestHistory(studentId, topic)\\
+3: \quad \textbf{if} history IS EMPTY \textbf{then}\\
+4: \qquad \textbf{return} \{ability\_band: "Diagnostic", distribution: \{Easy: 40\%, Medium: 40\%, Hard: 20\%\}\}\\
+5: \quad \textbf{end if}\\
+6: \quad abilityScore $\leftarrow$ FetchAbilityScore(studentId, topic)\\
+7: \quad abilityBand $\leftarrow$ ClassifyAbilityBand(abilityScore)\\
+8: \quad distribution $\leftarrow$ DISTRIBUTION\_MAP[abilityBand]\\
+9: \quad trend $\leftarrow$ AnalyzeRecentTrend(history)\\
+10: \quad \textbf{if} trend $\geq$ +0.05 \textbf{then}\\
+11: \qquad distribution $\leftarrow$ ShiftTowardsHarder(distribution)\\
+12: \quad \textbf{else} \textbf{if} trend $\leq$ -0.10 \textbf{then}\\
+13: \qquad distribution $\leftarrow$ ShiftTowardsEasier(distribution)\\
+14: \quad \textbf{end if}\\
+15: \quad recommendation $\leftarrow$ \{ability\_band: abilityBand, distribution: distribution, trend: trend\}\\
+16: \quad SaveRecommendationToDatabase(recommendation)\\
+17: \quad \textbf{return} recommendation\\
+18: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{LLM-BASED MENTOR MODULE IMPLEMENTATION}}
+
+The LLM-Based Mentor Module enhances the system by converting structured performance analytics into personalized, human-readable feedback. Unlike traditional rule-based systems that provide static insights, this module leverages a Large Language Model (LLM) to generate contextual, adaptive, and student-specific guidance.
+
+The implementation follows a controlled pipeline to ensure reliability, consistency, and minimal hallucination. After a test is completed, the system collects structured inputs from multiple modules, including overall accuracy, topic-wise performance, difficulty-wise accuracy, time metrics, weighted ability score, ability band, and SWOT analysis output.
+
+These inputs are processed by a Prompt Builder, which constructs a structured and constrained prompt. The prompt enforces a predefined format and includes only verified data points to ensure that the LLM response remains grounded in actual student performance. The prompt design follows a template-based approach with clearly defined sections such as strengths, weaknesses, focus areas, time management advice, and difficulty progression recommendations.
+
+The system uses a locally deployed LLM (Llama 3.2 via Ollama) to generate responses. Local deployment ensures reduced latency, improved data privacy, and independence from external API limitations such as rate limits and cost constraints. The LLM processes the prompt and generates structured feedback in natural language.
+
+To ensure output quality, an Evaluation Layer is implemented. This layer validates the LLM response using rule-based scoring metrics such as groundedness (alignment with input data), relevance, specificity, and hallucination detection. If the response fails to meet predefined thresholds, the system either regenerates the response or falls back to rule-based feedback templates.
+
+The final output is a structured feedback report containing:
+
+\begin{itemize}
+\item Strength summary
+\item Weakness analysis
+\item Priority focus areas
+\item Recommended difficulty progression
+\item Time management suggestions
+\item Exam readiness indication
+\end{itemize}
+
+Importantly, the LLM module operates strictly as an interpretive layer and does not modify core system decisions such as ability score, difficulty recommendation, or test generation logic. This separation ensures system stability while enhancing interpretability and user engagement.
+
+The generated feedback is stored in the database and presented to the student through the frontend interface. This module significantly improves the learning experience by providing mentor-like guidance tailored to individual performance.
+
+\subsection{Pseudocode for LLM Mentor Module}
+
+\algoheader{4.9}{Generate LLM-Based Feedback}
+1: \textbf{function} GENERATELLMMFEEDBACK(studentId, topic)\\
+2: \quad analytics $\leftarrow$ FetchPerformanceAnalytics(studentId, topic)\\
+3: \quad swot $\leftarrow$ FetchSWOTAnalysis(studentId, topic)\\
+4: \quad ability $\leftarrow$ FetchAbilityScore(studentId, topic)\\
+5: \quad inputData $\leftarrow$ \{\\
+6: \qquad accuracy: analytics.overall\_accuracy,\\
+7: \qquad topic\_performance: analytics.topic\_wise,\\
+8: \qquad difficulty\_performance: analytics.difficulty\_wise,\\
+9: \qquad time\_metrics: analytics.time\_stats,\\
+10: \qquad ability\_score: ability.score,\\
+11: \qquad ability\_band: ability.band,\\
+12: \qquad swot: swot\\
+13: \quad \}\\
+14: \quad prompt $\leftarrow$ BuildStructuredPrompt(inputData)\\
+15: \quad response $\leftarrow$ CallLLM(prompt)\\
+16: \quad evaluation $\leftarrow$ EvaluateResponse(response, inputData)\\
+17: \quad \textbf{if} evaluation.score < THRESHOLD \textbf{then}\\
+18: \qquad response $\leftarrow$ GenerateRuleBasedFeedback(inputData)\\
+19: \quad \textbf{end if}\\
+20: \quad SaveFeedback(studentId, topic, response)\\
+21: \quad \textbf{return} response\\
+22: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{STUDY PLAN GENERATOR IMPLEMENTATION}}
+
+The Study Plan Generator Module creates structured and personalized preparation plans based on student performance, syllabus coverage, and learning priorities. Unlike static study schedules, this module dynamically adapts the plan using analytics, SWOT insights, and difficulty recommendations.
+
+The implementation begins by collecting inputs from multiple modules, including topic-wise performance, difficulty-wise accuracy, SWOT analysis results, and the student's ability score. Additionally, the syllabus structure is retrieved to ensure complete coverage of all topics.
+
+The system first identifies priority areas by analyzing weaknesses and threats from the SWOT module. Topics with low accuracy or declining trends are marked as high priority. Opportunities (improving topics) are assigned moderate priority, while strengths are assigned lower priority but are still included periodically to maintain retention.
+
+Based on these priorities, the module allocates study time across topics. Higher priority topics receive more time slots and more frequent repetition. The system uses a weighted scheduling approach to distribute topics across a configurable time horizon (e.g., 7-day or 14-day plans).
+
+Each day in the study plan consists of structured tasks such as:
+
+\begin{itemize}
+\item Concept revision for weak topics
+\item Practice tests based on recommended difficulty
+\item Timed quizzes for speed improvement
+\item Review sessions for previously attempted questions
+\end{itemize}
+
+The module integrates with the difficulty recommendation system to ensure that practice tasks align with the student's current ability level. For example, a student struggling in a topic will receive more Easy and Medium level practice, while stronger topics will include more challenging questions.
+
+An optional LLM-assisted enhancement is used to generate human-readable strategy descriptions. While the core schedule is generated deterministically, the LLM provides explanations such as ``focus on strengthening fundamentals in Algebra'' or ``increase timed practice for Current Affairs.'' This ensures clarity without affecting system logic.
+
+The generated study plan is stored in the database and presented as a day-wise schedule. The system supports regeneration of plans based on updated performance data, ensuring continuous adaptation as the student progresses.
+
+This module enables structured, goal-oriented preparation by guiding students on what to study, when to study, and how to practice, thereby improving efficiency and consistency in exam preparation.
+
+\subsection{Pseudocode for Study Plan Generation}
+
+\algoheader{4.10}{Generate Study Plan}
+1: \textbf{function} GENERATESTUDYPLAN(studentId, durationDays)\\
+2: \quad analytics $\leftarrow$ FetchPerformanceAnalytics(studentId)\\
+3: \quad swot $\leftarrow$ FetchSWOTAnalysis(studentId)\\
+4: \quad syllabus $\leftarrow$ FetchSyllabus()\\
+5: \quad priorities $\leftarrow$ \{\}\\
+6: \quad \textbf{for} each topic IN syllabus \textbf{do}\\
+7: \qquad \textbf{if} topic IN swot.weaknesses OR topic IN swot.threats \textbf{then}\\
+8: \qquad\quad priorities[topic] $\leftarrow$ HIGH\\
+9: \qquad \textbf{else} \textbf{if} topic IN swot.opportunities \textbf{then}\\
+10: \qquad\quad priorities[topic] $\leftarrow$ MEDIUM\\
+11: \qquad \textbf{else}\\
+12: \qquad\quad priorities[topic] $\leftarrow$ LOW\\
+13: \qquad \textbf{end if}\\
+14: \quad \textbf{\textbf{end for}}\\
+15: \quad schedule $\leftarrow$ InitializeEmptyPlan(durationDays)\\
+16: \quad \textbf{for} day FROM 1 TO durationDays \textbf{do}\\
+17: \qquad selectedTopics $\leftarrow$ SelectTopicsBasedOnPriority(priorities)\\
+18: \qquad \textbf{for} each topic IN selectedTopics \textbf{do}\\
+19: \qquad\quad difficulty $\leftarrow$ FetchRecommendedDifficulty(studentId, topic)\\
+20: \qquad\quad task $\leftarrow$ \{\\
+21: \qquad\qquad "topic": topic,\\
+22: \qquad\qquad "activity": GenerateTaskType(topic, priorities[topic]),\\
+23: \qquad\qquad "difficulty": difficulty\\
+24: \qquad\quad \}\\
+25: \qquad\quad Append(schedule[day], task)\\
+26: \qquad \textbf{\textbf{end for}}\\
+27: \quad \textbf{\textbf{end for}}\\
+28: \quad SaveStudyPlan(studentId, schedule)\\
+29: \quad \textbf{return} schedule\\
+30: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{CURRENT AFFAIRS ENGINE IMPLEMENTATION}}
+
+The Current Affairs Engine is designed to automatically generate daily multiple-choice questions (MCQs) from current news sources, enabling students to stay updated with relevant events for competitive examinations. This module follows a pipeline-based architecture to ensure reliability, quality, and scalability.
+
+The implementation begins with the News Fetcher, which retrieves recent news articles from trusted sources using APIs or RSS feeds. The fetched data is filtered based on relevance, removing duplicate, irrelevant, or low-quality content. Filtering criteria include keyword matching, topic relevance (e.g., polity, economy, international relations), and content length.
+
+The filtered news articles are then passed to the MCQ Generator, which uses a Large Language Model (LLM) to convert news content into structured MCQs. Each generated question includes the question statement, four options, the correct answer, and an explanation. The prompt used for generation enforces a strict format to ensure consistency and exam relevance.
+
+To maintain quality, a Validation Module verifies the generated MCQs. This includes checks for:
+
+\begin{itemize}
+\item Proper question structure
+\item Valid number of options
+\item Presence of a correct answer
+\item Clarity and grammatical correctness
+\item Relevance to competitive exam patterns
+\end{itemize}
+
+Invalid or low-quality questions are discarded or regenerated. The validated questions are then stored in the database with metadata such as date, topic, source, and difficulty level.
+
+The Teacher Control Interface allows instructors to review generated questions before publishing. Teachers can approve, edit, or reject questions. Only approved questions are made available to students, ensuring quality control and preventing incorrect content from being displayed.
+
+The system supports manual and scheduled execution. Teachers can trigger the pipeline manually for a specific date, or the scheduler can automatically generate daily current affairs tests. Once approved, the questions are published as daily tests accessible to all students.
+
+The Current Affairs Engine integrates with the overall platform by allowing students to attempt daily tests, track performance, and receive analytics similar to regular topic-based tests. This ensures that current affairs preparation is seamlessly incorporated into the learning workflow.
+
+This module enhances the platform by providing up-to-date, automated, and exam-oriented content, reducing manual effort for teachers while ensuring continuous student engagement.
+
+\subsection{Pseudocode for Current Affairs Engine}
+
+\algoheader{4.11}{Generate Daily Current Affairs MCQs}
+1: \textbf{function} GENERATECURRENTAFFAIRS(date)\\
+2: \quad articles $\leftarrow$ FetchNewsArticles(date)\\
+3: \quad filteredArticles $\leftarrow$ []\\
+4: \quad \textbf{for} each article IN articles \textbf{do}\\
+5: \qquad \textbf{if} IsRelevant(article) AND NOT IsDuplicate(article) \textbf{then}\\
+6: \qquad\quad Append(filteredArticles, article)\\
+7: \qquad \textbf{end if}\\
+8: \quad \textbf{\textbf{end for}}\\
+9: \quad mcqList $\leftarrow$ []\\
+10: \quad \textbf{for} each article IN filteredArticles \textbf{do}\\
+11: \qquad prompt $\leftarrow$ BuildMCQPrompt(article)\\
+12: \qquad mcq $\leftarrow$ CallLLM(prompt)\\
+13: \qquad \textbf{if} ValidateMCQ(mcq) = TRUE \textbf{then}\\
+14: \qquad\quad Append(mcqList, mcq)\\
+15: \qquad \textbf{else}\\
+16: \qquad\quad mcq $\leftarrow$ RegenerateMCQ(article)\\
+17: \qquad\quad \textbf{if} ValidateMCQ(mcq) = TRUE \textbf{then}\\
+18: \qquad\qquad Append(mcqList, mcq)\\
+19: \qquad\quad \textbf{end if}\\
+20: \qquad \textbf{end if}\\
+21: \quad \textbf{\textbf{end for}}\\
+22: \quad SaveMCQsToDatabase(mcqList, date)\\
+23: \quad NotifyTeacherForReview(mcqList)\\
+24: \quad \textbf{return} mcqList\\
+25: \textbf{end function}
+\algofooter
+
+\algoheader{4.12}{Publish Approved MCQs}
+1: \textbf{function} PUBLISHMCQS(date)\\
+2: \quad approvedMCQs $\leftarrow$ FetchApprovedMCQs(date)\\
+3: \quad CreateDailyTest(approvedMCQs, date)\\
+4: \quad MakeAvailableToStudents(date)\\
+5: \textbf{end function}
+\algofooter
+
+\section{\MakeUppercase{SUMMARY}}
+
+This chapter presented the implementation of the Intelligent Competitive Exam Platform with Personalized Test Series. The system integrates secure JWT-based authentication, structured question ingestion, SBERT-based semantic classification, hybrid difficulty modeling, and customized test generation within a scalable Node.js backend architecture.
+
+The platform incorporates advanced performance analytics using weighted rolling models, enabling accurate evaluation of student progress. Based on this analysis, the system provides SWOT-based feedback and intelligent difficulty recommendations to support adaptive learning.
+
+In addition to core functionalities, the implementation includes advanced modules such as the LLM-based mentor, which converts analytical data into personalized feedback, the study plan generator, which creates structured and adaptive learning schedules, and the current affairs engine, which automates the generation of daily exam-oriented MCQs from real-world news sources.
+
+Together, these components transform the conceptual design into a fully functional, intelligent, and data-driven competitive exam preparation system. The architecture ensures scalability, modularity, and real-time adaptability, making the platform suitable for large-scale deployment and practical educational use.
+
+\end{sloppypar}

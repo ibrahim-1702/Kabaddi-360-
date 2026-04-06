@@ -1,0 +1,59 @@
+# =============================================================================
+# Multi-View 3D Reconstruction Pipeline — Configuration
+# =============================================================================
+
+# --- Paths ---
+paths:
+  samples_root: "samples/3D/Techniques"
+  output_root: "outputs"
+  calibration_file: "pipeline/calibration/camera_params.json"
+
+# --- Video Loading ---
+video_loader:
+  target_fps: 30.0
+  fps_tolerance: 1.0        # max FPS difference before warning
+  duration_tolerance: 0.5    # max duration difference (seconds)
+
+# --- Pose Extraction ---
+pose_extraction:
+  backend: "mediapipe"       # mediapipe | openpose
+  model_complexity: 1        # 0=lite, 1=full, 2=heavy
+  min_detection_confidence: 0.5
+  min_tracking_confidence: 0.5
+  debug_frames: 50           # frames to extract in debug mode
+
+# --- Temporal Synchronization ---
+synchronization:
+  pelvis_weight: 0.5
+  wrist_weight: 0.3
+  ankle_weight: 0.2
+  correlation_threshold: 0.3   # below this → fallback to offset=0
+  max_offset_frames: 30        # max allowed temporal offset
+
+# --- Triangulation ---
+triangulation:
+  confidence_threshold: 0.3   # relaxed for synthetic calibration
+  min_views: 2                 # minimum views required for triangulation
+  max_reprojection_error: 500.0 # relaxed for synthetic calibration
+
+# --- Post-Processing ---
+smoothing:
+  method: "savgol"             # savgol | ema
+  window_length: 11            # wider window for noisier 3D data
+  polyorder: 3
+  ema_alpha: 0.75
+
+normalization:
+  target_height: 1.7           # meters (average human height)
+  root_joint: "pelvis"         # pelvis = midpoint of hips
+
+# --- Animation Export ---
+animation:
+  fps: 30
+  format: "bvh"               # bvh | fbx
+  blender_path: "blender"     # path to blender executable
+
+# --- Logging ---
+logging:
+  level: "INFO"                # DEBUG | INFO | WARNING | ERROR
+  save_debug_outputs: true

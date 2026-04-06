@@ -10,6 +10,24 @@ import numpy as np
 from typing import Tuple, List
 
 
+def _normalize_by_torso(poses: np.ndarray) -> np.ndarray:
+    """
+    Scale each frame by torso height (left shoulder to left hip distance).
+    Makes DTW translation- and scale-invariant across different camera distances.
+
+    Args:
+        poses: Pose sequence (T, 17, 2) in COCO-17 format
+
+    Returns:
+        Normalized pose sequence (T, 17, 2)
+    """
+    normalized = poses.copy().astype(np.float32)
+    for t in range(len(poses)):
+        torso_height = np.linalg.norm(poses[t, 5] - poses[t, 11]) + 1e-6
+        normalized[t] = poses[t] / torso_height
+    return normalized
+
+
 def extract_pelvis_trajectory(poses: np.ndarray) -> np.ndarray:
     """
     Extract pelvis trajectory from pose sequence using hip midpoint.
@@ -128,9 +146,13 @@ def temporal_alignment(user_poses: np.ndarray, ghost_poses: np.ndarray) -> Tuple
     Returns:
         Tuple of (user_indices, ghost_indices) for aligned sequences
     """
+    # Normalize by torso height before DTW to remove camera-distance noise
+    user_poses_norm = _normalize_by_torso(user_poses)
+    ghost_poses_norm = _normalize_by_torso(ghost_poses)
+
     # Extract pelvis trajectories
-    user_pelvis = extract_pelvis_trajectory(user_poses)
-    ghost_pelvis = extract_pelvis_trajectory(ghost_poses)
+    user_pelvis = extract_pelvis_trajectory(user_poses_norm)
+    ghost_pelvis = extract_pelvis_trajectory(ghost_poses_norm)
     
     # Compute distance matrix
     distance_matrix = compute_distance_matrix(user_pelvis, ghost_pelvis)

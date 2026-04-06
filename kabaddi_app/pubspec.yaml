@@ -1,0 +1,55 @@
+name: kabaddi_app
+description: Kabaddi Ghost Trainer - AR-based kabaddi training mobile app
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.1.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI
+  cupertino_icons: ^1.0.2
+  google_fonts: ^5.1.0
+  shimmer: ^3.0.0
+
+  # State Management
+  provider: ^6.0.5
+
+  # Networking
+  dio: ^5.3.2
+
+  # Video / Camera
+  camera: ^0.10.5+5
+  video_player: ^2.7.2
+
+  # Audio
+  audioplayers: ^5.2.1
+  flutter_tts: ^4.0.2
+
+  # Translation (on-device)
+  google_mlkit_translation: ^0.10.0
+
+  # Storage
+  shared_preferences: ^2.2.1
+
+  # Utils
+  path_provider: ^2.1.1
+  permission_handler: ^10.4.5
+  percent_indicator: ^4.2.3
+  model_viewer_plus: ^1.7.2
+  webview_flutter: ^4.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/models/

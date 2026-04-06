@@ -59,6 +59,8 @@ Generate feedback in 3-4 paragraphs:
 3. Phase-specific insights (if quality varies)
 4. Temporal progression note (improving/degrading/stable)
 
+**IMPORTANT: Output plain text only. Do NOT use markdown formatting, asterisks, bold, headers, or bullet points.**
+
 ## Prohibited Behaviors
 - **CRITICAL: Do NOT invent problems when assessments are "Excellent" with no deviations listed**
 - Hallucinating joint issues not in context

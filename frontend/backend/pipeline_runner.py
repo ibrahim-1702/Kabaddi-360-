@@ -190,16 +190,8 @@ COCO17_JOINT_NAMES = {
 }
 
 def compute_joint_errors(expert_poses: np.ndarray, user_poses: np.ndarray) -> np.ndarray:
-    """Compute frame-wise, joint-wise Euclidean errors"""
-    T, num_joints, _ = expert_poses.shape
-    errors = np.zeros((T, num_joints))
-    
-    for t in range(T):
-        for j in range(num_joints):
-            diff = expert_poses[t, j, :] - user_poses[t, j, :]
-            errors[t, j] = np.linalg.norm(diff)
-    
-    return errors
+    """Compute frame-wise, joint-wise Manhattan (L1) errors"""
+    return np.sum(np.abs(expert_poses - user_poses), axis=2)
 
 
 def aggregate_joint_stats(errors: np.ndarray) -> Dict:

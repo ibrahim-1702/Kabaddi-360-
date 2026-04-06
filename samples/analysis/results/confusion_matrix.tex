@@ -1,0 +1,15 @@
+\begin{table}[htbp]
+\centering
+\caption{Similarity Score Confusion Matrix: Distance Metric vs Test Scenario}
+\label{tab:confusion_matrix}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Distance Metric} & \textbf{Same Person Same Pose} & \textbf{Different Person Same Pose} & \textbf{Same Person Different Pose} & \textbf{Different Person Different Pose} \\
+\midrule
+\textbf{Euclidean} & 100.0\% & 71.6\% & 52.0\% & 33.0\% \\
+\textbf{Manhattan} & 100.0\% & 70.6\% & 41.5\% & 21.8\% \\
+\textbf{Chebyshev} & 100.0\% & 71.8\% & 55.1\% & 35.2\% \\
+\textbf{Minkowski (p=3)} & 100.0\% & 71.8\% & 53.8\% & 34.5\% \\
+\bottomrule
+\end{tabular}
+\end{table}

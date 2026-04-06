@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 import uuid
 import subprocess
 import sys
@@ -7,10 +8,16 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.http import FileResponse
 from django.views import View
 from django.utils.decorators import method_decorator
 from .models import Tutorial, UserSession, RawVideo, PoseArtifact, AnalyticalResults
 
+
+class HealthCheckView(View):
+    """Simple health check endpoint for mobile app connectivity test."""
+    def get(self, request):
+        return JsonResponse({'status': 'ok', 'service': 'kabaddi_backend'})
 
 class ARPoseDataView(View):
     def get(self, request, tutorial_id):
@@ -170,20 +177,23 @@ class AssessmentTriggerView(View):
         if session.status != 'video_uploaded':
             return JsonResponse({'error': f'Invalid status: {session.status}'}, status=400)
         
-        # Trigger async pipeline execution
+        # Trigger pipeline in background thread so this request returns immediately
         try:
             from .tasks import process_multi_level_pipeline
-            process_multi_level_pipeline.delay(str(session.id))
-            
-            session.status = 'pose_extracted'
-            session.save()
-            
+            import threading
+            thread = threading.Thread(
+                target=process_multi_level_pipeline,
+                args=(str(session.id),),
+                daemon=True
+            )
+            thread.start()
+
             return JsonResponse({
                 'session_id': str(session.id),
                 'status': 'processing',
                 'message': 'Multi-level analytical pipeline started'
             })
-            
+
         except Exception as e:
             return JsonResponse({'error': f'Pipeline trigger failed: {str(e)}'}, status=500)
 
@@ -209,7 +219,7 @@ class ResultsView(View):
         try:
             session = UserSession.objects.get(id=session_id)
             
-            if session.status != 'scoring_complete' and session.status != 'feedback_generated':
+            if session.status not in ('scoring_complete', 'feedback_generated'):
                 return JsonResponse({
                     'error': 'Results not ready',
                     'status': session.status
@@ -233,6 +243,17 @@ class ResultsView(View):
             except (FileNotFoundError, json.JSONDecodeError):
                 return JsonResponse({'error': 'Error metrics file corrupted'}, status=500)
             
+            import math
+            def sanitize_floats(obj):
+                if isinstance(obj, float):
+                    if math.isnan(obj) or math.isinf(obj): return 0.0
+                    return obj
+                elif isinstance(obj, dict):
+                    return {k: sanitize_floats(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [sanitize_floats(v) for v in obj]
+                return obj
+            
             response_data = {
                 'session_id': str(session.id),
                 'tutorial': session.tutorial.name,
@@ -253,9 +274,80 @@ class ResultsView(View):
             except LLMFeedback.DoesNotExist:
                 pass
             
-            return JsonResponse(response_data)
+            return JsonResponse(sanitize_floats(response_data))
             
         except UserSession.DoesNotExist:
             return JsonResponse({'error': 'Session not found'}, status=404)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+
+
+class TTSAudioView(View):
+    """Return TTS feedback audio for a session."""
+    def get(self, request, session_id):
+        try:
+            session = UserSession.objects.get(id=session_id)
+        except UserSession.DoesNotExist:
+            return JsonResponse({'error': 'Session not found'}, status=404)
+
+        # Serve cached English wav
+        audio_path = settings.MEDIA_ROOT / 'tts_audio' / f'{session_id}.wav'
+        if audio_path.exists():
+            return FileResponse(open(audio_path, 'rb'), content_type='audio/wav')
+
+        # Audio not ready yet — return feedback text as fallback
+        try:
+            from .models import LLMFeedback
+            feedback = LLMFeedback.objects.get(user_session=session)
+            return JsonResponse({
+                'available': False,
+                'text': feedback.feedback_text,
+                'message': 'TTS audio not ready'
+            }, status=200)
+        except LLMFeedback.DoesNotExist:
+            return JsonResponse({'available': False, 'message': 'No feedback yet'}, status=200)
+
+
+class TutorialListAllView(View):
+    """List all active tutorials for mobile app technique selection."""
+    def get(self, request):
+        tutorials = Tutorial.objects.filter(is_active=True)
+        data = [{
+            'id': str(t.id),
+            'name': t.name,
+            'description': t.description,
+            'has_animation': bool(getattr(t, 'animation_fbx_path', None)),
+        } for t in tutorials]
+        return JsonResponse({'tutorials': data})
+
+
+class AnimationFileView(View):
+    """Serve FBX animation file for Unity AR ghost playback."""
+    def get(self, request, tutorial_id):
+        try:
+            tutorial = Tutorial.objects.get(id=tutorial_id, is_active=True)
+        except Tutorial.DoesNotExist:
+            return JsonResponse({'error': 'Tutorial not found'}, status=404)
+
+        # Check for animation file
+        anim_path = None
+        if hasattr(tutorial, 'animation_fbx_path') and tutorial.animation_fbx_path:
+            anim_path = Path(settings.MEDIA_ROOT) / tutorial.animation_fbx_path
+
+        if not anim_path or not anim_path.exists():
+            # Fallback: check media/animations/<tutorial_name>.fbx
+            fallback = Path(settings.MEDIA_ROOT) / 'animations' / f'{tutorial.name}.fbx'
+            if fallback.exists():
+                anim_path = fallback
+            else:
+                return JsonResponse({
+                    'error': 'Animation file not found',
+                    'expected_path': str(fallback)
+                }, status=404)
+
+        return FileResponse(
+            open(anim_path, 'rb'),
+            content_type='application/octet-stream',
+            as_attachment=True,
+            filename=f'{tutorial.name}_ghost.fbx'
+        )
