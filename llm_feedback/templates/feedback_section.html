@@ -1,0 +1,109 @@
+<!--
+LLM Feedback Integration - HTML Template Section
+
+Add this to your results page template (e.g., templates/results.html)
+where you want the AI feedback section to appear.
+
+Make sure to:
+1. Pass {{ session_id }} from Django view context
+2. Include the JavaScript (feedback_integration.js) or inline script
+3. Update CSS classes to match your existing styling
+-->
+
+<!-- AI Feedback Section -->
+<div class="feedback-container">
+    <h3>AI Coaching Feedback</h3>
+    
+    <!-- Generate Button -->
+    <button 
+        id="generate-feedback-btn" 
+        onclick="generateAIFeedback('{{ session_id }}')"
+        class="btn btn-primary">
+        Generate AI Feedback
+    </button>
+    
+    <!-- Loading Indicator -->
+    <div id="ai-loading" class="hidden">
+        <p>🔄 Generating personalized feedback...</p>
+    </div>
+    
+    <!-- Error Message -->
+    <div id="ai-error" class="error-message hidden"></div>
+    
+    <!-- Feedback Display -->
+    <div id="ai-feedback-section" class="hidden">
+        <div class="feedback-box">
+            <p id="ai-feedback-text"></p>
+        </div>
+    </div>
+</div>
+
+<!-- Minimal CSS (customize to match your design) -->
+<style>
+    .hidden { 
+        display: none; 
+    }
+
+    .feedback-container {
+        margin-top: 30px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .feedback-box {
+        background: #f9f9f9;
+        padding: 20px;
+        border-left: 4px solid #007bff;
+        margin-top: 15px;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    .error-message {
+        color: #d32f2f;
+        background: #ffebee;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+    }
+
+    #ai-loading {
+        color: #1976d2;
+        margin-top: 10px;
+        font-style: italic;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.3s;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+
+    .btn-primary:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+</style>
+
+<!-- Include JavaScript (choose one method) -->
+<!-- Method 1: Inline script -->
+<script src="{% static 'llm_feedback/feedback_integration.js' %}"></script>
+
+<!-- Method 2: Django static file -->
+<!-- <script>
+    // Paste content of feedback_integration.js here
+</script> -->

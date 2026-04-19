@@ -1,0 +1,2542 @@
+{
+  "SPSp": {
+    "scenario": "SPSp",
+    "video_a": "hand_left - Copy.mp4",
+    "video_b": "hand_left.mp4",
+    "ref_frames": 100,
+    "aligned_frames": 100,
+    "metrics": {
+      "Euclidean": {
+        "structural": 100.0,
+        "temporal": 100.0,
+        "overall": 100.0,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_shoulder": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_elbow": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_elbow": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_wrist": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_wrist": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_hip": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_hip": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_knee": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_knee": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_ankle": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_ankle": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          },
+          "mid": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          },
+          "late": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          }
+        },
+        "mean_error": 0.0,
+        "raw_errors_shape": [
+          100,
+          17
+        ]
+      },
+      "Manhattan": {
+        "structural": 100.0,
+        "temporal": 100.0,
+        "overall": 100.0,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_shoulder": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_elbow": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_elbow": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_wrist": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_wrist": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_hip": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_hip": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_knee": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_knee": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_ankle": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_ankle": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          },
+          "mid": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          },
+          "late": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          }
+        },
+        "mean_error": 0.0,
+        "raw_errors_shape": [
+          100,
+          17
+        ]
+      },
+      "Chebyshev": {
+        "structural": 100.0,
+        "temporal": 100.0,
+        "overall": 100.0,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_shoulder": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_elbow": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_elbow": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_wrist": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_wrist": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_hip": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_hip": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_knee": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_knee": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_ankle": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_ankle": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          },
+          "mid": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          },
+          "late": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          }
+        },
+        "mean_error": 0.0,
+        "raw_errors_shape": [
+          100,
+          17
+        ]
+      },
+      "Minkowski (p=3)": {
+        "structural": 100.0,
+        "temporal": 100.0,
+        "overall": 100.0,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_shoulder": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_elbow": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_elbow": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_wrist": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_wrist": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_hip": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_hip": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_knee": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_knee": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "left_ankle": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          },
+          "right_ankle": {
+            "mean": 0.0,
+            "max": 0.0,
+            "std": 0.0
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          },
+          "mid": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          },
+          "late": {
+            "nose": 0.0,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.0,
+            "right_shoulder": 0.0,
+            "left_elbow": 0.0,
+            "right_elbow": 0.0,
+            "left_wrist": 0.0,
+            "right_wrist": 0.0,
+            "left_hip": 0.0,
+            "right_hip": 0.0,
+            "left_knee": 0.0,
+            "right_knee": 0.0,
+            "left_ankle": 0.0,
+            "right_ankle": 0.0
+          }
+        },
+        "mean_error": 0.0,
+        "raw_errors_shape": [
+          100,
+          17
+        ]
+      }
+    },
+    "full_label": "Same Person Same Pose",
+    "expected": "~100%"
+  },
+  "DPSp": {
+    "scenario": "DPSp",
+    "video_a": "bonus_front_p1.mp4",
+    "video_b": "bonus_front_p2.mp4",
+    "ref_frames": 98,
+    "aligned_frames": 140,
+    "metrics": {
+      "Euclidean": {
+        "structural": 47.44,
+        "temporal": 74.29,
+        "overall": 71.6,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.32506655987780275,
+            "max": 0.5226795245672619,
+            "std": 0.13135298071375265
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.357077596651321,
+            "max": 1.0761632710158742,
+            "std": 0.30256139776946467
+          },
+          "right_shoulder": {
+            "mean": 0.43182096214803045,
+            "max": 0.9719761652776524,
+            "std": 0.1825275734191885
+          },
+          "left_elbow": {
+            "mean": 0.6095768571142043,
+            "max": 1.3623362739536946,
+            "std": 0.26822519283230195
+          },
+          "right_elbow": {
+            "mean": 0.73828092554463,
+            "max": 1.8569386760819582,
+            "std": 0.3789505817224732
+          },
+          "left_wrist": {
+            "mean": 0.7692827120311517,
+            "max": 1.502393847062104,
+            "std": 0.32303770754663624
+          },
+          "right_wrist": {
+            "mean": 0.9410437073351658,
+            "max": 1.4419147756162,
+            "std": 0.3151672881484017
+          },
+          "left_hip": {
+            "mean": 0.1878997777815165,
+            "max": 0.6525325560395752,
+            "std": 0.14622146701910002
+          },
+          "right_hip": {
+            "mean": 0.1878997777815165,
+            "max": 0.6525325560395752,
+            "std": 0.14622146701910002
+          },
+          "left_knee": {
+            "mean": 0.4824002162017047,
+            "max": 1.3714044638568352,
+            "std": 0.30751703359141364
+          },
+          "right_knee": {
+            "mean": 0.34725748845479204,
+            "max": 1.1394045176069982,
+            "std": 0.24775925550746716
+          },
+          "left_ankle": {
+            "mean": 0.35513130242208507,
+            "max": 1.1848996039901512,
+            "std": 0.28489448342841245
+          },
+          "right_ankle": {
+            "mean": 0.41649397984489345,
+            "max": 1.638496620223264,
+            "std": 0.39226577190852374
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.3959821190742868,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.16838499539884366,
+            "right_shoulder": 0.4188742101175051,
+            "left_elbow": 0.5326565270223101,
+            "right_elbow": 0.6438163197816043,
+            "left_wrist": 0.6079815425659233,
+            "right_wrist": 1.17071347877759,
+            "left_hip": 0.099446206441275,
+            "right_hip": 0.099446206441275,
+            "left_knee": 0.27543256287392476,
+            "right_knee": 0.23079777252098507,
+            "left_ankle": 0.1422984738622975,
+            "right_ankle": 0.25928055840136877
+          },
+          "mid": {
+            "nose": 0.3700675535070047,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.1805831254509968,
+            "right_shoulder": 0.38520721710405426,
+            "left_elbow": 0.4073416498813577,
+            "right_elbow": 0.43107971976259013,
+            "left_wrist": 0.5404052098934062,
+            "right_wrist": 0.5860584795082125,
+            "left_hip": 0.11767794530218384,
+            "right_hip": 0.11767794530218384,
+            "left_knee": 0.3281935890396602,
+            "right_knee": 0.40669479738590864,
+            "left_ankle": 0.3961767381022898,
+            "right_ankle": 0.33975435851255886
+          },
+          "late": {
+            "nose": 0.2106588487371483,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.7182499329072615,
+            "right_shoulder": 0.491105996413372,
+            "left_elbow": 0.8870957916710326,
+            "right_elbow": 1.1379368518606954,
+            "left_wrist": 1.1560294438582697,
+            "right_wrist": 1.0712457546014489,
+            "left_hip": 0.34469319072151117,
+            "right_hip": 0.34469319072151117,
+            "left_knee": 0.8391709295994486,
+            "right_knee": 0.40180202916101826,
+            "left_ankle": 0.5223903372472045,
+            "right_ankle": 0.6471020562070607
+          }
+        },
+        "mean_error": 0.473,
+        "raw_errors_shape": [
+          140,
+          17
+        ]
+      },
+      "Manhattan": {
+        "structural": 37.15,
+        "temporal": 74.29,
+        "overall": 70.57,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.4061397939858305,
+            "max": 0.7318146691236576,
+            "std": 0.17852212464869735
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.4309597299784866,
+            "max": 1.3000355355942443,
+            "std": 0.3508788175153932
+          },
+          "right_shoulder": {
+            "mean": 0.5331548752495988,
+            "max": 1.012137767598392,
+            "std": 0.21545731533166024
+          },
+          "left_elbow": {
+            "mean": 0.6820483142875025,
+            "max": 1.5231400242976725,
+            "std": 0.2952881998133206
+          },
+          "right_elbow": {
+            "mean": 0.9005459470826317,
+            "max": 1.9238170669580115,
+            "std": 0.4172123101538352
+          },
+          "left_wrist": {
+            "mean": 0.8856727292080739,
+            "max": 2.085308214341387,
+            "std": 0.4431379313968022
+          },
+          "right_wrist": {
+            "mean": 1.1578980606342348,
+            "max": 1.7949399470655285,
+            "std": 0.38027940458018206
+          },
+          "left_hip": {
+            "mean": 0.20967240023397232,
+            "max": 0.67550144080894,
+            "std": 0.1556121815850174
+          },
+          "right_hip": {
+            "mean": 0.20967240023397235,
+            "max": 0.67550144080894,
+            "std": 0.1556121815850174
+          },
+          "left_knee": {
+            "mean": 0.5674762287485594,
+            "max": 1.66306260419225,
+            "std": 0.32718256276249347
+          },
+          "right_knee": {
+            "mean": 0.39849862962497823,
+            "max": 1.2879143908011477,
+            "std": 0.27811659310372805
+          },
+          "left_ankle": {
+            "mean": 0.4567810763445668,
+            "max": 1.6461016364015546,
+            "std": 0.35278783626061744
+          },
+          "right_ankle": {
+            "mean": 0.5154209900863486,
+            "max": 1.923073196412765,
+            "std": 0.45066651411268704
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.4714852956974425,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.225874568904838,
+            "right_shoulder": 0.5354806335214276,
+            "left_elbow": 0.5922099407920791,
+            "right_elbow": 0.8037005568634603,
+            "left_wrist": 0.6634502037252169,
+            "right_wrist": 1.3490748695321764,
+            "left_hip": 0.11143306693144617,
+            "right_hip": 0.11143306693144617,
+            "left_knee": 0.3551081407100128,
+            "right_knee": 0.2584493829155101,
+            "left_ankle": 0.1903053044707148,
+            "right_ankle": 0.3503727875958693
+          },
+          "mid": {
+            "nose": 0.48106293668796946,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.215913337585138,
+            "right_shoulder": 0.5096309000480509,
+            "left_elbow": 0.45756339570517607,
+            "right_elbow": 0.53763190584532,
+            "left_wrist": 0.5777883569367432,
+            "right_wrist": 0.730678684684578,
+            "left_hip": 0.13183390528814065,
+            "right_hip": 0.13183390528814065,
+            "left_knee": 0.4121698708164371,
+            "right_knee": 0.46054419047832396,
+            "left_ankle": 0.5091370318949265,
+            "right_ankle": 0.41155030950706856
+          },
+          "late": {
+            "nose": 0.2672614793957309,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.8467277693800869,
+            "right_shoulder": 0.5544025763978675,
+            "left_elbow": 0.9944601516100305,
+            "right_elbow": 1.3582448383216852,
+            "left_wrist": 1.411051488122201,
+            "right_wrist": 1.3980082193646295,
+            "left_hip": 0.38366002990142534,
+            "right_hip": 0.38366002990142534,
+            "left_knee": 0.930632204760962,
+            "right_knee": 0.4735225442745162,
+            "left_ankle": 0.6652311953941473,
+            "right_ankle": 0.7808282092733316
+          }
+        },
+        "mean_error": 0.5657,
+        "raw_errors_shape": [
+          140,
+          17
+        ]
+      },
+      "Chebyshev": {
+        "structural": 49.94,
+        "temporal": 74.29,
+        "overall": 71.85,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.3017635317499711,
+            "max": 0.42559752482108104,
+            "std": 0.118261279693493
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.3379990181238314,
+            "max": 1.0709025076362992,
+            "std": 0.2995706878939246
+          },
+          "right_shoulder": {
+            "mean": 0.4074779428533226,
+            "max": 0.9711098688576756,
+            "std": 0.17647942413775253
+          },
+          "left_elbow": {
+            "mean": 0.6017506145729813,
+            "max": 1.3514777831271811,
+            "std": 0.26947611187276244
+          },
+          "right_elbow": {
+            "mean": 0.7037875212064685,
+            "max": 1.8556884821155681,
+            "std": 0.3758883202685228
+          },
+          "left_wrist": {
+            "mean": 0.743383730631092,
+            "max": 1.3007824329465,
+            "std": 0.28826523902838286
+          },
+          "right_wrist": {
+            "mean": 0.8857122658999889,
+            "max": 1.3834821117591922,
+            "std": 0.3198849504340958
+          },
+          "left_hip": {
+            "mean": 0.1857823632532067,
+            "max": 0.6521132805353358,
+            "std": 0.14608161597962527
+          },
+          "right_hip": {
+            "mean": 0.1857823632532067,
+            "max": 0.6521132805353358,
+            "std": 0.14608161597962527
+          },
+          "left_knee": {
+            "mean": 0.461811119700206,
+            "max": 1.3304609518239696,
+            "std": 0.31360535817847857
+          },
+          "right_knee": {
+            "mean": 0.33728200760638544,
+            "max": 1.1313143638675514,
+            "std": 0.24793134067152442
+          },
+          "left_ankle": {
+            "mean": 0.31602297727692275,
+            "max": 1.1463430816236864,
+            "std": 0.2657719347453063
+          },
+          "right_ankle": {
+            "mean": 0.38865780736725164,
+            "max": 1.6218794156622438,
+            "std": 0.39107023812001024
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.38506757841825073,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.14312374000642333,
+            "right_shoulder": 0.3934401885860063,
+            "left_elbow": 0.5282803347370879,
+            "right_elbow": 0.6154533787688568,
+            "left_wrist": 0.6044388605016126,
+            "right_wrist": 1.1538185931886633,
+            "left_hip": 0.0982261619906548,
+            "right_hip": 0.0982261619906548,
+            "left_knee": 0.2531993309290613,
+            "right_knee": 0.2274003340251461,
+            "left_ankle": 0.12437215528968074,
+            "right_ankle": 0.21910313077606308
+          },
+          "mid": {
+            "nose": 0.32868970847021084,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.17132827268171832,
+            "right_shoulder": 0.3473107592977253,
+            "left_elbow": 0.39896194440954796,
+            "right_elbow": 0.40917280119499466,
+            "left_wrist": 0.5379343730430681,
+            "right_wrist": 0.5452674105798229,
+            "left_hip": 0.1162987457860465,
+            "right_hip": 0.11629874578604651,
+            "left_knee": 0.3013342018236446,
+            "right_knee": 0.39779323319830545,
+            "left_ankle": 0.35441910682930483,
+            "right_ankle": 0.322230940305091
+          },
+          "late": {
+            "nose": 0.19330573488630898,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.6953987591702164,
+            "right_shoulder": 0.4813842050535271,
+            "left_elbow": 0.8764463671289914,
+            "right_elbow": 1.084856933816456,
+            "left_wrist": 1.0848216845160534,
+            "right_wrist": 0.9637551838737927,
+            "left_hip": 0.34095928408371556,
+            "right_hip": 0.34095928408371556,
+            "left_knee": 0.8264612776506539,
+            "right_knee": 0.38431454764716794,
+            "left_ankle": 0.4651999926482243,
+            "right_ankle": 0.6210318047101503
+          }
+        },
+        "mean_error": 0.4506,
+        "raw_errors_shape": [
+          140,
+          17
+        ]
+      },
+      "Minkowski (p=3)": {
+        "structural": 49.03,
+        "temporal": 74.29,
+        "overall": 71.76,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.31075699524647526,
+            "max": 0.470158803534921,
+            "std": 0.12285296785099785
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.34537779026375126,
+            "max": 1.0712513093468825,
+            "std": 0.2985306849905361
+          },
+          "right_shoulder": {
+            "mean": 0.41477092314585406,
+            "max": 0.9711342789216962,
+            "std": 0.17813072876788175
+          },
+          "left_elbow": {
+            "mean": 0.6033964329256664,
+            "max": 1.3524003308336927,
+            "std": 0.2682064720012734
+          },
+          "right_elbow": {
+            "mean": 0.7134590539883153,
+            "max": 1.855719091143746,
+            "std": 0.3757399115132744
+          },
+          "left_wrist": {
+            "mean": 0.7526363626063397,
+            "max": 1.361970284907006,
+            "std": 0.30129518569035607
+          },
+          "right_wrist": {
+            "mean": 0.907412361885213,
+            "max": 1.3950672893741054,
+            "std": 0.3116858621075227
+          },
+          "left_hip": {
+            "mean": 0.18613116005723412,
+            "max": 0.6521233085315422,
+            "std": 0.1459908146891216
+          },
+          "right_hip": {
+            "mean": 0.18613116005723412,
+            "max": 0.6521233085315422,
+            "std": 0.1459908146891216
+          },
+          "left_knee": {
+            "mean": 0.46922816335971224,
+            "max": 1.3373538146146458,
+            "std": 0.30959515254511
+          },
+          "right_knee": {
+            "mean": 0.3408233959684121,
+            "max": 1.1319624662064707,
+            "std": 0.24660671487271768
+          },
+          "left_ankle": {
+            "mean": 0.33376868156507616,
+            "max": 1.1476361816390848,
+            "std": 0.27325033690787204
+          },
+          "right_ankle": {
+            "mean": 0.3996155077941894,
+            "max": 1.6231330138766964,
+            "std": 0.38899680666963316
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.3870690052640595,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.15544611801576838,
+            "right_shoulder": 0.3999534415713048,
+            "left_elbow": 0.528715486194464,
+            "right_elbow": 0.6214134084542652,
+            "left_wrist": 0.6047698212539249,
+            "right_wrist": 1.155856399209384,
+            "left_hip": 0.09840287662963457,
+            "right_hip": 0.09840287662963457,
+            "left_knee": 0.26091173817862573,
+            "right_knee": 0.2280984528493411,
+            "left_ankle": 0.1319139417310917,
+            "right_ankle": 0.23804452239745852
+          },
+          "mid": {
+            "nose": 0.3467836932547792,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.17501895056525577,
+            "right_shoulder": 0.3604597435715474,
+            "left_elbow": 0.40146040238490366,
+            "right_elbow": 0.41481244959821434,
+            "left_wrist": 0.5381939769882725,
+            "right_wrist": 0.5623143171197079,
+            "left_hip": 0.116481711230397,
+            "right_hip": 0.116481711230397,
+            "left_knee": 0.3127363456535193,
+            "right_knee": 0.40055893565382833,
+            "left_ankle": 0.3732636825780761,
+            "right_ankle": 0.3284580176274148
+          },
+          "late": {
+            "nose": 0.20004194700819508,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.701627202800698,
+            "right_shoulder": 0.48358431872929414,
+            "left_elbow": 0.8784244538842019,
+            "right_elbow": 1.1021928859223802,
+            "left_wrist": 1.111799192952302,
+            "right_wrist": 1.00935241267387,
+            "left_hip": 0.3416423330898069,
+            "right_hip": 0.3416423330898069,
+            "left_knee": 0.8296041418814365,
+            "right_knee": 0.3914143963569802,
+            "left_ankle": 0.4918336386874654,
+            "right_ankle": 0.6289063028173388
+          }
+        },
+        "mean_error": 0.4587,
+        "raw_errors_shape": [
+          140,
+          17
+        ]
+      }
+    },
+    "full_label": "Different Person Same Pose",
+    "expected": "~70-80%"
+  },
+  "SPDp": {
+    "scenario": "SPDp",
+    "video_a": "bonus_left.mp4",
+    "video_b": "hand_left.mp4",
+    "ref_frames": 118,
+    "aligned_frames": 118,
+    "metrics": {
+      "Euclidean": {
+        "structural": 31.41,
+        "temporal": 100.0,
+        "overall": 51.99,
+        "joint_statistics": {
+          "nose": {
+            "mean": 1.137394721413774,
+            "max": 3.16784667342687,
+            "std": 1.0805295462664322
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.7360123583565334,
+            "max": 1.681265767122786,
+            "std": 0.5771687563997538
+          },
+          "right_shoulder": {
+            "mean": 0.7056531188157488,
+            "max": 2.2897622982533687,
+            "std": 0.7995095218305174
+          },
+          "left_elbow": {
+            "mean": 0.5513340173831744,
+            "max": 1.3404115103360634,
+            "std": 0.40045084282514565
+          },
+          "right_elbow": {
+            "mean": 0.7474247788031353,
+            "max": 2.4773309922744766,
+            "std": 0.6966673336389557
+          },
+          "left_wrist": {
+            "mean": 0.8573628248857078,
+            "max": 1.783327781067752,
+            "std": 0.48934439431185595
+          },
+          "right_wrist": {
+            "mean": 0.9555156234549668,
+            "max": 3.5494020870450345,
+            "std": 1.0223071458701571
+          },
+          "left_hip": {
+            "mean": 0.07880046152580927,
+            "max": 0.20835636499151858,
+            "std": 0.060163367472288884
+          },
+          "right_hip": {
+            "mean": 0.07880046152580927,
+            "max": 0.20835636499151858,
+            "std": 0.060163367472288884
+          },
+          "left_knee": {
+            "mean": 0.35546766499061105,
+            "max": 0.8630858702407569,
+            "std": 0.28271021078646114
+          },
+          "right_knee": {
+            "mean": 0.41345090339678514,
+            "max": 1.1951465989601315,
+            "std": 0.29242770061253454
+          },
+          "left_ankle": {
+            "mean": 0.5395823322903797,
+            "max": 1.1708639431184353,
+            "std": 0.2671166505322076
+          },
+          "right_ankle": {
+            "mean": 0.8684335970763443,
+            "max": 1.791740870478381,
+            "std": 0.45205511022725403
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.18339738434773376,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.1227253805787198,
+            "right_shoulder": 0.0759732777312506,
+            "left_elbow": 0.19288233110803965,
+            "right_elbow": 0.1356301617049777,
+            "left_wrist": 0.32792688603978415,
+            "right_wrist": 0.1255425118720591,
+            "left_hip": 0.018849763048333232,
+            "right_hip": 0.018849763048333232,
+            "left_knee": 0.08324534176443969,
+            "right_knee": 0.23789684904051825,
+            "left_ankle": 0.3244812375424695,
+            "right_ankle": 0.4609621417079936
+          },
+          "mid": {
+            "nose": 0.6628357086138744,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.685801250171487,
+            "right_shoulder": 0.2807596201583039,
+            "left_elbow": 0.8102487288765164,
+            "right_elbow": 0.5675908595518552,
+            "left_wrist": 1.0963815642960206,
+            "right_wrist": 0.7395589716738348,
+            "left_hip": 0.09685905467509959,
+            "right_hip": 0.09685905467509959,
+            "left_knee": 0.3849865119151098,
+            "right_knee": 0.5909273113150619,
+            "left_ankle": 0.6317714118926315,
+            "right_ankle": 0.8894665687977662
+          },
+          "late": {
+            "nose": 2.530237162533066,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 1.3829229921703228,
+            "right_shoulder": 1.7338621250641428,
+            "left_elbow": 0.6483825677954224,
+            "right_elbow": 1.5192626017438375,
+            "left_wrist": 1.1405195943354287,
+            "right_wrist": 1.9752971427349049,
+            "left_hip": 0.11964526422079033,
+            "right_hip": 0.11964526422079033,
+            "left_knee": 0.5921035543847417,
+            "right_knee": 0.41157660867382545,
+            "left_ankle": 0.6594215470573968,
+            "right_ankle": 1.2452111186320995
+          }
+        },
+        "mean_error": 0.6173,
+        "raw_errors_shape": [
+          118,
+          17
+        ]
+      },
+      "Manhattan": {
+        "structural": 16.44,
+        "temporal": 100.0,
+        "overall": 41.51,
+        "joint_statistics": {
+          "nose": {
+            "mean": 1.375159031900632,
+            "max": 3.7332325493659475,
+            "std": 1.2736283039973102
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.8778353244620999,
+            "max": 1.8795747767728028,
+            "std": 0.6604489231991757
+          },
+          "right_shoulder": {
+            "mean": 0.852904102824491,
+            "max": 2.899592244220688,
+            "std": 0.9485453403701932
+          },
+          "left_elbow": {
+            "mean": 0.6921596644506095,
+            "max": 1.5211392139425006,
+            "std": 0.48609679145025314
+          },
+          "right_elbow": {
+            "mean": 0.8834323886308673,
+            "max": 2.8242023485258976,
+            "std": 0.7994134114458286
+          },
+          "left_wrist": {
+            "mean": 1.0685484089242314,
+            "max": 2.2322436429616737,
+            "std": 0.6270972664229801
+          },
+          "right_wrist": {
+            "mean": 1.1160463626876593,
+            "max": 3.5619697841652185,
+            "std": 1.1029973640408899
+          },
+          "left_hip": {
+            "mean": 0.09394592469141656,
+            "max": 0.22416564390360233,
+            "std": 0.06936620089366022
+          },
+          "right_hip": {
+            "mean": 0.09394592469141656,
+            "max": 0.22416564390360233,
+            "std": 0.06936620089366022
+          },
+          "left_knee": {
+            "mean": 0.43357674599032825,
+            "max": 1.0249632761200589,
+            "std": 0.3334601820074263
+          },
+          "right_knee": {
+            "mean": 0.5023529064730246,
+            "max": 1.5083659554934283,
+            "std": 0.34721932309130693
+          },
+          "left_ankle": {
+            "mean": 0.6837865872219674,
+            "max": 1.4653144603832213,
+            "std": 0.3442912305242571
+          },
+          "right_ankle": {
+            "mean": 1.102786758515907,
+            "max": 2.1288715289839515,
+            "std": 0.5938245289887502
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.23685921210599728,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.16266363928375321,
+            "right_shoulder": 0.08950494755125557,
+            "left_elbow": 0.24094406932799628,
+            "right_elbow": 0.15425115740510606,
+            "left_wrist": 0.40264694747955826,
+            "right_wrist": 0.14603875030449837,
+            "left_hip": 0.021959241331790717,
+            "right_hip": 0.021959241331790717,
+            "left_knee": 0.10158866540585879,
+            "right_knee": 0.2915694211653358,
+            "left_ankle": 0.38884092526332653,
+            "right_ankle": 0.5673761137486893
+          },
+          "mid": {
+            "nose": 0.8503562382878107,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.8068118221345626,
+            "right_shoulder": 0.3789094205289897,
+            "left_elbow": 0.9823068177576618,
+            "right_elbow": 0.7466911110654336,
+            "left_wrist": 1.2917390218037996,
+            "right_wrist": 0.9414216813386543,
+            "left_hip": 0.10866105865909326,
+            "right_hip": 0.10866105865909326,
+            "left_knee": 0.48511946334544803,
+            "right_knee": 0.7107748726574054,
+            "left_ankle": 0.7981505750442288,
+            "right_ankle": 1.066761003068187
+          },
+          "late": {
+            "nose": 2.9966840799729026,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 1.6443756322803367,
+            "right_shoulder": 2.0593630944540093,
+            "left_elbow": 0.8492013952207813,
+            "right_elbow": 1.7277068347022826,
+            "left_wrist": 1.5001914862752084,
+            "right_wrist": 2.232062849076521,
+            "left_hip": 0.14978568534856698,
+            "right_hip": 0.14978568534856698,
+            "left_knee": 0.7070109751389446,
+            "right_knee": 0.5046553876182498,
+            "left_ankle": 0.859853719504937,
+            "right_ankle": 1.659937248725471
+          }
+        },
+        "mean_error": 0.752,
+        "raw_errors_shape": [
+          118,
+          17
+        ]
+      },
+      "Chebyshev": {
+        "structural": 35.8,
+        "temporal": 100.0,
+        "overall": 55.06,
+        "joint_statistics": {
+          "nose": {
+            "mean": 1.0874812546947794,
+            "max": 3.142037030297134,
+            "std": 1.052394642524933
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.6965164782202979,
+            "max": 1.671189280790295,
+            "std": 0.5661177565772595
+          },
+          "right_shoulder": {
+            "mean": 0.6726356440405058,
+            "max": 2.215879179589982,
+            "std": 0.7819624113747259
+          },
+          "left_elbow": {
+            "mean": 0.5062822819083063,
+            "max": 1.3288903334900968,
+            "std": 0.38730144172316766
+          },
+          "right_elbow": {
+            "mean": 0.7131972675160171,
+            "max": 2.4622490288300307,
+            "std": 0.6894694395712658
+          },
+          "left_wrist": {
+            "mean": 0.7890955685352447,
+            "max": 1.7029787605880737,
+            "std": 0.45397016391741724
+          },
+          "right_wrist": {
+            "mean": 0.9104077891731356,
+            "max": 3.5493797580368507,
+            "std": 1.0136994531724368
+          },
+          "left_hip": {
+            "mean": 0.07456148232979508,
+            "max": 0.2077051438204961,
+            "std": 0.058950003923110686
+          },
+          "right_hip": {
+            "mean": 0.07456148232979508,
+            "max": 0.2077051438204961,
+            "std": 0.058950003923110686
+          },
+          "left_knee": {
+            "mean": 0.331236281857485,
+            "max": 0.860593509139457,
+            "std": 0.27479181838981304
+          },
+          "right_knee": {
+            "mean": 0.3889721180210395,
+            "max": 1.139637297905921,
+            "std": 0.2867865895695094
+          },
+          "left_ankle": {
+            "mean": 0.4891671933469953,
+            "max": 1.11824064489637,
+            "std": 0.254204677280781
+          },
+          "right_ankle": {
+            "mean": 0.7771703366789664,
+            "max": 1.7534944414922722,
+            "std": 0.4203392849714893
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.16769301491161442,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.10836520070725597,
+            "right_shoulder": 0.0715368479337165,
+            "left_elbow": 0.17467966943202004,
+            "right_elbow": 0.13041579204102238,
+            "left_wrist": 0.3136635715378307,
+            "right_wrist": 0.12279064444387658,
+            "left_hip": 0.018217582720832633,
+            "right_hip": 0.018217582720832633,
+            "left_knee": 0.07728826851916888,
+            "right_knee": 0.21779826436206562,
+            "left_ankle": 0.30065064613004633,
+            "right_ankle": 0.4181828795712483
+          },
+          "mid": {
+            "nose": 0.6162373311508614,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.6682898058339745,
+            "right_shoulder": 0.23783756311311677,
+            "left_elbow": 0.7529712777071763,
+            "right_elbow": 0.4970381594846038,
+            "left_wrist": 1.0665658677884302,
+            "right_wrist": 0.6726416449833361,
+            "left_hip": 0.09369210549099966,
+            "right_hip": 0.09369210549099966,
+            "left_knee": 0.3535896814063309,
+            "right_knee": 0.5605594698610818,
+            "left_ankle": 0.5709636759370158,
+            "right_ankle": 0.8500567440500371
+          },
+          "late": {
+            "nose": 2.4437376139386853,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 1.2974849793721799,
+            "right_shoulder": 1.6826350991488297,
+            "left_elbow": 0.5890730581687874,
+            "right_elbow": 1.4921643364347648,
+            "left_wrist": 0.982108223835867,
+            "right_wrist": 1.9101564958692177,
+            "left_hip": 0.11084442686635905,
+            "right_hip": 0.11084442686635905,
+            "left_knee": 0.5570410303022184,
+            "right_knee": 0.3885689572944979,
+            "left_ankle": 0.5932192563582508,
+            "right_ankle": 1.056118860172197
+          }
+        },
+        "mean_error": 0.5778,
+        "raw_errors_shape": [
+          118,
+          17
+        ]
+      },
+      "Minkowski (p=3)": {
+        "structural": 33.98,
+        "temporal": 100.0,
+        "overall": 53.78,
+        "joint_statistics": {
+          "nose": {
+            "mean": 1.1013503750829337,
+            "max": 3.144254484794909,
+            "std": 1.0578937756284903
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.7131597684668131,
+            "max": 1.6719299821036302,
+            "std": 0.5689773308463566
+          },
+          "right_shoulder": {
+            "mean": 0.6836025318165656,
+            "max": 2.221689411330692,
+            "std": 0.7831394360246793
+          },
+          "left_elbow": {
+            "mean": 0.5255364874539308,
+            "max": 1.3299075417157515,
+            "std": 0.39022363131845245
+          },
+          "right_elbow": {
+            "mean": 0.7265884155601301,
+            "max": 2.4633665083483893,
+            "std": 0.6882258143476144
+          },
+          "left_wrist": {
+            "mean": 0.819396163433326,
+            "max": 1.7198514280713608,
+            "std": 0.4672119545892106
+          },
+          "right_wrist": {
+            "mean": 0.9288211217442489,
+            "max": 3.5493798108392545,
+            "std": 1.0154126208341876
+          },
+          "left_hip": {
+            "mean": 0.07621229752936032,
+            "max": 0.20773959794973312,
+            "std": 0.05913584383685405
+          },
+          "right_hip": {
+            "mean": 0.07621229752936032,
+            "max": 0.20773959794973312,
+            "std": 0.05913584383685405
+          },
+          "left_knee": {
+            "mean": 0.3415830666008662,
+            "max": 0.8607202217520957,
+            "std": 0.27674362378864076
+          },
+          "right_knee": {
+            "mean": 0.3986762343106587,
+            "max": 1.1487387188596379,
+            "std": 0.2868908037472576
+          },
+          "left_ankle": {
+            "mean": 0.511325452242156,
+            "max": 1.1292762176752489,
+            "std": 0.2559951717207793
+          },
+          "right_ankle": {
+            "mean": 0.8221339487445556,
+            "max": 1.7588906420709844,
+            "std": 0.42918648241399554
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 0.17349845876242467,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.11453715524012144,
+            "right_shoulder": 0.07348136452489074,
+            "left_elbow": 0.1830426160657629,
+            "right_elbow": 0.13295817422638442,
+            "left_wrist": 0.3175114410570381,
+            "right_wrist": 0.12334940226127691,
+            "left_hip": 0.018426357123632667,
+            "right_hip": 0.018426357123632667,
+            "left_knee": 0.08001262150414078,
+            "right_knee": 0.22751341391952956,
+            "left_ankle": 0.3130199285069283,
+            "right_ankle": 0.4412030285681844
+          },
+          "mid": {
+            "nose": 0.6301214894693847,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.6719608863236928,
+            "right_shoulder": 0.25846816688299723,
+            "left_elbow": 0.7811892578375451,
+            "right_elbow": 0.5299054527667582,
+            "left_wrist": 1.0730360014113935,
+            "right_wrist": 0.7011030817248475,
+            "left_hip": 0.0950310853006513,
+            "right_hip": 0.0950310853006513,
+            "left_knee": 0.36630169643697486,
+            "right_knee": 0.5720168723535507,
+            "left_ankle": 0.5978753700910883,
+            "right_ankle": 0.864337378640183
+          },
+          "late": {
+            "nose": 2.46545415696864,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 1.3369857264523795,
+            "right_shoulder": 1.6929766757361784,
+            "left_elbow": 0.6102065609333707,
+            "right_elbow": 1.4971437895840698,
+            "left_wrist": 1.0614349257215907,
+            "right_wrist": 1.9361811372590623,
+            "left_hip": 0.11420527134793608,
+            "right_hip": 0.11420527134793608,
+            "left_knee": 0.5725135864799673,
+            "right_knee": 0.39655286210018986,
+            "left_ankle": 0.620287167981294,
+            "right_ankle": 1.1523932517682802
+          }
+        },
+        "mean_error": 0.5942,
+        "raw_errors_shape": [
+          118,
+          17
+        ]
+      }
+    },
+    "full_label": "Same Person Different Pose",
+    "expected": "~40-55%"
+  },
+  "DPDp": {
+    "scenario": "DPDp",
+    "video_a": "bonus_left1_p1.mp4",
+    "video_b": "kabaddi_clip.mp4",
+    "ref_frames": 120,
+    "aligned_frames": 120,
+    "metrics": {
+      "Euclidean": {
+        "structural": 16.22,
+        "temporal": 100.0,
+        "overall": 32.97,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.882869902318983,
+            "max": 1.3832112870928657,
+            "std": 0.3396889138166783
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 1.0038044391470244,
+            "max": 1.7227660961231495,
+            "std": 0.4231306990661599
+          },
+          "right_shoulder": {
+            "mean": 0.32801000043092543,
+            "max": 0.7897957357204,
+            "std": 0.19170241217862627
+          },
+          "left_elbow": {
+            "mean": 0.8989344975336057,
+            "max": 2.445989238902939,
+            "std": 0.6046146608360178
+          },
+          "right_elbow": {
+            "mean": 0.5200130928689431,
+            "max": 1.4508213219312396,
+            "std": 0.3189152217170111
+          },
+          "left_wrist": {
+            "mean": 0.9702269038884485,
+            "max": 2.6730529379066557,
+            "std": 0.6494691427041707
+          },
+          "right_wrist": {
+            "mean": 0.7507709822379076,
+            "max": 2.1355151708493887,
+            "std": 0.5495481925384299
+          },
+          "left_hip": {
+            "mean": 0.2455906465550234,
+            "max": 0.5973337494561614,
+            "std": 0.14458051853867487
+          },
+          "right_hip": {
+            "mean": 0.2455906465550234,
+            "max": 0.5973337494561614,
+            "std": 0.14458051853867487
+          },
+          "left_knee": {
+            "mean": 0.8981881357327443,
+            "max": 1.6835760267639772,
+            "std": 0.45132600548145274
+          },
+          "right_knee": {
+            "mean": 0.8320348409418128,
+            "max": 2.0488820400378143,
+            "std": 0.6156848866576816
+          },
+          "left_ankle": {
+            "mean": 0.8113513277484595,
+            "max": 2.05330942906625,
+            "std": 0.455785726595114
+          },
+          "right_ankle": {
+            "mean": 1.4154199992094822,
+            "max": 2.678407286836766,
+            "std": 0.6647446327985541
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 1.1110486391375107,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.8891217106093741,
+            "right_shoulder": 0.2291244783882173,
+            "left_elbow": 0.4690357869141294,
+            "right_elbow": 0.4305118312097106,
+            "left_wrist": 0.7093746178023665,
+            "right_wrist": 0.45497745788383914,
+            "left_hip": 0.17216158722704367,
+            "right_hip": 0.17216158722704367,
+            "left_knee": 1.146295987567294,
+            "right_knee": 0.29114131059521675,
+            "left_ankle": 0.684087925149662,
+            "right_ankle": 1.1231055045163276
+          },
+          "mid": {
+            "nose": 0.6271630745943396,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.8405745326089384,
+            "right_shoulder": 0.3109209434314002,
+            "left_elbow": 1.0173201642330878,
+            "right_elbow": 0.7246774788874539,
+            "left_wrist": 0.9821115977832118,
+            "right_wrist": 1.2241254220592748,
+            "left_hip": 0.30491514395807673,
+            "right_hip": 0.30491514395807673,
+            "left_knee": 0.8154952080391592,
+            "right_knee": 1.2373934286596069,
+            "left_ankle": 1.0200113632053722,
+            "right_ankle": 1.5914547469607758
+          },
+          "late": {
+            "nose": 0.9103979932250985,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 1.2817170742227606,
+            "right_shoulder": 0.4439845794731587,
+            "left_elbow": 1.2104475414536,
+            "right_elbow": 0.40484996850966476,
+            "left_wrist": 1.2191944960797667,
+            "right_wrist": 0.5732100667706087,
+            "left_hip": 0.25969520847995,
+            "right_hip": 0.25969520847995,
+            "left_knee": 0.7327732115917798,
+            "right_knee": 0.9675697835706145,
+            "left_ankle": 0.729954694890344,
+            "right_ankle": 1.531699746151343
+          }
+        },
+        "mean_error": 0.7541,
+        "raw_errors_shape": [
+          120,
+          17
+        ]
+      },
+      "Manhattan": {
+        "structural": 2.19,
+        "temporal": 100.0,
+        "overall": 21.75,
+        "joint_statistics": {
+          "nose": {
+            "mean": 1.0168289190078694,
+            "max": 1.8121148211634324,
+            "std": 0.41610151623827946
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 1.1267965132018594,
+            "max": 1.8960301896636254,
+            "std": 0.47364040946355096
+          },
+          "right_shoulder": {
+            "mean": 0.41075762011817135,
+            "max": 1.072081646811573,
+            "std": 0.25673190812673824
+          },
+          "left_elbow": {
+            "mean": 1.0435864041301353,
+            "max": 2.625399131272884,
+            "std": 0.6253821339217354
+          },
+          "right_elbow": {
+            "mean": 0.6256571854566815,
+            "max": 1.4607808402922458,
+            "std": 0.30977953676535935
+          },
+          "left_wrist": {
+            "mean": 1.1619654627576392,
+            "max": 2.9218440603435445,
+            "std": 0.7001567965833698
+          },
+          "right_wrist": {
+            "mean": 0.8648556218999371,
+            "max": 2.243087668946225,
+            "std": 0.5770425293401611
+          },
+          "left_hip": {
+            "mean": 0.26119360027198046,
+            "max": 0.6349075420713496,
+            "std": 0.14893776675610831
+          },
+          "right_hip": {
+            "mean": 0.26119360027198046,
+            "max": 0.6349075420713496,
+            "std": 0.14893776675610831
+          },
+          "left_knee": {
+            "mean": 1.0557159063435675,
+            "max": 2.1905833726146575,
+            "std": 0.5496598348427548
+          },
+          "right_knee": {
+            "mean": 0.9715450683376052,
+            "max": 2.2874132694408327,
+            "std": 0.677065965760499
+          },
+          "left_ankle": {
+            "mean": 0.9543764283515356,
+            "max": 2.2140326988631953,
+            "std": 0.47327868448319943
+          },
+          "right_ankle": {
+            "mean": 1.6893730520182904,
+            "max": 2.9996903116937936,
+            "std": 0.703604491897994
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 1.2474625309894403,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 1.0101847881883892,
+            "right_shoulder": 0.2826112171637032,
+            "left_elbow": 0.6190081051906743,
+            "right_elbow": 0.5801374083838864,
+            "left_wrist": 0.9091412463171018,
+            "right_wrist": 0.5421573704267075,
+            "left_hip": 0.17801602948926704,
+            "right_hip": 0.17801602948926704,
+            "left_knee": 1.2494567463002388,
+            "right_knee": 0.3686612910471311,
+            "left_ankle": 0.8463710766837179,
+            "right_ankle": 1.3892043481379044
+          },
+          "mid": {
+            "nose": 0.6911184480465791,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.9160985676624727,
+            "right_shoulder": 0.36981635155135706,
+            "left_elbow": 1.111618487319849,
+            "right_elbow": 0.7920943892860415,
+            "left_wrist": 1.105899051271154,
+            "right_wrist": 1.363879335353342,
+            "left_hip": 0.32534217660775433,
+            "right_hip": 0.32534217660775433,
+            "left_knee": 0.955026680650344,
+            "right_knee": 1.4075069327800127,
+            "left_ankle": 1.1400737218266235,
+            "right_ankle": 1.858046537341668
+          },
+          "late": {
+            "nose": 1.111905777987589,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 1.4541061837547162,
+            "right_shoulder": 0.5798452916394539,
+            "left_elbow": 1.4001326198798831,
+            "right_elbow": 0.5047397587001163,
+            "left_wrist": 1.4708560906846622,
+            "right_wrist": 0.6885301599197617,
+            "left_hip": 0.2802225947189201,
+            "right_hip": 0.2802225947189201,
+            "left_knee": 0.9626642920801196,
+            "right_knee": 1.138466981185672,
+            "left_ankle": 0.8766844865442656,
+            "right_ankle": 1.8208682705752977
+          }
+        },
+        "mean_error": 0.8803,
+        "raw_errors_shape": [
+          120,
+          17
+        ]
+      },
+      "Chebyshev": {
+        "structural": 19.07,
+        "temporal": 100.0,
+        "overall": 35.25,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.8601474438245925,
+            "max": 1.274427742042471,
+            "std": 0.33214258733060964
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.9910216122804013,
+            "max": 1.713017637930022,
+            "std": 0.41880632920615535
+          },
+          "right_shoulder": {
+            "mean": 0.30620815717608857,
+            "max": 0.6970403559031206,
+            "std": 0.17579977874404107
+          },
+          "left_elbow": {
+            "mean": 0.8687629542195615,
+            "max": 2.4388663067509126,
+            "std": 0.6136273913597504
+          },
+          "right_elbow": {
+            "mean": 0.4888776525432072,
+            "max": 1.4507869000403022,
+            "std": 0.3297491130014254
+          },
+          "left_wrist": {
+            "mean": 0.9213106944403561,
+            "max": 2.6602188350472327,
+            "std": 0.6634283555268439
+          },
+          "right_wrist": {
+            "mean": 0.7291154447538964,
+            "max": 2.134556852461077,
+            "std": 0.5536299034840785
+          },
+          "left_hip": {
+            "mean": 0.24456315460722303,
+            "max": 0.5960698283168506,
+            "std": 0.14478507011991543
+          },
+          "right_hip": {
+            "mean": 0.24456315460722303,
+            "max": 0.5960698283168506,
+            "std": 0.14478507011991543
+          },
+          "left_knee": {
+            "mean": 0.8679025051920618,
+            "max": 1.5617144997001111,
+            "std": 0.43703027290211277
+          },
+          "right_knee": {
+            "mean": 0.8093277369438105,
+            "max": 2.034149610914082,
+            "std": 0.6180061127962622
+          },
+          "left_ankle": {
+            "mean": 0.7808304593368617,
+            "max": 2.052250146878859,
+            "std": 0.46351348871482945
+          },
+          "right_ankle": {
+            "mean": 1.3565514199553406,
+            "max": 2.6693152115993595,
+            "std": 0.6836473680460998
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 1.0986983635872885,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.8784700672708177,
+            "right_shoulder": 0.21277919411841378,
+            "left_elbow": 0.42766514647539466,
+            "right_elbow": 0.3789497731344619,
+            "left_wrist": 0.6355739620587082,
+            "right_wrist": 0.43951412282247054,
+            "left_hip": 0.1720060104222735,
+            "right_hip": 0.1720060104222735,
+            "left_knee": 1.140373767700774,
+            "right_knee": 0.2699895733979777,
+            "left_ankle": 0.6459965999492527,
+            "right_ankle": 1.0738234794016832
+          },
+          "mid": {
+            "nose": 0.619498368238283,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.8355759887868061,
+            "right_shoulder": 0.3011508771780901,
+            "left_elbow": 0.9984969603650772,
+            "right_elbow": 0.7145348832819808,
+            "left_wrist": 0.9538405551500528,
+            "right_wrist": 1.2076014157827408,
+            "left_hip": 0.3033838406171367,
+            "right_hip": 0.3033838406171367,
+            "left_knee": 0.7973066022566093,
+            "right_knee": 1.219788172189338,
+            "left_ankle": 1.006941447987185,
+            "right_ankle": 1.543798609651601
+          },
+          "late": {
+            "nose": 0.8622455996482052,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 1.2590187807835804,
+            "right_shoulder": 0.4046944002317618,
+            "left_elbow": 1.1801267558182127,
+            "right_elbow": 0.37314830121317877,
+            "left_wrist": 1.174517566112307,
+            "right_wrist": 0.540230795656478,
+            "left_hip": 0.258299612782259,
+            "right_hip": 0.258299612782259,
+            "left_knee": 0.6660271456188027,
+            "right_knee": 0.9382054652441159,
+            "left_ankle": 0.6895533300741473,
+            "right_ankle": 1.4520321708127377
+          }
+        },
+        "mean_error": 0.7284,
+        "raw_errors_shape": [
+          120,
+          17
+        ]
+      },
+      "Minkowski (p=3)": {
+        "structural": 18.16,
+        "temporal": 100.0,
+        "overall": 34.52,
+        "joint_statistics": {
+          "nose": {
+            "mean": 0.8663072966251283,
+            "max": 1.3055642383629364,
+            "std": 0.3323172238217328
+          },
+          "left_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_eye": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "right_ear": {
+            "mean": null,
+            "max": null,
+            "std": null
+          },
+          "left_shoulder": {
+            "mean": 0.9930735659053388,
+            "max": 1.7137136571912017,
+            "std": 0.4193559562869327
+          },
+          "right_shoulder": {
+            "mean": 0.31349307521395164,
+            "max": 0.728740508952981,
+            "std": 0.1802545582052882
+          },
+          "left_elbow": {
+            "mean": 0.877800287266245,
+            "max": 2.439229973671809,
+            "std": 0.6091519585467597
+          },
+          "right_elbow": {
+            "mean": 0.5006757999161595,
+            "max": 1.450787058122037,
+            "std": 0.3247520924234844
+          },
+          "left_wrist": {
+            "mean": 0.9402722961774356,
+            "max": 2.661062063415921,
+            "std": 0.6530339213382214
+          },
+          "right_wrist": {
+            "mean": 0.7356937944195091,
+            "max": 2.1345760028204763,
+            "std": 0.5510853309995468
+          },
+          "left_hip": {
+            "mean": 0.24469394823494064,
+            "max": 0.5961247830871375,
+            "std": 0.14471013130396854
+          },
+          "right_hip": {
+            "mean": 0.24469394823494064,
+            "max": 0.5961247830871375,
+            "std": 0.14471013130396854
+          },
+          "left_knee": {
+            "mean": 0.8764937253702512,
+            "max": 1.5949907875167866,
+            "std": 0.4398876370185142
+          },
+          "right_knee": {
+            "mean": 0.8155562070876236,
+            "max": 2.035337415637848,
+            "std": 0.6149772290978158
+          },
+          "left_ankle": {
+            "mean": 0.7907021817313828,
+            "max": 2.0522728449730048,
+            "std": 0.4591431797420696
+          },
+          "right_ankle": {
+            "mean": 1.3763690737723304,
+            "max": 2.669816681951943,
+            "std": 0.6728526982822376
+          }
+        },
+        "phase_statistics": {
+          "early": {
+            "nose": 1.1002732123912946,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.8797124316118785,
+            "right_shoulder": 0.21887302600106553,
+            "left_elbow": 0.44061119116407,
+            "right_elbow": 0.3987139797950209,
+            "left_wrist": 0.6700077398969562,
+            "right_wrist": 0.44311315596560047,
+            "left_hip": 0.17201229387563957,
+            "right_hip": 0.17201229387563957,
+            "left_knee": 1.1408399695449678,
+            "right_knee": 0.27752321203355645,
+            "left_ankle": 0.6582266299118134,
+            "right_ankle": 1.0855950632707747
+          },
+          "mid": {
+            "nose": 0.621499191848999,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 0.8363218702480106,
+            "right_shoulder": 0.3033775417645533,
+            "left_elbow": 1.006004652307554,
+            "right_elbow": 0.717478080145882,
+            "left_wrist": 0.9658963103297232,
+            "right_wrist": 1.2108224445098266,
+            "left_hip": 0.30362100476206044,
+            "right_hip": 0.30362100476206044,
+            "left_knee": 0.8005106462140802,
+            "right_knee": 1.2224801446051696,
+            "left_ankle": 1.008946117024216,
+            "right_ankle": 1.5586692735626315
+          },
+          "late": {
+            "nose": 0.8771494856350909,
+            "left_eye": null,
+            "right_eye": null,
+            "left_ear": null,
+            "right_ear": null,
+            "left_shoulder": 1.2631863958561271,
+            "right_shoulder": 0.4182286578762362,
+            "left_elbow": 1.1867850183271114,
+            "right_elbow": 0.3858353398075759,
+            "left_wrist": 1.1849128383056275,
+            "right_wrist": 0.5531457827831001,
+            "left_hip": 0.2584485460671219,
+            "right_hip": 0.2584485460671219,
+            "left_knee": 0.6881305603517056,
+            "right_knee": 0.9466652646241442,
+            "left_ankle": 0.7049337982581191,
+            "right_ankle": 1.4848428844835848
+          }
+        },
+        "mean_error": 0.7366,
+        "raw_errors_shape": [
+          120,
+          17
+        ]
+      }
+    },
+    "full_label": "Different Person Different Pose",
+    "expected": "~20-35%"
+  }
+}

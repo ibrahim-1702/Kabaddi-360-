@@ -1,0 +1,266 @@
+% -------------------------------------------------------------------
+% CHAPTER 3 — SYSTEM DESIGN
+% -------------------------------------------------------------------
+\chapter{System Design}
+\begin{sloppypar}
+
+This chapter presents the high-level system design of the AR-Based Kabaddi Ghost Trainer. The proposed system integrates multiple modules, including mobile application video capture, pose extraction, temporal alignment, similarity scoring, and LLM-based feedback mentoring, within a unified and offline-capable architecture.
+
+As illustrated in Figure~\ref{fig:system_architecture_3}, the overall platform is organized as an end-to-end adaptive training architecture. The system is designed as a structured learning workflow, where each module contributes to a specific stage of the technique analysis process.
+
+Standardized data formats ensure consistent evaluation of keypoints, while pose normalization handles variable camera perspectives. Joint similarity is measured through a deterministic and mathematical approach, providing stable baseline metrics. The architecture uses these quantitative metrics to generate augmented reality (AR) visualizations and contextual AI-driven feedback, enhancing the learner’s theoretical understanding and physical execution.
+
+By integrating both deterministic evaluation models and AI-powered feedback components, the system guarantees accurate, scalable, and personalized coaching guidance.
+
+\begin{figure}[H]
+    \centering
+
+    \includegraphics[width=1.1\textwidth]{figures/system_architecture_overview.png}
+
+    \caption{Layered System Architecture Overview}
+    \label{fig:system_architecture_3}
+
+\end{figure}
+
+
+\section{System Architecture Overview}
+
+The system follows a modular, layer-driven architecture consisting of four primary layers: the Visual Input Layer, Analytical Processing Layer, Core Evaluation Layer, and Feedback Output Layer. 
+
+The Visual Input Layer operates via a mobile application, acting as the primary interface for students. Here, learners record their actions, ensuring appropriate landscape formatting and adequate framing for pose capture. 
+
+The Analytical Processing Layer is responsible for extracting clean skeletal data. Real-time inference tools convert complex video inputs into simplified skeletal representations, abstracting the athlete's body mechanics independent of background or lighting constraints.
+
+The Core Evaluation Layer houses the main business and scoring logic of the system. It aligns temporal execution frames between the recorded user and an expert ``ghost'' sequence, suppressing anomalies resulting from natural movement variations.
+
+Finally, the Feedback Output Layer is responsible for delivering tangible results back to the student. It manages the delivery of translated LLM-based feedback through on-device Text-to-Speech (TTS), AR skeletal overlays, and percentage-based technique evaluations. This ensures a clear separation of concerns, where evaluation logic operates independently from feedback delivery, resulting in a flexible and reliable coaching ecosystem.
+
+\section{Mobile Application and AR Rendering Module}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/person_detection_pipeline.png}
+    \caption{Data Flow for Mobile App and AR Rendering Module}
+    \label{fig:app_module}
+\end{figure}
+
+The Mobile Application Module serves as the critical bridge between the athlete and the backend processing servers. Built within the Flutter framework \cite{flutter_dev}, it offers a seamless and responsive user experience adapted for practical training scenarios.
+
+The application governs the entire capture process. When recording, it enforces a structured sequence, prompting users to perform specific designated techniques (e.g., ``Bonus Step'' or ``Hand Touch''). This minimizes extraneous variables and creates specialized endpoints for downstream performance metrics.
+
+The Augmented Reality (AR) component of the system is built around pre-generated 3D animated avatars derived from expert technique videos. Each expert video is processed through Plask.ai, an AI-based motion capture tool that extracts skeletal motion from monocular video and retargets it onto a 3D humanoid avatar, producing a GLB format animated model file. These GLB files represent the correct execution of each Kabaddi technique as a looping 3D animation and are stored on the Django server's filesystem, linked to their corresponding Tutorial record via the \texttt{ar\_glb\_path} field.
+
+When a user selects a technique in the mobile application, the AR Playback Screen fetches the corresponding GLB file from the server through the \texttt{/api/tutorials/\{id\}/ar-pose/} endpoint. The file is rendered in real-time using the \texttt{model\_viewer\_plus} Flutter package, which integrates Android's ARCore to place and display the 3D avatar in the user's physical environment through the device camera. The user can observe the expert avatar performing the technique in their actual training space before proceeding to record their own attempt.
+
+Furthermore, recognizing the diversity of regional Kabaddi practitioners, the mobile frontend provides accessibility features by driving LLM-generated feedback into natural language audio playback, enabling hands-free study integration during intense physical training.
+
+\section{Pose Extraction and Preprocessing Module}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/pose_estimation_flow.png}
+    \caption{Pose Extraction and Preprocessing Module}
+    \label{fig:pose_extraction}
+\end{figure}
+
+The Pose Extraction and Preprocessing Module is tasked with abstracting raw camera footage into robust joint coordinates. This allows the system to eliminate confounding factors like subject clothing, camera artifacts, or dynamic backgrounds.
+
+The pipeline applies an aggressive object detection hierarchy. By first identifying the primary active athlete among potential background actors, the system isolates a bounding box focused heavily on technique mechanics. Subsequently, localized pose estimation derives 33 individual anatomical landmarks per frame. 
+
+Because unstructured data often contains jitter or missing points, a dedicated Level-1 Cleaning Pipeline processes the skeletal sequence. It performs temporal interpolation for obscured joints, anchors the bodily coordinate system centrally, and scales the skeleton based on torso metrics to normalize variations in body height and camera distance. Thus, downstream pipelines receive a stable, scale-invariant representation structured effectively for metric evaluation.
+
+\section{Temporal Alignment Module}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/dtw_alignment.png}
+    \caption{Temporal Alignment Module}
+    \label{fig:temp_alignment}
+\end{figure}
+
+The Temporal Alignment Module addresses the reality that athletes execute combinations with variable rhythms, velocities, and pacing. Direct, rigid frame-to-frame comparisons fail because an advanced raider might strike faster than a novice, confusing the validation metrics.
+
+To solve this, the module evaluates sequences dynamically by measuring time warps. By monitoring a stable reference anchor, largely defined around the center of mass (the pelvis), the system matches the logical progression phases (preparation, execution, recovery) between the user and the expert regardless of aggregate execution time. 
+
+The system algorithmically aligns the user's trajectory coordinates step-by-step alongside the ghost. This generates a synchronized timeline ensuring that metrics evaluate the quality of the strike during the precise moment of execution, guaranteeing a fair and comprehensive assessment.
+
+\section{Joint-Level Error Computation Module}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/error_computation.png}
+    \caption{Joint-Level Error Computation Module}
+    \label{fig:error_computation}
+\end{figure}
+
+The Joint-Level Error Computation Module identifies biomechanical deficiencies on a node-by-node basis. With temporal deviations resolved by the previous module, spatial comparison becomes robust and definitive.
+
+For every synchronized frame, the module compares the offset between the user’s joint position and the expert’s corresponding joint position. It compiles these deviations into comprehensive statistical profiles—generating mean, maximum, and standard deviation variance levels over the lifespan of the technique.
+
+To make the evaluation Kabaddi-specific, the module implements anatomical weighting. Critical leverage joints such as ankles, knees, hips, shoulders, and wrists are weighted significantly higher than facial landmarks, ensuring the coaching system concentrates primarily on functional striking and defensive stability. Results from this module govern the severity tags eventually processed by the automated coaching mentor.
+
+\section{Similarity Scoring Module}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/similarity_scoring.png}
+    \caption{Similarity Scoring Module}
+    \label{fig:sim_scoring}
+\end{figure}
+
+The Similarity Scoring Module consolidates highly complex coordinate metrics into three distinct, user-friendly performance values on a scale from 0 to 100.
+
+The first dimension is the Structural Similarity Score. This metric is a derived expression tracking the spatial accuracy and joint relationship structure, verifying if the user mimicked the expert’s body alignment correctly. 
+The second dimension is the Temporal Similarity Score, which grades the rhythmic efficiency of the action. Even if posture is correct, extreme slowness or unnatural stuttering yields penalties here.
+Finally, the Overall Similarity Score weaves these dimensions together. 
+
+By categorizing outputs into tiers (ranging from ``Excellent'' to ``Needs Improvement''), this module simplifies the evaluation and gives the user a clear baseline of performance readiness without interpreting raw data arrays.
+
+\section{LLM-Based Feedback Module}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/data_serialization.png}
+    \caption{LLM-Based Feedback Module Workflow}
+    \label{fig:llm_feedback}
+\end{figure}
+
+The final component is the LLM-Based Feedback Module, designed to transform systematic numeric insights into conversational, mentor-like coaching. While numeric similarity scores inform an athlete of a deficiency, they do not prescribe a practical correction. 
+
+The module incorporates an intelligent context orchestrator that translates raw error logs, identifying exactly which movement phase failed and which pivotal joints drifted beyond acceptable thresholds. This data is rigorously filtered into an active instruction payload.
+
+A locally deployed Large Language Model (LLM) consumes this payload, operating on pre-engineered prompts constrained tightly to Kabaddi domain knowledge. Unlike open-domain chatbots, this implementation avoids hallucinations by strictly referencing empirical performance logs. It produces segmented, actionable feedback highlighting distinct problem areas and coaching cues—thus closing the adaptive learning cycle effectively.
+
+\section{Database Design}
+
+The system uses a relational database managed by Django ORM with SQLite for development and PostgreSQL-compatible for production. The database schema comprises six primary models organized around the session lifecycle.
+
+The \textbf{Tutorial} model stores expert technique definitions. Each tutorial record contains a unique identifier, a technique name (e.g., ``hand\_touch'', ``bonus''), a description, the file path to the pre-extracted expert pose array stored as a NumPy file of shape $(T, 17, 2)$, and the file path to the pre-generated AR GLB animation file (\texttt{ar\_glb\_path}) produced by Plask.ai from the expert technique video.
+
+The \textbf{UserSession} model is the central entity tracking the lifecycle of a single training attempt. It stores the session UUID, a foreign key to the associated Tutorial, a status field tracking pipeline progress through states (``created'', ``video\_uploaded'', ``pose\_extracted'', ``level1\_complete'', ``scoring\_complete'', ``feedback\_generated'', ``failed''), a timestamp, and an optional error message field.
+
+The \textbf{RawVideo} model stores metadata about the uploaded user video, including the file path, file size in bytes, and a one-to-one relationship with the UserSession.
+
+The \textbf{PoseArtifact} model records the path to the Level-1 cleaned pose file generated from the user video, linked to the UserSession.
+
+The \textbf{AnalyticalResults} model stores paths to the two mandatory pipeline outputs: the scores JSON file and the error metrics JSON file. Both are required for the session to be considered complete.
+
+The \textbf{LLMFeedback} model stores the text feedback generated by the Ollama LLM, the path to the TTS audio WAV file, the generation timestamp, and the model name used for generation.
+
+\begin{table}[H]
+\centering
+\caption{Database Schema Summary}
+\label{tab:db_schema}
+\begin{tabular}{|l|l|p{6cm}|}
+\hline
+\textbf{Model} & \textbf{Key Fields} & \textbf{Purpose} \\
+\hline
+Tutorial & id, name, expert\_pose\_path & Expert technique definitions \\
+\hline
+UserSession & id, tutorial, status, error\_message & Session lifecycle tracking \\
+\hline
+RawVideo & file\_path, file\_size, user\_session & Uploaded video metadata \\
+\hline
+PoseArtifact & pose\_level1\_path, user\_session & Cleaned pose file reference \\
+\hline
+AnalyticalResults & scores\_path, error\_metrics\_path & Pipeline output references \\
+\hline
+LLMFeedback & feedback\_text, audio\_path, model\_used & AI coaching feedback \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:db_schema}, the database design follows a strict one-to-one relationship chain from UserSession through all dependent models, ensuring referential integrity and enabling efficient status-based queries from the mobile application.
+
+
+\section{REST API Design}
+
+The Django backend exposes a RESTful HTTP API consumed by the Flutter mobile application. All endpoints follow a session-centric design where the session UUID serves as the primary resource identifier. Table~\ref{tab:api_endpoints} summarizes the available endpoints.
+
+\begin{table}[H]
+\centering
+\caption{REST API Endpoint Specification}
+\label{tab:api_endpoints}
+\begin{tabular}{|l|l|p{5.5cm}|}
+\hline
+\textbf{Method} & \textbf{Endpoint} & \textbf{Description} \\
+\hline
+GET & /api/health/ & Server health check \\
+\hline
+GET & /api/tutorials/ & List available techniques \\
+\hline
+POST & /api/session/start/ & Create new training session \\
+\hline
+POST & /api/session/\{id\}/upload-video/ & Upload user video (multipart) \\
+\hline
+POST & /api/session/\{id\}/assess/ & Trigger analysis pipeline \\
+\hline
+GET & /api/session/\{id\}/status/ & Poll pipeline status \\
+\hline
+GET & /api/session/\{id\}/results/ & Fetch scores and feedback \\
+\hline
+GET & /api/session/\{id\}/tts-audio/ & Stream TTS audio WAV \\
+\hline
+GET & /api/tutorials/\{id\}/ar-pose/ & Fetch AR ghost pose data \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:api_endpoints}, the API follows a sequential workflow. The mobile application first calls the start endpoint to obtain a session ID, uploads the video, triggers assessment, and then polls the status endpoint at three-second intervals until the pipeline completes. The results endpoint returns scores immediately upon scoring completion and includes feedback text once the LLM generation finishes.
+
+The assessment trigger endpoint returns immediately with a ``processing'' status, as the pipeline executes in a background thread to prevent HTTP timeout. This asynchronous design is critical given the LLM inference time of approximately 96 seconds on CPU hardware.
+
+
+\section{Mobile Application Design}
+
+The Flutter mobile application implements a linear navigation flow comprising seven screens, each corresponding to a distinct stage of the training workflow.
+
+The \textbf{Splash Screen} performs server connectivity verification on launch. It attempts a health check against the configured server URL and navigates to the Connect Screen if the server is unreachable, or directly to the Home Screen if a previous connection exists.
+
+The \textbf{Connect Screen} allows the user to enter the Django server IP address and port. Upon successful health check, the address is persisted using SharedPreferences and the application navigates to the Home Screen.
+
+The \textbf{Home Screen} displays the list of available Kabaddi techniques fetched from the tutorials endpoint. Each technique card shows the technique name and description. Selecting a technique navigates to the Recording Screen with the selected tutorial passed as a route argument.
+
+The \textbf{Recording Screen} enforces landscape orientation using SystemChrome and initializes the rear camera. A three-second countdown precedes automatic recording start. A progress bar tracks elapsed time against the 30-second maximum. The user may stop recording early using the stop button. Upon completion, the captured video path is passed to the Processing Screen.
+
+The \textbf{Processing Screen} manages the complete pipeline lifecycle through the SessionProvider. It displays real-time status messages and a progress indicator as the pipeline advances through its stages. The screen polls the status endpoint every three seconds and navigates to the Results Screen only when the ``feedback\_generated'' status is received.
+
+The \textbf{Results Screen} displays the three similarity scores using circular progress indicators, the LLM-generated feedback text, and a multilingual audio playback section. On-device translation via Google ML Kit and native TTS via flutter\_tts enable feedback delivery in seven regional Indian languages.
+
+The \textbf{AR Playback Screen} renders the expert ghost skeleton as a 3D model overlay using the model\_viewer\_plus package, allowing the user to observe the correct technique before recording.
+
+\begin{table}[H]
+\centering
+\caption{Mobile Application Screen Flow}
+\label{tab:app_screens}
+\begin{tabular}{|l|l|p{5cm}|}
+\hline
+\textbf{Screen} & \textbf{Navigation Trigger} & \textbf{Key Action} \\
+\hline
+Splash & App launch & Health check \\
+\hline
+Connect & Health check fail & Server URL entry \\
+\hline
+Home & Health check pass & Technique selection \\
+\hline
+AR Playback & Technique selected & Ghost preview \\
+\hline
+Recording & Start recording & Landscape video capture \\
+\hline
+Processing & Recording complete & Pipeline polling \\
+\hline
+Results & feedback\_generated & Score and feedback display \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:app_screens}, the application enforces a strict linear flow that prevents users from skipping pipeline stages. The Provider state management pattern ensures that session state is accessible across all screens without prop drilling.
+
+
+\section{Summary}
+
+This chapter explored the high-level system design outlining the AR-Based Kabaddi Ghost Trainer. Developing clear modular boundaries between physical video capture, abstract pose refinement, structural-temporal orchestration, error detection, and final linguistic feedback generation allows the platform to act efficiently.
+
+The database schema provides a clean session-centric data model that tracks the complete pipeline lifecycle. The REST API exposes a minimal set of endpoints that support the asynchronous polling architecture required by the long-running LLM inference stage. The mobile application implements a structured seven-screen navigation flow that guides the user through technique selection, video recording, pipeline processing, and multilingual feedback delivery.
+
+\end{sloppypar}

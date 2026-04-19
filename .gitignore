@@ -1,0 +1,111 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.sqlite3
+db.sqlite3
+
+# Media files
+*.mp4
+*.avi
+*.mov
+*.npy
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.wav
+
+# Logs
+*.log
+logs/
+
+# Model files
+*.pt
+*.pth
+*.h5
+*.pkl
+*.task
+
+# Output directories
+*_out/
+*_output/
+test_output/
+pipeline_out/
+pose_out/
+preproc_out/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+.cache/
+
+# Documentation builds
+docs/_build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.env.local
+
+# Node modules (if any)
+node_modules/
+
+# Specific to this project
+yolov8n.pt
+*.parquet
+
+# 3D Models
+*.fbx
+*.glb
+
+# Documents / archives / fonts (keep out of git history)
+*.pdf
+*.zip
+*.ttf
+*.otf
+
+# App/backend generated artifacts
+kabaddi_backend/media/
+outputs/
+
+# Archive folder (local only, do not push)
+_archive/

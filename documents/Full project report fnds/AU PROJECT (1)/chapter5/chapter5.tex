@@ -1,0 +1,468 @@
+\chapter{\MakeUppercase{EVALUATION AND ANALYSIS}}
+\begin{sloppypar}
+
+The evaluation phase serves as the validation layer of the proposed platform, where implementation outcomes are measured against the objectives defined in earlier chapters. It establishes whether the integrated modules behave correctly not only in isolation but also as part of a connected adaptive learning pipeline. This chapter therefore examines both algorithmic quality and practical usefulness, with emphasis on reliability under realistic educational scenarios. The analysis covers the full workflow, beginning with question processing modules and extending to recommendation, feedback, and planning modules that directly influence student preparation. A combination of quantitative metrics and qualitative interpretation is used so that numerical performance can be linked to pedagogical impact. Controlled experimental settings are used to maintain consistency, while diverse test cases are included to capture module-specific edge conditions. Graphs, confusion matrices, and comparative summaries are incorporated to make performance trends transparent and easy to interpret. The outcomes presented in this chapter provide evidence for system readiness, highlight limitations that require refinement, and justify the design choices adopted in the implementation.
+
+\section{Evaluation and Analysis}
+
+This chapter presents a comprehensive evaluation and analysis of the proposed \textbf{Intelligent Competitive Exam Platform with Personalized Test Series}. The primary objective of this chapter is to assess the performance, reliability, and effectiveness of each module within the system using systematic testing methodologies and well-defined evaluation metrics. The evaluation is conducted using controlled datasets, real execution outputs, and simulated student profiles to ensure that the results reflect the actual behavior of the system under realistic conditions.
+
+The system is composed of multiple interconnected modules, including topic classification, difficulty tagging, test generation, performance analytics, difficulty recommendation, LLM-Based feedback generation, study plan generation, and current affairs question generation. Since these modules perform different types of tasks ranging from classification to content generation, appropriate evaluation metrics are selected for each module. Classification-based modules are evaluated using standard metrics such as accuracy, precision, recall, and F1-score, while system-level modules are assessed using domain-specific metrics such as distribution accuracy, trend correctness, coverage, alignment, and quality scores.
+
+In addition to quantitative evaluation, this chapter also provides qualitative analysis to interpret the results and understand system behavior. Key strengths, limitations, and edge cases are identified through detailed analysis of outputs such as confusion matrices, performance graphs, and module-wise comparisons. Special attention is given to identifying weak areas, understanding their root causes, and justifying their impact on the overall system performance.
+
+The chapter further includes visual representations such as confusion matrices, bar charts, and trend graphs to provide a clear and intuitive understanding of the evaluation results. These visualizations help in comparing module performances, tracking student ability progression, and analyzing improvements in LLM-generated feedback.
+
+Overall, this chapter plays a critical role in validating the proposed system by demonstrating that it is not only functionally correct but also effective, reliable, and suitable for real-world deployment in competitive exam preparation scenarios.
+
+\subsection{Evaluation Metrics}
+
+To evaluate the performance of the proposed \textbf{Intelligent Competitive Exam Platform}, a combination of standard classification metrics and domain-specific evaluation measures is employed. Since the system consists of multiple modules performing different tasks such as classification, recommendation, analytics, and content generation, appropriate metrics are selected based on the nature of each module.
+
+For classification-based modules such as \textbf{SBERT topic classification} and \textbf{difficulty tagging}, standard metrics including Accuracy, Precision, Recall, F1-score, and Specificity are used. These metrics are derived from the confusion matrix and provide a detailed understanding of model performance.
+
+\textbf{Accuracy} measures the overall correctness of the system by calculating the proportion of correctly classified instances. For the SBERT-based topic classification module, the system achieved an accuracy of \textbf{94.50\%}, as illustrated in Figure~\ref{fig:eval_5_1}. Similarly, the difficulty tagging module achieved an accuracy of \textbf{75.00\%}, as shown in Figure~\ref{fig:eval_5_2}.
+
+To visually examine classification quality, the SBERT topic-level confusion matrix is presented first.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{assets/figures/figure1.png}
+    \caption{SBERT Topic Classification Confusion Matrix}
+    \label{fig:eval_5_1}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_5_1}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates strong diagonal dominance, indicating that most questions are mapped to their correct topics. It can be observed that only a few off-diagonal entries appear, which confirms low cross-topic confusion and high semantic discrimination.
+
+For difficulty-level evaluation, the confusion matrix for difficulty tagging is presented next.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{assets/figures/figure2.png}
+    \caption{Difficulty Tagging Confusion Matrix}
+    \label{fig:eval_5_2}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_5_2}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates the imbalance in Easy-class prediction compared with Medium and Hard classes. It can be observed that misclassification is concentrated around the Easy-to-Medium boundary, which justifies the need for recalibration using empirical student performance.
+
+\begin{equation}
+\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN} \tag{5.1}
+\end{equation}
+
+\textbf{Precision} measures the proportion of correctly predicted positive instances among all predicted positives. In the SBERT classification module, the weighted precision is \textbf{0.9463}, indicating that most predicted topics are correct.
+
+\begin{equation}
+\text{Precision} = \frac{TP}{TP + FP} \tag{5.2}
+\end{equation}
+
+\textbf{Recall (Sensitivity)} measures the proportion of actual positive instances that are correctly identified. The SBERT model achieved a recall of \textbf{0.9450}, demonstrating strong ability to correctly identify relevant topics. However, in the difficulty tagging module, the recall for Easy questions is significantly lower (\textbf{0.25}), indicating misclassification of easy questions as medium, as visualized in Figure~\ref{fig:eval_5_2}.
+
+\begin{equation}
+\text{Recall} = \frac{TP}{TP + FN} \tag{5.3}
+\end{equation}
+
+\textbf{F1-score} is the harmonic mean of precision and recall, providing a balanced evaluation metric. The SBERT model achieved an F1-score of \textbf{0.9449}, confirming consistent performance across both precision and recall. In contrast, the difficulty tagging module achieved a lower weighted F1-score of \textbf{0.7091}, reflecting imbalance in classification.
+
+\begin{equation}
+\text{F1-score} = \frac{2 \times \text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} \tag{5.4}
+\end{equation}
+
+\textbf{Specificity} measures the ability of the model to correctly identify negative instances. For example, the SBERT classification module shows high specificity across all classes (close to \textbf{1.0}), indicating that incorrect topic assignments are minimal.
+
+\begin{equation}
+\text{Specificity} = \frac{TN}{TN + FP} \tag{5.5}
+\end{equation}
+
+In addition to classification metrics, \textbf{system-level modules} are evaluated using domain-specific measures. The \textbf{test generation module} achieves a distribution accuracy of \textbf{99.17\%}, ensuring that generated tests match the intended difficulty distribution (refer to Figure~\ref{fig:eval_5_3}). The \textbf{performance analytics module} achieves \textbf{100\% trend accuracy}, demonstrating reliable tracking of student progress over time (Figure~\ref{fig:eval_5_4}). The \textbf{difficulty recommendation module} achieves \textbf{60\% band alignment accuracy} with \textbf{100\% drop detection recall}, indicating strong detection of performance decline despite boundary limitations.
+
+For the \textbf{LLM-based mentor module}, evaluation is based on qualitative scoring metrics such as groundedness, relevance, specificity, and hallucination control. The improved LLM approach achieves a total score of \textbf{39.2/40}, representing a \textbf{243.86\% improvement} over baseline performance (Figure~\ref{fig:eval_5_5}). The \textbf{study plan generator} achieves an average plan quality score of \textbf{73.97\%}, with \textbf{100\% weak topic coverage}, as shown in Figure~\ref{fig:eval_5_6}. The \textbf{current affairs engine} achieves \textbf{100\% answer accuracy}, with average relevance and explanation scores of \textbf{9.2/10} and \textbf{9.5/10}, respectively (Figure~\ref{fig:eval_5_7}).
+
+To verify whether generated tests follow expected difficulty composition, the distribution plot is presented below.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{assets/figures/figure3.png}
+    \caption{Test Generation Distribution Accuracy}
+    \label{fig:eval_5_3}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_5_3}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates near-perfect alignment between target and generated difficulty distributions. It can be observed that deviation is minimal, supporting the conclusion that the generator maintains high distribution fidelity.
+
+To assess temporal consistency of learner tracking, the analytics trend visualization is shown next.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{assets/figures/figure4.png}
+    \caption{Performance Analytics Trend Evaluation}
+    \label{fig:eval_5_4}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_5_4}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates smooth and stable progression in ability estimation over time. It can be observed that trend detection remains consistent across profiles, validating the reliability of the weighted rolling model.
+
+To compare the quality of mentor feedback before and after prompt-structured refinement, the following figure is provided.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{assets/figures/figure5.png}
+    \caption{LLM Feedback Quality Comparison}
+    \label{fig:eval_5_5}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_5_5}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates a substantial gain in feedback quality for the improved LLM pipeline over baseline generation. It can be observed that groundedness, relevance, and specificity improve together, indicating stronger instructional usefulness.
+
+To evaluate planning quality across generated schedules, the study-plan performance visualization is shown below.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{assets/figures/figure6.png}
+    \caption{Study Plan Quality Evaluation}
+    \label{fig:eval_5_6}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_5_6}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates strong weak-topic coverage and high feasibility across plans. It can be observed that scheduling quality remains practically usable even when alignment scores vary among learner profiles.
+
+To validate dynamic question quality in the news-driven pipeline, the current affairs evaluation figure is presented next.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{assets/figures/figure7.png}
+    \caption{Current Affairs Engine Evaluation}
+    \label{fig:eval_5_7}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_5_7}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates consistently high factual correctness and explanation quality in generated MCQs. It can be observed that relevance scores remain strong, supporting the conclusion that the module is suitable for daily exam-oriented updates.
+
+Overall, these evaluation metrics provide a comprehensive assessment of the system, combining quantitative accuracy measures with qualitative performance indicators. This multi-dimensional evaluation ensures that the platform is not only technically accurate but also effective in delivering personalized and meaningful learning experiences.
+
+\subsection{Confusion Matrix Terms}
+
+The confusion matrix is a fundamental evaluation tool used to analyze the performance of classification models by comparing predicted outputs with actual labels. In the proposed system, confusion matrices are primarily used to evaluate the \textbf{SBERT-based topic classification module} and the \textbf{difficulty tagging module}, as illustrated in Figure~\ref{fig:eval_5_1} and Figure~\ref{fig:eval_5_2}, respectively. These matrices provide a detailed breakdown of correct and incorrect predictions, forming the basis for calculating evaluation metrics such as accuracy, precision, recall, and F1-score.
+
+A confusion matrix consists of four key components: True Positives (TP), True Negatives (TN), False Positives (FP), and False Negatives (FN). These components help in understanding how effectively the model performs across different classes and where misclassifications occur.
+
+\textbf{True Positives (TP):} True Positives represent the number of instances where the system correctly predicts the actual class. For example, in the SBERT topic classification module, TP refers to questions correctly classified into their respective topics. High TP values contribute directly to higher accuracy and recall. In the evaluation, topics such as \textit{Aptitude} achieved perfect classification (TP = 40), contributing to the overall accuracy of \textbf{94.50\%}.
+
+\textbf{True Negatives (TN):} True Negatives indicate the number of instances where the system correctly identifies that a data point does not belong to a specific class. High TN values reflect the model's ability to avoid incorrect assignments. In the topic classification confusion matrix (Figure~\ref{fig:eval_5_1}), TN values are consistently high (close to 160 per class), indicating strong discrimination between different topics.
+
+\textbf{False Positives (FP):} False Positives occur when the system incorrectly predicts a class for an instance that does not belong to it. For example, an Economics question incorrectly classified as Geography contributes to FP for Geography. These errors reduce precision. In the SBERT module, FP values are relatively low, resulting in a high precision of \textbf{0.9463}. However, in the difficulty tagging module (Figure~\ref{fig:eval_5_2}), a significant number of Easy questions are misclassified as Medium (FP = 15 for Medium), reducing its precision.
+
+\textbf{False Negatives (FN):} False Negatives represent instances where the system fails to correctly identify the actual class. For example, an Easy question incorrectly labeled as Medium contributes to FN for the Easy class. High FN values reduce recall. In the difficulty tagging module, the Easy class has a high FN value (FN = 15), resulting in a low recall of \textbf{0.25}, as shown in Figure~\ref{fig:eval_5_2}.
+
+The general structure of the confusion matrix is shown below:
+
+\begin{table}[H]
+\centering
+\caption{Confusion Matrix Structure}
+\label{tab:cm_structure}
+\begin{tabular}{|l|c|c|}
+\hline
+ & Actual Positive & Actual Negative \\
+\hline
+Predicted Positive & TP & FP \\
+\hline
+Predicted Negative & FN & TN \\
+\hline
+\end{tabular}
+\end{table}
+
+The corresponding metric values are summarized in Table~\ref{tab:cm_structure}.
+
+The confusion matrices presented in Figure~\ref{fig:eval_5_1} and Figure~\ref{fig:eval_5_2} visually demonstrate the classification performance of the system. In Figure~\ref{fig:eval_5_1}, most values are concentrated along the diagonal, indicating correct topic classification with minimal misclassification. In contrast, Figure~\ref{fig:eval_5_2} shows off-diagonal values for the Easy class, highlighting the limitation of keyword-based difficulty tagging.
+
+Overall, the confusion matrix provides a clear and detailed understanding of model performance, enabling the identification of strengths and weaknesses in classification. It serves as the foundation for computing all major evaluation metrics and plays a crucial role in validating the effectiveness of the classification components within the system.
+
+\section{Module-wise Performance Evaluation}
+
+This section presents a detailed module-wise evaluation of the system, focusing on the internal working, performance metrics, and expert-level interpretation of each component. Unlike the overall evaluation, this section analyzes how each module contributes to the system's intelligence, adaptability, and reliability. The evaluation combines quantitative metrics, confusion matrix insights, and qualitative reasoning to provide a deep understanding of system behavior.
+
+Each module is evaluated not only based on numerical performance but also on its practical effectiveness in a real-world competitive exam preparation scenario. This includes analyzing error patterns, adaptability to edge cases, and contribution to personalized learning. The results are supported by corresponding figures and evaluation outputs generated during experimentation.
+
+Beyond module-level scores, this section also studies the interaction effect among modules. For example, even a small topic misclassification can propagate into difficulty recommendation and study planning quality. Therefore, module-wise evaluation is interpreted both in isolation and in terms of downstream influence. This approach ensures that system-level conclusions are not biased by high performance in a single component while ignoring cascading errors.
+
+Another important aspect considered in this section is robustness under variation in user behavior. The system was tested with simulated student profiles representing low-performing, moderate-performing, and high-performing learners. This helps verify whether each module maintains stable quality under different learning trajectories. The analysis shows that modules retain consistent behavior across profiles, with predictable deviations only in edge conditions such as sparse historical attempts.
+
+To improve interpretability, the evaluation is structured around four dimensions: correctness, consistency, responsiveness, and pedagogical usefulness. Correctness reflects numerical accuracy, consistency reflects stability across runs, responsiveness reflects computational efficiency and adaptive reaction to new data, and pedagogical usefulness reflects the practical value of outputs for learners. This multi-dimensional framing provides a richer evaluation than accuracy alone.
+
+\subsection{SBERT-Based Topic Classification Evaluation}
+
+The SBERT-based semantic classification module forms the backbone of the system's content understanding. It converts questions into dense vector embeddings and compares them with syllabus embeddings using cosine similarity.
+
+\begin{table}[H]
+\centering
+\caption{SBERT Topic Classification Metrics}
+\label{tab:sbert_metrics}
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Accuracy & 94.50\% \\
+\hline
+Precision & 0.9463 \\
+\hline
+Recall & 0.9450 \\
+\hline
+F1-Score & 0.9449 \\
+\hline
+\end{tabular}
+\end{table}
+
+The corresponding metric values are summarized in Table~\ref{tab:sbert_metrics}.
+
+These values indicate highly reliable classification performance.
+
+From an expert perspective, the high precision value indicates that the system produces very few incorrect topic assignments (low False Positives), while the high recall confirms that it successfully identifies most relevant topics (low False Negatives). The confusion matrix (Figure~\ref{fig:eval_5_1}) shows strong diagonal dominance, meaning that the majority of predictions are correct.
+
+A deeper analysis of class-wise performance reveals that certain overlaps exist between closely related subjects such as Economics and Geography, where minor misclassifications occur. These errors are not random but arise due to semantic similarity between topics, which is a known limitation of embedding-based approaches. However, the impact of these errors is minimal due to the overall high accuracy.
+
+The SBERT model is highly efficient and scalable, making it suitable for large datasets. Its ability to generalize across different question patterns demonstrates strong semantic understanding, which is critical for competitive exam systems.
+
+From a deployment perspective, inference latency remained within acceptable limits for batch and near-real-time operation. Caching precomputed syllabus embeddings further reduced repeated computation overhead, allowing the classifier to process large question pools efficiently. This confirms that the model is not only accurate but also operationally practical for sustained use.
+
+Error inspection also reveals that ambiguous multi-topic questions are the primary source of residual misclassification. Instead of indicating model weakness alone, this pattern validates the system's design choice to include an LLM fallback mechanism. In practice, the fallback resolves many of these borderline cases and improves final end-to-end correctness.
+
+\subsection{Difficulty Tagging and Recalibration Evaluation}
+
+The module-specific performance values are presented in Table~\ref{tab:difficulty_tagging_metrics}.
+
+The difficulty tagging module initially assigns difficulty levels using Bloom's Taxonomy and later refines them through empirical recalibration based on student performance.
+
+\begin{table}[H]
+\centering
+\caption{Difficulty Tagging and Recalibration Metrics}
+\label{tab:difficulty_tagging_metrics}
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Accuracy & 75.00\% \\
+\hline
+Weighted Precision & 0.8571 \\
+\hline
+Weighted Recall & 0.7500 \\
+\hline
+Weighted F1-Score & 0.7091 \\
+\hline
+\end{tabular}
+\end{table}
+
+From an expert standpoint, this performance highlights the limitations of rule-based classification. The confusion matrix (Figure~\ref{fig:eval_5_2}) indicates noticeable class imbalance, especially for Easy questions, when explicit cognitive keywords are absent.
+
+However, this limitation is effectively addressed by the recalibration mechanism. By analyzing student response patterns, the system dynamically adjusts difficulty levels, ensuring that the final classification reflects real-world difficulty rather than theoretical assumptions.
+
+This hybrid approach combining rule-based initialization with data-driven refinement is a key strength of the system. It ensures both interpretability and adaptability, making the module robust in practical scenarios.
+
+The recalibration process also improves fairness across question styles. Questions that appear linguistically complex but are consistently solved by students are progressively shifted toward lower difficulty bands, while deceptively simple-looking but frequently missed questions are moved upward. This behavior aligns the system with authentic learner experience.
+
+Over repeated attempts, recalibration stabilizes and reduces volatility in difficulty assignment. This is important because unstable difficulty labels can distort ability estimates and recommendation quality. The observed convergence pattern indicates that the module becomes more reliable as more interaction data accumulates.
+
+\subsection{Customized Test Generation Evaluation}
+
+The evaluation metrics for personalized test generation are listed in Table~\ref{tab:test_generation_metrics}.
+
+The test generation module is responsible for creating personalized tests based on student ability.
+
+\begin{table}[H]
+\centering
+\caption{Customized Test Generation Metrics}
+\label{tab:test_generation_metrics}
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Distribution Accuracy & 99.17\% \\
+\hline
+Repetition Rate & 0.0\% \\
+\hline
+Subtopic Coverage & 33.33\% \\
+\hline
+\end{tabular}
+\end{table}
+
+From an expert perspective, this module demonstrates near-perfect control over difficulty distribution. The system accurately matches target distributions (Easy, Medium, Hard) with actual generated tests, as shown in Figure~\ref{fig:eval_5_3}. The negligible deviation confirms the correctness of the selection algorithm.
+
+The zero repetition rate indicates that the system effectively tracks previously used questions and avoids redundancy, which is critical for maintaining test quality. The observed subtopic coverage is constrained by the available dataset rather than algorithm limitations.
+
+The module successfully balances randomness, diversity, and constraint satisfaction, making it highly reliable for real-world deployment.
+
+In addition, stress testing with varied question counts confirms that generation quality remains stable from short quizzes to long-form mock tests. The module preserves both distribution constraints and uniqueness constraints even under limited pool conditions by using controlled fallback and rebalancing logic.
+
+From a learner-experience viewpoint, this stability is essential: students receive predictable challenge calibration without repeated content, which supports motivation and progressive practice. The module therefore contributes directly to long-term retention and exam-readiness.
+
+\subsection{Performance Analytics and Ability Modeling Evaluation}
+
+The core analytics and ability-modeling metrics are summarized in Table~\ref{tab:performance_analytics_metrics}.
+
+The performance analytics module evaluates student responses and computes a dynamic ability score using a weighted rolling model.
+
+\begin{table}[H]
+\centering
+\caption{Performance Analytics and Ability Modeling Metrics}
+\label{tab:performance_analytics_metrics}
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Trend Accuracy & 100.00\% \\
+\hline
+Ability Stability & 0.0791 \\
+\hline
+\end{tabular}
+\end{table}
+
+The ability progression curves (Figure~\ref{fig:eval_5_4}) show smooth transitions, indicating stability in ability estimation and consistency over time.
+
+From an expert viewpoint, the use of weighted contributions (recent performance, last five tests, cumulative performance) ensures that the system remains responsive to recent changes while maintaining long-term stability. This is a significant improvement over simple averaging methods, which fail to capture performance trends effectively.
+
+The module provides detailed insights into topic-wise and difficulty-wise performance, enabling precise identification of strengths and weaknesses. This forms the foundation for personalized recommendations and study planning.
+
+Ablation-style comparison with unweighted scoring indicates that the weighted model better captures recovery and decline phases. In unweighted schemes, short-term performance spikes often distort conclusions, whereas the weighted rolling approach controls noise and reflects authentic progress more faithfully.
+
+The analytics output is also explainable to end users: each ability transition can be traced to measurable factors (accuracy, difficulty mix, and time behavior). This transparency improves trust in system recommendations and helps learners understand why the platform suggests specific next steps.
+
+\subsection{Intelligent Difficulty Recommendation Evaluation}
+
+The recommendation quality metrics are presented in Table~\ref{tab:difficulty_recommendation_metrics}.
+
+The recommendation module determines the optimal difficulty distribution for future tests based on student ability and performance trends.
+
+\begin{table}[H]
+\centering
+\caption{Intelligent Difficulty Recommendation Metrics}
+\label{tab:difficulty_recommendation_metrics}
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Band Alignment Accuracy & 60.00\% \\
+\hline
+Drop Detection Recall & 100.00\% \\
+\hline
+\end{tabular}
+\end{table}
+
+From an expert perspective, the moderate alignment accuracy is due to strict threshold-based classification, where slight variations in ability score can shift the predicted band. However, the module strongly detects performance decline and supports timely intervention.
+
+The module prioritizes adaptability over rigid accuracy. It dynamically adjusts difficulty levels to maintain an optimal challenge level for students, preventing both under-challenging and overloading.
+
+This behavior aligns with educational principles such as the zone of proximal development, ensuring effective learning progression.
+
+The recommendation outputs are especially effective when combined with trend analytics, because recommendations are conditioned not only on current band but also on trajectory direction. This prevents overreaction to one-off scores and enables smoother pedagogical transitions.
+
+Future tuning can improve band alignment by replacing hard thresholds with soft probability margins. Even without that enhancement, the current module already delivers substantial practical value by consistently detecting risk patterns and guiding corrective adaptation.
+
+\subsection{LLM-Based Mentor Evaluation}
+
+The mentor-module evaluation results are provided in Table~\ref{tab:llm_mentor_metrics}.
+
+The LLM-based mentor module transforms structured analytics into personalized feedback.
+
+\begin{table}[H]
+\centering
+\caption{LLM-Based Mentor Evaluation Metrics}
+\label{tab:llm_mentor_metrics}
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Baseline Score & 11.4 \\
+\hline
+Improved Score & 39.2 \\
+\hline
+Improvement & +243.86\% \\
+\hline
+\end{tabular}
+\end{table}
+
+From an expert standpoint, this improvement is substantial and demonstrates the effectiveness of structured prompting. The LLM generates feedback that is highly grounded in actual performance data, with strong relevance and specificity.
+
+The evaluation metrics show that groundedness ensures alignment with real data, specificity provides actionable insights, and relevance ensures meaningful feedback.
+
+The evaluation layer further ensures reliability by detecting and preventing hallucinated responses. This makes the module both intelligent and trustworthy.
+
+Qualitative review shows that students receive clearer explanations of why specific topics need attention and how to improve in the next cycle. This shift from numeric-only reporting to actionable narrative guidance significantly improves interpretability and likely improves adherence to recommendations.
+
+The module also benefits from prompt constraints that enforce concise structure (strengths, weaknesses, action items, next test strategy). This consistency reduces output variance and supports predictable mentoring quality across different learner profiles.
+
+\subsection{Study Plan Generator Evaluation}
+
+The study-plan quality indicators are summarized in Table~\ref{tab:study_plan_metrics}.
+
+The study plan generator creates personalized schedules based on student performance.
+
+\begin{table}[H]
+\centering
+\caption{Study Plan Generator Metrics}
+\label{tab:study_plan_metrics}
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Avg Score & 73.97\% \\
+\hline
+Coverage & 100\% \\
+\hline
+Feasibility & 100\% \\
+\hline
+\end{tabular}
+\end{table}
+
+From an expert perspective, the most significant achievement of this module is its ability to consistently cover all weak areas identified in analytics. This ensures that no learning gaps are ignored.
+
+The feasibility metric confirms that generated plans are realistic and executable within available time constraints. However, alignment scores vary across students, indicating potential for further optimization in prioritization strategies.
+
+Overall, the module effectively bridges the gap between analysis and actionable planning.
+
+Further analysis indicates that plan quality improves when learner history is richer, because task prioritization becomes more precise. For cold-start users, the module still produces feasible schedules but with broader topic coverage rather than highly targeted sequencing.
+
+The inclusion of phase-based scheduling (learning, practice, revision) supports cognitive reinforcement and avoids overloading. This structure aligns with exam preparation behavior and improves consistency in daily execution.
+
+\subsection{Current Affairs Engine Evaluation}
+
+The current-affairs evaluation metrics are presented in Table~\ref{tab:current_affairs_metrics}.
+
+The current affairs engine generates MCQs from daily news data.
+
+\begin{table}[H]
+\centering
+\caption{Current Affairs Engine Metrics}
+\label{tab:current_affairs_metrics}
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Accuracy & 100\% \\
+\hline
+Relevance & 9.2/10 \\
+\hline
+Explanation & 9.5/10 \\
+\hline
+\end{tabular}
+\end{table}
+
+From an expert standpoint, this module demonstrates high reliability and content quality. The validation pipeline ensures that only accurate and relevant questions are published, reducing the risk of incorrect information.
+
+The high explanation quality indicates that the system provides not just answers but also conceptual understanding, which is essential for competitive exams.
+
+This module ensures continuous content generation, keeping the system dynamic and up-to-date.
+
+Module robustness is reinforced by multi-stage validation (format, factual coherence, and exam relevance). Items failing validation are automatically rejected or regenerated, which maintains output quality without requiring full manual authoring.
+
+By continuously introducing fresh and exam-aligned questions, the engine complements static syllabus practice and reduces content staleness. This significantly strengthens long-term learner engagement and improves practical preparedness for evolving exam patterns.
+
+Overall, the module-wise evaluation demonstrates that each component of the system performs effectively both individually and as part of an integrated architecture. The combination of strong quantitative performance and intelligent qualitative behavior validates the system as a robust and scalable solution for personalized competitive exam preparation.
+
+\end{sloppypar}

@@ -1,0 +1,51 @@
+% -------------------------------------------------------------------
+% CHAPTER 6 — CONCLUSION AND FUTURE WORK
+% -------------------------------------------------------------------
+\chapter{Conclusion and Future Work}
+\begin{sloppypar}
+
+This chapter summarizes the key contributions and outcomes of the proposed AR-based Kabaddi Ghost Trainer. The system successfully integrates multiple components including YOLOv8-based person detection, MediaPipe pose estimation, COCO-17 format conversion, Level-1 pose cleaning, DTW-based temporal alignment, joint-level error localization, similarity scoring, context-driven LLM feedback generation, and text-to-speech audio output within a unified and scalable architecture. The implementation demonstrates that combining deterministic pose analysis with structured LLM reasoning results in an effective and explainable system for independent Kabaddi technique training.
+
+The evaluation of the system shows that the Level-1 cleaning pipeline eliminates all NaN joint values through interpolation and fallback mechanisms, producing stable pose sequences for downstream analysis. The DTW temporal alignment module correctly handles speed variations between user and expert executions, and torso-height normalization resolves the camera-distance noise problem that previously caused temporal scores to collapse to zero. The similarity scoring module produces scores that correctly reflect genuine technique quality differences across users, and the error localization module accurately identifies biomechanically significant joints as primary deviation sources. The LLM feedback pipeline achieves a composite quality score of 78.4\%, representing a substantial improvement over unstructured baseline generation, confirming the effectiveness of context-driven prompt engineering.
+
+Despite these contributions, certain limitations remain. The structural scoring accuracy depends on consistent camera orientation, and portrait-mode recordings introduce systematic coordinate mismatches relative to landscape-mode expert data. The LLM inference time of approximately 96 seconds on CPU hardware, while acceptable under the current asynchronous architecture, limits the responsiveness of the feedback stage. The current system evaluates 2D pose data only, meaning movements with significant depth variation may not be fully captured. Additionally, the raider selection heuristic may fail in scenarios with multiple equally active subjects.
+
+
+% ===================================================================
+\section{Conclusion}
+% ===================================================================
+
+The objective of this project was to design and develop an AR-based Kabaddi Ghost Trainer that enables objective evaluation of player movements using pose-based analysis and delivers interpretable coaching feedback through a locally hosted LLM. The system integrates pose extraction, temporal alignment, error localization, similarity scoring, and feedback generation into a four-level analytical pipeline accessible through a mobile application and a Django REST backend.
+
+The evaluation demonstrates that the pose extraction pipeline reliably produces clean COCO-17 skeletal sequences from user-recorded video, with the Level-1 cleaning stage eliminating all missing joint values. The DTW temporal alignment module correctly synchronises user and expert sequences despite natural speed variations, and the introduction of torso-height normalization resolves the scale-invariance problem that previously caused temporal scores to be unreliable. The error localization module produces structured joint and phase statistics that serve as grounded inputs for the LLM feedback pipeline, ensuring that generated coaching advice is anchored to actual performance data rather than generic observations.
+
+The mobile application provides a complete end-to-end training workflow: technique selection, landscape-mode video recording, background pipeline processing, score display, and multilingual feedback delivery through on-device translation and native text-to-speech. The asynchronous polling architecture ensures that the application remains responsive throughout the LLM inference period, delivering scores immediately and feedback upon completion.
+
+The LLM feedback evaluation confirms that structured prompt engineering with context injection produces significantly higher quality coaching feedback compared to unstructured baseline generation. The five-metric automated evaluation framework provides a reproducible and transparent method for assessing feedback quality without requiring human annotation.
+
+Overall, the proposed system successfully addresses the limitations of existing training approaches by providing a data-driven, pose-level, and explainable framework for independent Kabaddi technique assessment and improvement.
+
+
+% ===================================================================
+\section{Future Work}
+% ===================================================================
+
+Although the proposed AR-based Kabaddi Ghost Trainer demonstrates strong performance across all pipeline stages, several opportunities for further enhancement have been identified through evaluation and deployment experience.
+
+One important direction for future work is the extension of pose analysis to three-dimensional skeletal data. The current system operates exclusively on 2D keypoints, which limits its ability to capture depth-dependent movements such as forward lunges and lateral evasions. Integrating multi-camera triangulation or monocular depth estimation would enable 3D pose comparison and improve structural scoring accuracy for techniques with significant depth variation.
+
+Another key area for improvement is the replacement of the current scoring formulas with a learning-based similarity model. The present structural and temporal scores are computed using fixed exponential decay functions and threshold-based formulas. Training a regression model on annotated expert-user pose pairs would allow the scoring module to learn technique-specific similarity criteria, potentially improving score accuracy and generalizability across different Kabaddi techniques.
+
+The LLM feedback module can be further refined through model quantization and fine-tuning. Replacing the full Llama 3 model with a smaller quantized variant such as Phi-3 Mini or Gemma 2B would reduce inference time from approximately 96 seconds to under 20 seconds on CPU hardware, significantly improving the user experience. Fine-tuning on a Kabaddi-specific coaching corpus would further improve technique awareness and reduce hallucination rates.
+
+Expanding the expert pose database to cover additional Kabaddi techniques beyond Hand Touch and Bonus Step is another important direction. The current system supports only two techniques, limiting its practical utility for comprehensive training programs. Adding techniques such as Toe Touch, Dubki, and Thigh Touch would make the system applicable to a broader range of training scenarios.
+
+The on-device translation and text-to-speech pipeline in the mobile application can be enhanced by integrating AI4Bharat IndicTTS once Python 3.11 compatibility is established on the server. This would provide natural, colloquial speech synthesis in regional Indian languages including Tamil, Hindi, Telugu, Kannada, and Malayalam, significantly improving accessibility for non-English-speaking users.
+
+Real-time feedback capability represents a longer-term enhancement goal. The current system operates in offline batch mode, processing recorded video after the training session. Extending the pipeline to support live pose estimation and real-time DTW alignment would enable immediate corrective feedback during practice, transforming the system from a post-session analysis tool into an active training assistant.
+
+Finally, a longitudinal study tracking user improvement across multiple training sessions would provide valuable data for validating the system's effectiveness as a coaching tool. Collecting session-over-session score trends and correlating them with self-reported technique improvement would establish the practical impact of the system on Kabaddi skill development.
+
+Overall, future enhancements aim to make the system more accurate, faster, linguistically accessible, and applicable to a wider range of techniques, transforming it into a comprehensive AI-driven coaching platform for Kabaddi training.
+
+\end{sloppypar}

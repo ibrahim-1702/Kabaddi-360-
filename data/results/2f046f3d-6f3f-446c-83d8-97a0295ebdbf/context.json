@@ -1,0 +1,201 @@
+{
+  "metadata": {
+    "session_id": "2f046f3d-6f3f-446c-83d8-97a0295ebdbf",
+    "pose_id": "039fc84f-6e7f-4bd6-85ed-7c49abb8766b",
+    "num_frames": 129,
+    "reference_duration": 78,
+    "pipeline_version": "production_v1"
+  },
+  "summary": {
+    "overall_score": 54.2,
+    "overall_assessment": "Needs Improvement",
+    "structural_score": 43.6,
+    "structural_assessment": "Needs Improvement",
+    "temporal_score": 70.0,
+    "temporal_assessment": "Fair"
+  },
+  "joint_deviations": {
+    "major": [
+      {
+        "joint": "right_ankle",
+        "mean_error": 1.4,
+        "max_error": 2.55,
+        "severity": "major"
+      },
+      {
+        "joint": "left_wrist",
+        "mean_error": 1.24,
+        "max_error": 1.84,
+        "severity": "major"
+      },
+      {
+        "joint": "right_wrist",
+        "mean_error": 1.22,
+        "max_error": 2.1,
+        "severity": "major"
+      },
+      {
+        "joint": "right_knee",
+        "mean_error": 1.02,
+        "max_error": 1.87,
+        "severity": "major"
+      },
+      {
+        "joint": "right_elbow",
+        "mean_error": 0.96,
+        "max_error": 1.72,
+        "severity": "major"
+      },
+      {
+        "joint": "left_elbow",
+        "mean_error": 0.95,
+        "max_error": 1.46,
+        "severity": "major"
+      },
+      {
+        "joint": "left_ankle",
+        "mean_error": 0.95,
+        "max_error": 1.82,
+        "severity": "major"
+      },
+      {
+        "joint": "left_knee",
+        "mean_error": 0.81,
+        "max_error": 1.65,
+        "severity": "major"
+      },
+      {
+        "joint": "right_shoulder",
+        "mean_error": 0.71,
+        "max_error": 1.38,
+        "severity": "major"
+      }
+    ],
+    "moderate": [
+      {
+        "joint": "left_shoulder",
+        "mean_error": 0.62,
+        "max_error": 1.14,
+        "severity": "moderate"
+      },
+      {
+        "joint": "left_hip",
+        "mean_error": 0.38,
+        "max_error": 0.71,
+        "severity": "moderate"
+      },
+      {
+        "joint": "right_hip",
+        "mean_error": 0.38,
+        "max_error": 0.71,
+        "severity": "moderate"
+      },
+      {
+        "joint": "nose",
+        "mean_error": 0.37,
+        "max_error": 0.63,
+        "severity": "moderate"
+      }
+    ],
+    "minor": [
+      {
+        "joint": "left_eye",
+        "mean_error": NaN,
+        "max_error": NaN,
+        "severity": "minor"
+      },
+      {
+        "joint": "right_eye",
+        "mean_error": NaN,
+        "max_error": NaN,
+        "severity": "minor"
+      },
+      {
+        "joint": "left_ear",
+        "mean_error": NaN,
+        "max_error": NaN,
+        "severity": "minor"
+      },
+      {
+        "joint": "right_ear",
+        "mean_error": NaN,
+        "max_error": NaN,
+        "severity": "minor"
+      }
+    ]
+  },
+  "phase_analysis": {
+    "early": {
+      "quality": "Poor",
+      "mean_error": 1.38,
+      "dominant_joints": [
+        {
+          "joint": "right_ankle",
+          "error": 2.31
+        },
+        {
+          "joint": "right_wrist",
+          "error": 2.0
+        },
+        {
+          "joint": "right_knee",
+          "error": 1.67
+        }
+      ]
+    },
+    "mid": {
+      "quality": "Fair",
+      "mean_error": 0.77,
+      "dominant_joints": [
+        {
+          "joint": "left_wrist",
+          "error": 1.22
+        },
+        {
+          "joint": "right_ankle",
+          "error": 1.2
+        },
+        {
+          "joint": "right_wrist",
+          "error": 1.13
+        }
+      ]
+    },
+    "late": {
+      "quality": "Good",
+      "mean_error": 0.38,
+      "dominant_joints": [
+        {
+          "joint": "left_wrist",
+          "error": 0.83
+        },
+        {
+          "joint": "right_ankle",
+          "error": 0.68
+        },
+        {
+          "joint": "left_elbow",
+          "error": 0.54
+        }
+      ]
+    }
+  },
+  "temporal_trend": {
+    "pattern": "improving",
+    "early_mean_error": 1.38,
+    "mid_mean_error": 0.77,
+    "late_mean_error": 0.38
+  },
+  "thresholds_used": {
+    "joint_tier_high": 0.7,
+    "joint_tier_medium": 0.3,
+    "phase_excellent": 0.3,
+    "phase_good": 0.5,
+    "phase_fair": 0.8,
+    "stability_threshold": 0.1,
+    "score_excellent": 90,
+    "score_good": 75,
+    "score_fair": 60,
+    "top_n_joints_per_phase": 3
+  }
+}

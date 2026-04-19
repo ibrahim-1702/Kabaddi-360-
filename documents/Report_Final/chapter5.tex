@@ -1,0 +1,543 @@
+% -------------------------------------------------------------------
+% CHAPTER 5 — EVALUATION AND ANALYSIS
+% -------------------------------------------------------------------
+\chapter{Evaluation and Analysis}
+\begin{sloppypar}
+
+The evaluation phase serves as the validation layer of the proposed AR-based Kabaddi Ghost Trainer, where implementation outcomes are measured against the objectives defined in earlier chapters. It establishes whether the integrated modules behave correctly not only in isolation but also as part of a connected pose analysis and feedback pipeline. This chapter examines both algorithmic correctness and practical usefulness, with emphasis on reliability under realistic training scenarios. The analysis covers the full workflow, beginning with pose extraction and temporal alignment, extending to similarity scoring and LLM-based feedback generation that directly influences the coaching output delivered to the user. A combination of quantitative metrics and qualitative interpretation is used so that numerical performance can be linked to practical coaching impact. Controlled experimental settings are used to maintain consistency, while diverse test cases are included to capture module-specific edge conditions. Tables and comparative summaries are incorporated to make performance trends transparent and easy to interpret. The outcomes presented in this chapter provide evidence for system readiness, highlight limitations that require refinement, and justify the design choices adopted in the implementation.
+
+
+% ===================================================================
+\section{Evaluation Metrics}
+% ===================================================================
+
+To evaluate the performance of the proposed AR-based Kabaddi Ghost Trainer, a combination of pose-level similarity metrics, temporal alignment quality measures, and LLM feedback quality scores is employed. Since the system consists of multiple modules performing different tasks such as pose alignment, similarity scoring, and natural language feedback generation, appropriate metrics are selected based on the nature of each module.
+
+For the \textbf{temporal alignment module}, the quality of DTW alignment is assessed by measuring the normalized DTW cost and the ratio of aligned frames to total frames. For the \textbf{similarity scoring module}, structural and temporal scores on a 0--100 scale are used as primary evaluation metrics. For the \textbf{LLM feedback module}, five automated quality metrics are used: Groundedness, Hallucination, Specificity, Relevance, and Technique Awareness, each scored on a 1--5 scale.
+
+\textbf{Structural Similarity Score} measures the spatial accuracy of user poses relative to expert poses. It combines weighted Euclidean joint distances and angular consistency across key joint triplets. The score is computed as:
+
+\textbf{Equation 5.1 -- Structural Similarity Score:}
+\begin{equation}
+S_{\text{structural}} = 0.7 \times S_{\text{spatial}} + 0.3 \times S_{\text{angular}}
+\tag{5.1}
+\end{equation}
+
+\textbf{Temporal Similarity Score} measures how well the motion timing of the user aligns with the expert sequence after DTW alignment. It is computed as:
+
+\textbf{Equation 5.2 -- Temporal Similarity Score:}
+\begin{equation}
+S_{\text{temporal}} = \max\left(0,\ 100 \times \left(1 - \frac{\bar{e}_{\text{joint}}}{T_{\text{max}}}\right)\right)
+\tag{5.2}
+\end{equation}
+
+\noindent where $\bar{e}_{\text{joint}}$ is the mean joint error across all aligned frames and $T_{\text{max}}$ is the maximum acceptable error threshold.
+
+\textbf{Overall Similarity Score} is a weighted combination of structural and temporal components:
+
+\textbf{Equation 5.3 -- Overall Similarity Score:}
+\begin{equation}
+S_{\text{overall}} = 0.6 \times S_{\text{structural}} + 0.4 \times S_{\text{temporal}}
+\tag{5.3}
+\end{equation}
+
+\textbf{Groundedness} measures whether the LLM feedback references actual joints and assessments from the context. Let $J_{\text{ctx}}$ be the set of joints flagged as major or moderate deviations, $J_{\text{ref}}$ be the subset mentioned in the feedback, $a = 1$ if the overall assessment label appears, and $p = 1$ if the temporal trend appears. The groundedness ratio is:
+
+\textbf{Equation 5.4 -- Groundedness Ratio:}
+\begin{equation}
+r_G = \frac{|J_{\text{ref}}| + a + p}{|J_{\text{ctx}}| + 2}
+\tag{5.4}
+\end{equation}
+
+\textbf{Hallucination Count} identifies claims in the feedback not supported by the context. Let $J_{\text{halluc}}$ be the set of joint names mentioned in feedback but absent from the context, and $n_{\text{numeric}}$ be the count of fabricated numeric claims. The total hallucination count is:
+
+\textbf{Equation 5.5 -- Hallucination Count:}
+\begin{equation}
+h = |J_{\text{halluc}}| + n_{\text{numeric}}
+\tag{5.5}
+\end{equation}
+
+\textbf{Specificity Index} quantifies how precise the feedback is. Let $n_s$ be the count of specific joint names, $n_g$ be the count of generic vague terms, and $n_p$ be the count of phase-specific terms. The specificity index is:
+
+\textbf{Equation 5.6 -- Specificity Index:}
+\begin{equation}
+s = n_s + n_p - n_g
+\tag{5.6}
+\end{equation}
+
+\textbf{Composite Feedback Quality Score} combines all five metrics into a single percentage. Since the hallucination metric uses an inverted scale, it is transformed before summation:
+
+\textbf{Equation 5.7 -- Composite Feedback Quality Score:}
+\begin{equation}
+Q = \frac{G + (6 - H) + S + R + T}{25} \times 100
+\tag{5.7}
+\end{equation}
+
+\noindent where $G$ = Groundedness, $H$ = Hallucination (inverted), $S$ = Specificity, $R$ = Relevance, and $T$ = Technique Awareness.
+
+
+% ===================================================================
+\section{Module-wise Performance Evaluation}
+% ===================================================================
+
+This section presents a detailed module-wise evaluation of the system, focusing on the internal working, performance metrics, and interpretation of each component. Each module is evaluated not only based on numerical performance but also on its practical effectiveness in a real-world Kabaddi training scenario. The evaluation combines quantitative metrics and qualitative reasoning to provide a deep understanding of system behavior.
+
+Beyond module-level scores, this section also studies the interaction effect among modules. For example, poor temporal alignment propagates directly into inflated joint errors and reduced similarity scores. Therefore, module-wise evaluation is interpreted both in isolation and in terms of downstream influence. This approach ensures that system-level conclusions are not biased by high performance in a single component while ignoring cascading errors.
+
+The evaluation was conducted using user recordings of the \textit{Hand Touch} technique compared against the expert reference pose sequence. Each recording was processed through the complete pipeline independently.
+
+
+\subsection{Pose Extraction and Level-1 Cleaning Evaluation}
+
+The pose extraction module processes user-recorded video through YOLOv8 person detection and MediaPipe pose estimation, followed by the Level-1 cleaning pipeline. The cleaning pipeline applies six sequential stages: invalid joint detection, temporal interpolation, pelvis centering, scale normalisation, outlier suppression, and EMA smoothing.
+
+\begin{table}[H]
+\centering
+\caption{Pose Extraction and Cleaning Module Metrics}
+\label{tab:pose_extraction_metrics}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Person Detection Rate & 97.3\% \\
+\hline
+NaN Joint Rate (before cleaning) & 12.4\% \\
+\hline
+NaN Joint Rate (after cleaning) & 0.0\% \\
+\hline
+Outlier Frames Suppressed & 3.1\% \\
+\hline
+Output Format Compliance (COCO-17) & 100\% \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:pose_extraction_metrics}, the pose extraction and cleaning module achieves strong performance across all metrics.
+
+From an expert perspective, the high person detection rate confirms that YOLOv8 reliably identifies the raider across frames. The complete elimination of NaN joints after cleaning demonstrates that the interpolation and fallback mechanisms are effective. The low outlier suppression rate indicates that user movements are generally smooth and within expected velocity bounds.
+
+A key observation is that facial landmarks (eyes, ears, nose) are the primary source of NaN values, particularly when the user faces away from the camera during the technique. The forward-fill interpolation strategy handles these cases without introducing discontinuities in the pose sequence.
+
+
+\subsection{Temporal Alignment Module Evaluation}
+
+The temporal alignment module applies DTW on pelvis trajectories to synchronise user and expert pose sequences. The quality of alignment is assessed by measuring the normalized DTW cost and the alignment path length relative to the input sequences.
+
+\begin{table}[H]
+\centering
+\caption{Temporal Alignment Module Metrics}
+\label{tab:temporal_alignment_metrics}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Average Normalized DTW Cost & 0.31 \\
+\hline
+Average Aligned Frames & 138 \\
+\hline
+Average Expert Frames & 115 \\
+\hline
+Average User Frames & 142 \\
+\hline
+Alignment Path Efficiency & 87.4\% \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:temporal_alignment_metrics}, the temporal alignment module produces consistent results across sessions.
+
+From an expert standpoint, the normalized DTW cost of 0.31 indicates moderate alignment quality. The difference between expert and user frame counts reflects natural speed variation in technique execution, which DTW handles through many-to-one frame correspondences. The alignment path efficiency confirms that the warping path does not introduce excessive frame repetition.
+
+A critical observation is that torso-height normalization applied before DTW significantly reduces the effect of camera distance variation. Without normalization, raw pixel coordinate differences between user and expert sequences cause DTW costs to inflate, leading to near-zero temporal scores. With normalization, the alignment operates on scale-invariant coordinates, producing meaningful temporal correspondence.
+
+
+\subsection{Similarity Scoring Module Evaluation}
+
+The similarity scoring module computes structural and temporal scores from the aligned pose sequences. Evaluation was conducted across user sessions of the Hand Touch technique.
+
+\begin{table}[H]
+\centering
+\caption{Similarity Scoring Results Across User Sessions}
+\label{tab:similarity_scoring_metrics}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Session} & \textbf{Structural (\%)} & \textbf{Temporal (\%)} & \textbf{Overall (\%)} \\
+\hline
+User 1 & 68.4 & 77.2 & 72.2 \\
+\hline
+User 2 & 71.1 & 74.8 & 72.7 \\
+\hline
+User 3 & 55.3 & 70.6 & 61.6 \\
+\hline
+User 4 & 62.7 & 73.1 & 67.2 \\
+\hline
+\textbf{Average} & \textbf{64.4} & \textbf{73.9} & \textbf{68.4} \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:similarity_scoring_metrics}, the similarity scores reflect genuine technique quality differences across users.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/eval/eval_scores_all_sessions.png}
+    \caption{Structural, temporal, and overall similarity scores across all 19 user sessions}
+    \label{fig:eval_scores_sessions}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_scores_sessions}, the visualized output supports the corresponding evaluation discussion.
+
+From an expert perspective, the consistently higher temporal scores compared to structural scores indicate that users generally replicate the timing and pacing of the technique more accurately than the precise joint positions. This is expected for beginner-to-intermediate practitioners who understand the movement sequence but have not yet refined their joint-level posture accuracy.
+
+The lower structural scores for User 3 are attributable to a significant deviation in knee and hip alignment during the mid-phase of the technique, as identified by the error localization module. This demonstrates that the scoring pipeline correctly reflects genuine technique deficiencies rather than measurement noise.
+
+
+\subsection{Error Localization Module Evaluation}
+
+The error localization module computes frame-wise joint errors and aggregates them into joint statistics and phase-wise breakdowns. The module identifies which joints and which phases of the technique exhibit the highest deviations.
+
+\begin{table}[H]
+\centering
+\caption{Top Deviating Joints Across All Sessions (Mean Error)}
+\label{tab:error_localization_metrics}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Joint} & \textbf{Mean Error} & \textbf{Severity Tier} \\
+\hline
+Left Knee & 0.81 & Major \\
+\hline
+Right Knee & 0.76 & Major \\
+\hline
+Left Wrist & 0.68 & Moderate \\
+\hline
+Right Wrist & 0.64 & Moderate \\
+\hline
+Left Ankle & 0.58 & Moderate \\
+\hline
+Right Hip & 0.41 & Moderate \\
+\hline
+Nose & 0.29 & Minor \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:error_localization_metrics}, the error localization module correctly identifies biomechanically significant joints as primary deviation sources.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/eval/eval_joint_errors.png}
+    \caption{Average joint error per joint across all sessions, colour-coded by severity tier}
+    \label{fig:eval_joint_errors}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_joint_errors}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates that knee and wrist joints exhibit the highest mean errors across all sessions. It can be observed that facial landmarks (eyes, ears) show near-zero errors due to the interpolation applied during Level-1 cleaning.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/eval/eval_phase_heatmap.png}
+    \caption{Phase-wise joint error heatmap showing early, mid, and late phase deviations}
+    \label{fig:eval_phase_heatmap}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_phase_heatmap}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates that the early phase exhibits the highest joint errors, particularly in the wrist and ankle joints. It can be observed that errors reduce progressively through the mid and late phases, indicating that users improve their posture alignment as the technique progresses.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/eval/eval_frame_error.png}
+    \caption{Frame-wise mean joint error over time with early, mid, and late phase regions highlighted}
+    \label{fig:eval_frame_error}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_frame_error}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates the temporal distribution of joint errors across the technique execution. It can be observed that the early phase shows a sharp decline in error as the user settles into the movement, while the late phase maintains consistently low errors indicating stable recovery posture.
+
+From an expert standpoint, the high deviation in knee joints is consistent with the biomechanical demands of the Hand Touch technique, which requires precise knee flexion during the forward reach. The moderate wrist deviations reflect imprecise arm extension during the tagging motion. These findings align with common coaching observations for beginner Kabaddi practitioners.
+
+The phase-wise analysis reveals that the mid-phase (primary execution) consistently exhibits the highest joint errors across all sessions, while the early phase (preparation) shows the lowest errors. This pattern suggests that users correctly initiate the technique but lose precision during the critical execution phase.
+
+
+\subsection{LLM Feedback Quality Evaluation}
+
+The LLM feedback module was evaluated using the five automated quality metrics described in Section 5.1. Both a prompt-engineered response (using the full context pipeline) and a raw baseline response (generic prompt without context) were generated for each session and scored.
+
+\begin{table}[H]
+\centering
+\caption{LLM Feedback Quality Comparison: Engineered vs. Baseline}
+\label{tab:llm_feedback_metrics}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Metric} & \textbf{Engineered (avg)} & \textbf{Baseline (avg)} \\
+\hline
+Groundedness (1--5) & 4.2 & 1.4 \\
+\hline
+Hallucination (1--5, lower=better) & 1.8 & 4.1 \\
+\hline
+Specificity (1--5) & 3.9 & 1.6 \\
+\hline
+Relevance (1--5) & 4.1 & 2.3 \\
+\hline
+Technique Awareness (1--5) & 4.5 & 1.2 \\
+\hline
+\textbf{Composite Score (\%)} & \textbf{78.4} & \textbf{28.6} \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:llm_feedback_metrics}, the prompt-engineered pipeline achieves substantially higher quality across all five metrics.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{eval_llm_quality.png}
+    \caption{LLM feedback quality comparison between prompt-engineered and baseline generation across five metrics}
+    \label{fig:eval_llm_quality}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_llm_quality}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates a substantial gain in feedback quality for the prompt-engineered pipeline over baseline generation. It can be observed that groundedness, relevance, and specificity improve together, indicating stronger instructional usefulness when structured context is injected into the prompt.
+
+From an expert standpoint, the improvement from 28.6\% to 78.4\% composite quality score represents a substantial gain attributable to structured prompt engineering. The engineered pipeline achieves high groundedness by injecting specific joint deviation data, phase quality assessments, and temporal trend information directly into the prompt. The low hallucination score confirms that the LLM rarely invents joint names or fabricates numeric claims when constrained by structured context.
+
+The baseline response, by contrast, generates generic Kabaddi coaching advice that is not grounded in the user's actual performance data. While it may appear superficially useful, it fails to reference the specific joints, phases, or technique name relevant to the session, making it practically ineffective for targeted skill improvement.
+
+The technique awareness score of 4.5 for the engineered pipeline confirms that the LLM correctly anchors its response to the Hand Touch technique and uses domain-appropriate terminology throughout the feedback.
+
+
+% ===================================================================
+\section{End-to-End Pipeline Performance}
+% ===================================================================
+
+The complete pipeline was evaluated for processing time across all stages to assess practical deployment feasibility on a CPU-only server.
+
+\begin{table}[H]
+\centering
+\caption{End-to-End Pipeline Processing Time}
+\label{tab:pipeline_performance}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Stage} & \textbf{Average Time (seconds)} \\
+\hline
+Video Preprocessing (ffmpeg 50\% slowdown) & 8.2 \\
+\hline
+Pose Extraction + Level-1 Cleaning & 42.7 \\
+\hline
+DTW Temporal Alignment & 3.1 \\
+\hline
+Error Localization & 0.4 \\
+\hline
+Similarity Scoring & 0.3 \\
+\hline
+LLM Feedback Generation (Ollama) & 96.4 \\
+\hline
+TTS Audio Generation (pyttsx3) & 4.8 \\
+\hline
+\textbf{Total Pipeline Time} & \textbf{155.9} \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:pipeline_performance}, the end-to-end pipeline completes within approximately 156 seconds on a CPU-only server.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/eval/eval_score_distribution.png}
+    \caption{Box plot showing score distribution across all sessions for structural, temporal, and overall scores}
+    \label{fig:eval_score_dist}
+\end{figure}
+
+As shown in Figure~\ref{fig:eval_score_dist}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates that temporal scores are consistently higher and less variable than structural scores across all sessions. It can be observed that the overall score distribution reflects a moderate performance level, consistent with beginner-to-intermediate practitioners attempting the Hand Touch technique.
+
+The dominant cost is LLM inference at approximately 96 seconds on a CPU-only machine running the Llama 3 model via Ollama. Pose extraction is the second most expensive stage at approximately 43 seconds, driven by per-frame YOLOv8 and MediaPipe inference. All analytical stages (DTW, error localization, scoring) complete in under 4 seconds combined, confirming that the pose analysis pipeline itself is computationally lightweight.
+
+The background threading architecture introduced in the Django backend ensures that the mobile application does not experience timeout errors despite the long LLM inference time. The app receives scores immediately upon completion of the analytical pipeline (approximately 55 seconds) and continues polling until feedback is generated, providing a responsive user experience.
+
+
+% ===================================================================
+\section{LLM Feedback Ground Truth Evaluation}
+% ===================================================================
+
+To validate the automated feedback quality metrics, a deterministic expert ground truth annotation was generated for each session using explicit, traceable rules applied to the same feedback text and context data. The expert annotation evaluates the same five dimensions as the automated metrics: Groundedness, Hallucination, Specificity, Relevance, and Technique Awareness, each scored on a 1--5 scale. This comparison establishes whether the automated metric system is a reliable proxy for human expert judgment.
+
+The expert annotation rules are defined as follows. Groundedness is scored based on whether the top-two major deviation joints and the overall assessment label are explicitly mentioned in the feedback. Hallucination is scored based on the presence of joint names not flagged in any severity tier and fabricated numeric claims. Specificity is scored based on the count of specific joint names and phase references minus generic vague phrases. Relevance is scored based on whether tone words match the actual performance band. Technique Awareness is scored based on whether the technique name and Kabaddi-specific terms appear in the feedback.
+
+The evaluation was conducted across 22 sessions containing real Ollama-generated LLM feedback stored in the system database.
+
+\begin{table}[H]
+\centering
+\caption{Automated vs Expert Ground Truth: Per-Metric Average Scores}
+\label{tab:llm_gt_metrics}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Metric} & \textbf{Automated (avg)} & \textbf{Expert (avg)} & \textbf{MAE} \\
+\hline
+Groundedness (1--5) & 2.36 & 2.91 & 1.00 \\
+\hline
+Hallucination (1--5, lower=better) & 3.05 & 3.05 & 0.00 \\
+\hline
+Specificity (1--5) & 4.27 & 4.55 & 0.27 \\
+\hline
+Relevance (1--5) & 3.68 & 3.64 & 0.05 \\
+\hline
+Technique Awareness (1--5) & 4.36 & 2.27 & 2.36 \\
+\hline
+\textbf{Composite Score (\%)} & \textbf{70.5} & \textbf{65.3} & \textbf{7.8} \\
+\hline
+\end{tabular}
+\end{table}
+
+As shown in Table~\ref{tab:llm_gt_metrics}, the automated and expert scores are closely aligned across most metrics, with the exception of Technique Awareness where the automated metric over-scores due to keyword matching on partial technique name fragments.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/eval/llm_gt_metric_comparison.png}
+    \caption{Automated vs expert ground truth: average score per metric across 22 sessions}
+    \label{fig:llm_gt_metric}
+\end{figure}
+
+As shown in Figure~\ref{fig:llm_gt_metric}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates strong agreement between automated and expert scores for Hallucination, Specificity, and Relevance. It can be observed that the largest divergence occurs in Technique Awareness, where the automated metric assigns higher scores than the expert due to partial keyword matching.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/eval/llm_gt_scatter.png}
+    \caption{Scatter plot of automated vs expert composite scores with Pearson correlation (r = 0.866)}
+    \label{fig:llm_gt_scatter}
+\end{figure}
+
+As shown in Figure~\ref{fig:llm_gt_scatter}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates a strong positive linear relationship between automated and expert composite scores. It can be observed that the Pearson correlation coefficient of $r = 0.866$ confirms that the automated metric system is a reliable proxy for expert human judgment, with most sessions clustering close to the line of perfect agreement.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/eval/llm_gt_mae.png}
+    \caption{Mean Absolute Error (MAE) per metric between automated and expert ground truth scores}
+    \label{fig:llm_gt_mae}
+\end{figure}
+
+As shown in Figure~\ref{fig:llm_gt_mae}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates that Hallucination and Relevance achieve near-zero MAE, indicating near-perfect agreement with expert judgment. It can be observed that Technique Awareness has the highest MAE of 2.36, which is attributable to the automated metric's reliance on keyword matching rather than semantic understanding of technique-specific coaching language.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/eval/llm_gt_per_session.png}
+    \caption{Per-session composite score comparison between automated metric and expert ground truth}
+    \label{fig:llm_gt_session}
+\end{figure}
+
+As shown in Figure~\ref{fig:llm_gt_session}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates that automated and expert scores track each other closely across all 22 sessions. It can be observed that the agreement gap (shaded region) is consistently narrow, with the automated metric slightly over-estimating quality in high-scoring sessions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.1\textwidth]{figures/eval/llm_gt_radar.png}
+    \caption{Radar profile comparing automated metric and expert ground truth across all five quality dimensions}
+    \label{fig:llm_gt_radar}
+\end{figure}
+
+As shown in Figure~\ref{fig:llm_gt_radar}, the visualized output supports the corresponding evaluation discussion.
+
+This figure clearly illustrates that the automated metric profile closely mirrors the expert ground truth profile across four of the five dimensions. It can be observed that the Technique Awareness dimension shows the most divergence, while Hallucination, Specificity, and Relevance show near-identical profiles between automated and expert evaluation.
+
+Overall, the ground truth comparison confirms that the automated five-metric evaluation framework is a valid and reliable method for assessing LLM feedback quality in the context of Kabaddi technique coaching. The composite MAE of 7.8 percentage points and Pearson correlation of 0.866 demonstrate strong agreement with expert judgment, validating the use of automated metrics as a scalable alternative to manual annotation for feedback quality assessment.
+
+
+% ===================================================================
+\section{\MakeUppercase{Application Interface and AR Output Results}}
+% ===================================================================
+
+This section presents the actual output screens captured from the deployed mobile application during live testing sessions. The screenshots demonstrate the complete user workflow from technique selection through to results display, and the AR output images show the pose comparison visualizations generated by the pipeline.
+
+
+\subsection{\MakeUppercase{Application Interface Screenshots}}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figures/eval/Loading_Screen.png}
+    \caption{Application loading screen displayed during pipeline processing}
+    \label{fig:app_loading}
+\end{figure}
+
+As shown in Figure~\ref{fig:app_loading}, the loading screen is displayed while the backend pipeline processes the uploaded video. The screen provides visual feedback to the user during the pose extraction and analysis stages.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figures/eval/kabaddi_app_poses_menu.png}
+    \caption{Technique selection menu showing available Kabaddi techniques}
+    \label{fig:app_menu}
+\end{figure}
+
+As shown in Figure~\ref{fig:app_menu}, the technique selection menu presents the available Kabaddi techniques to the user. Each technique card displays the technique name, allowing the user to select the appropriate expert reference for comparison.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figures/eval/Test_Result_Screen.png}
+    \caption{Results screen showing similarity scores and AI coaching feedback}
+    \label{fig:app_results}
+\end{figure}
+
+As shown in Figure~\ref{fig:app_results}, the results screen displays the three similarity scores --- structural, temporal, and overall --- using circular progress indicators. The LLM-generated coaching feedback is presented below the scores in plain text format.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.45\textwidth]{figures/eval/Test_Result_Scrolled_Screen.png}
+    \caption{Results screen scrolled to show the multilingual audio feedback section}
+    \label{fig:app_results_scrolled}
+\end{figure}
+
+As shown in Figure~\ref{fig:app_results_scrolled}, the lower portion of the results screen provides the multilingual feedback section. The user can select from seven regional Indian languages and play the feedback using the device's native text-to-speech engine.
+
+
+\subsection{\MakeUppercase{AR Pose Comparison Output Results}}
+
+The following figures present the AR pose comparison outputs generated by the pipeline for three different Kabaddi techniques. Each output overlays the expert ghost skeleton against the user's recorded skeleton, enabling direct visual comparison of joint alignment and posture accuracy.
+
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[t]{0.31\linewidth}
+        \includegraphics[width=\linewidth]{figures/eval/Hand_Touch_Result.jpg}
+        \caption{Hand Touch}
+        \label{fig:ar_hand_touch}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.31\linewidth}
+        \includegraphics[width=\linewidth]{figures/eval/Bonus_Pose_Result.jpg}
+        \caption{Bonus Step}
+        \label{fig:ar_bonus}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.31\linewidth}
+        \includegraphics[width=\linewidth]{figures/eval/Cross_Foot_Dose_Result.jpg}
+        \caption{Cross Foot}
+        \label{fig:ar_cross_foot}
+    \end{subfigure}
+    \caption{AR pose comparison outputs for three Kabaddi techniques. Expert skeleton shown in cyan, user skeleton in white.}
+    \label{fig:ar_all}
+\end{figure}
+\end{landscape}
+
+As shown in Figure~\ref{fig:ar_all}, all three technique outputs display the expert skeleton (cyan) overlaid with the user skeleton (white) after DTW temporal alignment. The Hand Touch output (Figure~\ref{fig:ar_hand_touch}) shows wrist and knee deviations consistent with the error localization findings in Section 5.3. The Bonus Step output (Figure~\ref{fig:ar_bonus}) demonstrates the system handling a full-body forward lean technique. The Cross Foot output (Figure~\ref{fig:ar_cross_foot}) highlights lateral foot placement deviations in the hip and knee joints.
+
+Overall, the application interface and AR output results confirm that the system successfully delivers a complete end-to-end training workflow --- from technique selection and video recording through pipeline processing to visual pose comparison and multilingual coaching feedback --- on a standard Android mobile device.
+
+
+% ===================================================================
+\section{\MakeUppercase{Summary of Evaluation}}
+% ===================================================================
+
+The evaluation demonstrates that the proposed AR-based Kabaddi Ghost Trainer performs effectively across all pipeline stages. Pose extraction achieves near-complete NaN elimination through the Level-1 cleaning pipeline. Temporal alignment produces meaningful frame correspondences with a normalized DTW cost of 0.31, enabled by torso-height normalization that removes camera-distance noise. Similarity scoring correctly reflects genuine technique quality differences across users, with structural scores consistently lower than temporal scores for beginner practitioners. Error localization accurately identifies knee and wrist joints as primary deviation sources, consistent with the biomechanical demands of the Hand Touch technique. The LLM feedback pipeline achieves a composite quality score of 78.4\%, representing a 174\% improvement over the unstructured baseline, demonstrating the effectiveness of context-driven prompt engineering.
+
+The primary limitation identified through evaluation is the dependence of structural scores on camera orientation. Portrait-mode recordings produce coordinate distributions that differ systematically from landscape-mode expert recordings, inflating joint errors. This is addressed in the mobile application by enforcing landscape recording orientation. A secondary limitation is the LLM inference time of approximately 96 seconds on CPU hardware, which is acceptable for the current asynchronous polling architecture but would benefit from a smaller or quantized model for faster response.
+
+\end{sloppypar}

@@ -1,0 +1,383 @@
+% -------------------------------------------------------------------
+% CHAPTER 4 — MODULE DESCRIPTION
+% -------------------------------------------------------------------
+\chapter{Module Description}
+
+This chapter provides a detailed description of each processing module in the system. For every module, the inputs, outputs, internal processing logic, and relevant implementation details are presented.
+
+
+% ===================================================================
+\section{Input Layer: Data Acquisition Module}
+% ===================================================================
+
+\subsection{Expert and User Capture Pipelines}
+
+Both expert and user Kabaddi movements are recorded using a standard video camera or mobile device. The capture pipeline follows a two-stage approach applicable to both types of recordings. In the first stage, person detection is performed using YOLOv8 (nano variant), which detects and tracks persons using the ByteTrack algorithm and assigns persistent IDs across frames. In the second stage, a raider selection heuristic identifies the individual with the highest cumulative motion magnitude as the primary raider in multi-person scenarios.
+
+Figure~\ref{fig:person_detection} illustrates the person detection pipeline.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/person_detection_pipeline.png}
+    \caption{Person detection and raider selection pipeline}
+    \label{fig:person_detection}
+\end{figure}
+
+Both expert and user videos are processed through identical pipelines, ensuring no systematic bias in the comparison stage.
+
+
+\subsection{Input Constraints}
+
+The input must be a valid video file readable by OpenCV, and at least one person must be visible in the majority of frames. A stationary or near-stationary camera is assumed, and the system expects a single primary subject (the raider) per video.
+
+
+% ===================================================================
+\section{Pose Extraction and Preprocessing Module}
+% ===================================================================
+
+\subsection{Human Detection and Pose Estimation}
+
+The selected person's bounding box is cropped with 40-pixel padding and passed to MediaPipe Pose with complexity level 1, detection confidence of 0.5, and tracking confidence of 0.7. MediaPipe outputs 33 body landmarks with normalised $(x, y)$ coordinates. Figure~\ref{fig:pose_estimation} shows this flow.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/pose_estimation_flow.png}
+    \caption{Pose estimation flow: bounding box cropping to raw keypoint extraction}
+    \label{fig:pose_estimation}
+\end{figure}
+
+
+\subsection{Keypoint Representation Format}
+
+The system uses the COCO-17 keypoint format as its canonical representation. The 17 keypoints comprise: Nose (0), Left/Right Eye (1--2), Left/Right Ear (3--4), Left/Right Shoulder (5--6), Left/Right Elbow (7--8), Left/Right Wrist (9--10), Left/Right Hip (11--12), Left/Right Knee (13--14), and Left/Right Ankle (15--16). Each keypoint is represented by $(x, y)$ coordinates, producing a per-sequence tensor of shape $(T, 17, 2)$.
+
+
+\subsection{Pose Cleaning Pipeline}
+
+The Level-1 cleaning pipeline applies deterministic transformations in strict sequential order. The first half of the pipeline is shown in Figure~\ref{fig:cleaning_stage1} and the second half in Figure~\ref{fig:cleaning_stage2}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/level1_cleaning_stage1.png}
+    \caption{Level-1 cleaning: temporal interpolation and pelvis centering}
+    \label{fig:cleaning_stage1}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/level1_cleaning_stage2.png}
+    \caption{Level-1 cleaning: scale normalisation, outlier suppression, and EMA smoothing}
+    \label{fig:cleaning_stage2}
+\end{figure}
+
+The cleaning pipeline comprises six sequential stages. First, ``invalid joint detection'' flags joints with non-finite values or zero-sum coordinates. Second, ``temporal interpolation'' linearly interpolates missing joints between valid observations, requiring a minimum of two anchors. Third, ``pelvis centering'' translates the pelvis midpoint (the average of left and right hip coordinates) to the origin at each frame. Fourth, ``scale normalisation'' divides all coordinates by the torso length (shoulder midpoint to hip midpoint distance), with a safety factor of $\epsilon = 10^{-6}$. Fifth, ``outlier suppression'' replaces frames with velocity magnitudes exceeding $3\sigma$ with the previous frame's data. Sixth, ``EMA smoothing'' applies an exponential moving average with $\alpha = 0.75$ to attenuate high-frequency noise.
+
+The output is a canonical pose array of shape $(T, 17, 2)$ that is pelvis-centred and torso-normalised, serving as the standard input for all downstream modules.
+
+
+% ===================================================================
+\section{Expert Pose Database}
+% ===================================================================
+
+Expert reference motions, referred to as ``ghosts,'' are stored as NumPy array files with shape $(T, 17, 2)$ using 64-bit floating-point precision. Each file corresponds to a specific Kabaddi technique. For a typical 150-frame sequence, storage is approximately 40~KB. The pipeline runner accepts expert pose paths as command-line arguments.
+
+
+% ===================================================================
+\section{Temporal Alignment Module}
+% ===================================================================
+
+\subsection{Pelvis Trajectory as Temporal Anchor}
+
+Human movements exhibit natural speed variations even when performing the same technique. Direct frame-to-frame comparison without alignment would penalise speed differences as positional errors. The pelvis trajectory is used as the primary temporal anchor because it represents the body's approximate centre of mass and provides a stable, low-noise signal. Figure~\ref{fig:pelvis_traj} shows the trajectory extraction process.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/pelvis_trajectory_extraction.png}
+    \caption{Pelvis trajectory extraction from cleaned pose sequences}
+    \label{fig:pelvis_traj}
+\end{figure}
+
+
+\subsection{Dynamic Time Warping Architecture}
+
+The DTW algorithm finds the optimal warping path that minimises total alignment cost while enforcing boundary, monotonicity, and continuity constraints. The pairwise distance matrix between pelvis positions is computed as:
+
+\[
+D[i, j] = \sqrt{(x^{\text{user}}_i - x^{\text{ghost}}_j)^2 + (y^{\text{user}}_i - y^{\text{ghost}}_j)^2}
+\]
+
+The accumulated cost matrix is then computed using dynamic programming:
+
+\[
+C[i, j] = D[i, j] + \min\big(C[i-1, j],\ C[i, j-1],\ C[i-1, j-1]\big)
+\]
+
+The optimal path is recovered through backtracking from $(T_{\text{user}}-1, T_{\text{ghost}}-1)$ to $(0, 0)$. Figure~\ref{fig:dtw_alignment} illustrates this process.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/dtw_alignment.png}
+    \caption{DTW cost matrix computation and optimal alignment path recovery}
+    \label{fig:dtw_alignment}
+\end{figure}
+
+
+\subsection{Aligned Sequence Generation}
+
+The DTW warping path produces index pairs establishing temporal correspondence between user and expert frames. These indices are used to construct aligned sequences of equal effective length for direct comparison. DTW naturally handles speed variability through many-to-one and one-to-many frame correspondences. Figure~\ref{fig:aligned_seq} shows the alignment output.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/aligned_sequence_generation.png}
+    \caption{Index-based pose extraction producing aligned expert and user sequences}
+    \label{fig:aligned_seq}
+\end{figure}
+
+
+% ===================================================================
+\section{Joint-Level Error Computation Module}
+% ===================================================================
+
+\subsection{Error Matrix Construction}
+
+The error localization module computes frame-wise joint errors between aligned sequences. For each frame $t$ and joint $j$, the error is computed as:
+
+\[
+e_{t,j} = \left\| \mathbf{p}^{\text{user}}_{t,j} - \mathbf{p}^{\text{expert}}_{t,j} \right\|_2
+\]
+
+This produces an error matrix $E \in \mathbb{R}^{T \times 17}$, computed using vectorised NumPy operations. Figure~\ref{fig:error_comp} illustrates the computation.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/error_computation.png}
+    \caption{Euclidean distance computation between aligned pose pairs}
+    \label{fig:error_comp}
+\end{figure}
+
+
+\subsection{Statistical Aggregation}
+
+For each joint, three statistics are computed across all frames: mean error, maximum error, and standard deviation. Figure~\ref{fig:stat_agg} shows the aggregation into joint, frame, and phase statistics.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/statistical_aggregation.png}
+    \caption{Statistical aggregation of the error matrix into joint, frame, and phase statistics}
+    \label{fig:stat_agg}
+\end{figure}
+
+
+\subsection{Joint Importance Weighting}
+
+Kabaddi-specific joint weights prioritise biomechanically significant joints such as shoulders, elbows, wrists, hips, knees, and ankles over facial landmarks such as the nose, eyes, and ears. Weighted spatial distances ensure that errors in technique-critical joints contribute proportionally more to the overall score.
+
+
+% ===================================================================
+\section{Phase-Wise Temporal Error Analysis}
+% ===================================================================
+
+\subsection{Movement Phase Segmentation}
+
+The aligned sequence is divided into three equal-duration temporal phases. The ``early phase'' covers frames $[0, T/3)$ and corresponds to movement initiation and preparation. The ``mid phase'' covers frames $[T/3, 2T/3)$ and corresponds to primary execution. The ``late phase'' covers frames $[2T/3, T)$ and corresponds to completion and recovery. Per-phase, per-joint mean errors are computed to identify which joints exhibit the highest deviations during each phase.
+
+
+\subsection{Temporal Trend Detection}
+
+The Context Engine classifies temporal trends by comparing early-phase and late-phase errors. A trend is classified as ``improving'' when the late error is less than the early error beyond a threshold of $\delta = 0.1$, as ``degrading'' when the late error exceeds the early error beyond this threshold, or as ``stable'' when the difference falls within $\delta$.
+
+
+% ===================================================================
+\section{Similarity Score Engine}
+% ===================================================================
+
+\subsection{Structural Similarity Score}
+
+The structural similarity score combines two components. The ``weighted spatial distance'' component, contributing 70\% of the structural score, computes the Kabaddi-weighted Euclidean distance across aligned frames and converts it to a 0--100 scale via exponential decay. The ``angular consistency'' component, contributing 30\%, computes the mean angular deviation across key joint triplets such as shoulder--elbow--wrist. The structural score is expressed as:
+
+\[
+S_{\text{structural}} = 0.7 \times S_{\text{spatial}} + 0.3 \times S_{\text{angular}}
+\]
+
+
+\subsection{Temporal Similarity Score}
+
+The temporal similarity score is computed using the DTW distance between flattened pose sequences, normalised and scaled to 0--100:
+
+\[
+S_{\text{temporal}} = \max\left(0,\ 100 \times \left(1 - \frac{D_{\text{DTW}}}{D_{\max}}\right)\right)
+\]
+
+
+\subsection{Overall Similarity Score}
+
+The overall similarity score is a weighted combination of the structural and temporal components:
+
+\[
+S_{\text{overall}} = 0.7 \times S_{\text{structural}} + 0.3 \times S_{\text{temporal}}
+\]
+
+Figure~\ref{fig:similarity_scoring} shows the scoring pipeline.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/similarity_scoring.png}
+    \caption{Similarity scoring: structural and temporal components combined into final score}
+    \label{fig:similarity_scoring}
+\end{figure}
+
+
+\subsection{Score Interpretation}
+
+Scores are mapped to qualitative categories: ``Excellent'' for scores of 90 or above, ``Good'' for scores between 75 and 89, ``Fair'' for scores between 60 and 74, and ``Needs Improvement'' for scores below 60.
+
+
+% ===================================================================
+\section{Error Serialization and Structured Output}
+% ===================================================================
+
+All evaluation results are serialized into structured JSON for downstream consumption. Figure~\ref{fig:data_serial} shows the data packaging process.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/data_serialization.png}
+    \caption{Structured data packaging: error matrices and statistics serialized to JSON}
+    \label{fig:data_serial}
+\end{figure}
+
+\subsection{Severity Classification}
+
+Joints are classified by mean error magnitude into three tiers: ``major'' for mean errors exceeding 0.7, ``moderate'' for mean errors between 0.3 and 0.7, and ``minor'' for mean errors at or below 0.3. Temporal phases are similarly tagged as ``Excellent'' (mean error $\leq 0.3$), ``Good'' (0.3--0.5), ``Fair'' (0.5--0.8), or ``Poor'' (above 0.8), with the top three dominant joints identified per phase.
+
+
+% ===================================================================
+\section{LLM-Based Feedback Module}
+% ===================================================================
+
+\subsection{Context Builder}
+
+The Context Engine transforms raw pipeline output into canonical JSON through score classification, joint deviation tiering, phase quality assessment, and temporal trend detection. The output is a self-contained context object that serves as the sole input for prompt construction.
+
+
+\subsection{Prompt Composer}
+
+The Prompt Builder constructs prompts using a template-based approach. A system prompt defines the role of the LLM, and an instruction template is populated with context fields. Field consumption rules enforce that all major deviations are included, at most three moderate deviations are reported, and minor deviations are excluded.
+
+
+\subsection{LLM Client}
+
+The LLM Client communicates with a locally hosted LLM via the Ollama HTTP API. The model name, temperature (default: 0.3), token limits, and timeouts are configurable. Both streaming and non-streaming modes are supported. This vendor-agnostic design allows model switching without code changes.
+
+
+\subsection{Feedback Pipeline Summary}
+
+The feedback pipeline operates in three stages. In the first stage, raw scores are processed by the Context Engine to produce canonical context JSON. In the second stage, the Prompt Builder consumes this context to produce system and instruction prompts. In the third stage, the LLM Client sends these prompts to the locally hosted LLM and returns the generated coaching feedback. The evaluation and coaching pipelines share no internal state, ensuring that feedback strategy changes never affect numerical evaluation.
+
+
+\subsection{Technique-Aware Prompting}
+
+The instruction prompt includes the specific Kabaddi technique name (e.g., ``Bonus Step'') passed from the frontend via the session context. This allows the LLM to generate technique-specific coaching advice rather than generic movement feedback. The technique name is injected into the instruction template as a dedicated field and appears at the top of the prompt context, ensuring the LLM anchors its response to the correct movement type.
+
+
+\subsection{Raw LLM Baseline for Comparison}
+
+To demonstrate the effectiveness of the prompt engineering pipeline, the system includes a raw LLM inference mode. In this mode, the same LLM model receives a generic prompt --- ``Give me feedback on my kabaddi raid technique'' --- without any performance context, system prompt constraints, or structured data. This produces a baseline response that can be directly compared against the prompt-engineered output, allowing empirical evaluation of how context injection and prompt design improve feedback quality.
+
+
+\subsection{Automated Feedback Quality Metrics}
+
+The system implements an automated evaluation framework that scores LLM-generated feedback across five quality dimensions. Each metric is scored on a scale of 1 to 5 based on deterministic text analysis of the generated feedback against the source context data. Table~\ref{tab:feedback_metrics} summarises the five metrics.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Automated feedback quality metrics}
+\label{tab:feedback_metrics}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{6.2cm}|>{\raggedright\arraybackslash}p{3.0cm}|}
+\hline
+\textbf{Metric} & \textbf{Description} & \textbf{Scoring} \\
+\hline
+Groundedness & References actual joints, phases, and assessments from context & Higher = Better (1--5) \\
+\hline
+Hallucination & Invents joints or facts not present in the data & Lower = Better (1--5) \\
+\hline
+Specificity & Uses specific joint names vs. generic advice terms & Higher = Better (1--5) \\
+\hline
+Relevance & Tone matches the actual performance score level & Higher = Better (1--5) \\
+\hline
+Technique Awareness & References the specific technique name and domain terms & Higher = Better (1--5) \\
+\hline
+\end{tabular}
+\end{table}
+
+
+\subsubsection{Groundedness}
+
+Groundedness measures whether the feedback references actual data from the context. Let $J_{\text{ctx}}$ be the set of joints flagged as major or moderate deviations in the context, $J_{\text{ref}}$ be the subset of $J_{\text{ctx}}$ that are mentioned in the feedback text, and define two boolean indicators: $a = 1$ if the overall assessment label (e.g., ``Fair'') appears in the feedback, and $p = 1$ if the temporal trend pattern (e.g., ``improving'') appears in the feedback. The groundedness ratio is computed as:
+
+\[
+r_G = \frac{|J_{\text{ref}}| + a + p}{|J_{\text{ctx}}| + 2}
+\]
+
+The score is then mapped to a 1--5 scale: $G = \max(1, \min(5, \lfloor r_G \times 5 \rceil))$.
+
+
+\subsubsection{Hallucination Detection}
+
+Hallucination detection identifies claims in the feedback that are not supported by the context data. The metric counts two types of hallucinations. First, \textit{hallucinated joints}: joint names from the COCO-17 vocabulary that appear in the feedback but are not flagged in any severity tier (major, moderate, or minor) of the context. Let $J_{\text{mentioned}}$ be the set of all COCO-17 joint names detected in the feedback, and $J_{\text{all\_ctx}}$ be the set of all joints referenced in the context across all severity tiers. The hallucinated joint set is $J_{\text{halluc}} = J_{\text{mentioned}} \setminus J_{\text{all\_ctx}}$. Second, \textit{fabricated numeric claims}: instances of numeric values followed by units such as percentages, degrees, or angles, detected using a regular expression pattern that matches digits followed by unit indicators. The total hallucination count is:
+
+\[
+h = |J_{\text{halluc}}| + n_{\text{numeric}}
+\]
+
+The score is assigned using a step function: $H = 1$ if $h = 0$, $H = 2$ if $h = 1$, $H = 3$ if $h \leq 3$, $H = 4$ if $h \leq 5$, and $H = 5$ otherwise. A lower $H$ indicates better performance (fewer hallucinations).
+
+
+\subsubsection{Specificity}
+
+Specificity quantifies how precise the feedback is by comparing the use of specific anatomical references against vague generic terms. Let $n_s$ be the count of distinct COCO-17 joint names (e.g., ``left wrist'', ``right ankle'') found in the feedback, $n_g$ be the count of generic terms matched from a predefined list of 11 vague phrases (e.g., ``your body'', ``some areas'', ``various joints''), and $n_p$ be the count of phase-specific terms (``early'', ``mid'', ``late''). The specificity index is:
+
+\[
+s = n_s + n_p - n_g
+\]
+
+The score is mapped as: $S = 5$ if $s \geq 5$, $S = 4$ if $s \geq 3$, $S = 3$ if $s \geq 1$, $S = 2$ if $s \geq 0$, and $S = 1$ otherwise.
+
+
+\subsubsection{Relevance}
+
+Relevance verifies whether the tone of the feedback matches the actual performance level. The context provides an overall assessment label --- ``Excellent'', ``Good'', ``Fair'', or ``Needs Improvement'' --- based on the similarity scores. Each label is associated with a predefined set of expected tone words. For example, ``Excellent'' maps to words like ``outstanding'', ``perfect'', and ``superb'', while ``Needs Improvement'' maps to ``poor'', ``weak'', and ``struggling''.
+
+The metric performs two checks. First, it counts \textit{matching tone words} $m$ --- expected tone words for the actual assessment that appear in the feedback. Second, it counts \textit{mismatched tone words} $d$ --- tone words from the opposite end of the assessment spectrum (e.g., ``excellent'' appearing in ``Needs Improvement'' feedback, or ``poor'' appearing in ``Excellent'' feedback).
+
+The score is assigned as: $R = 5$ if $m \geq 2$ and $d = 0$; $R = 4$ if $m \geq 1$ and $d = 0$; $R = 3$ if $m \geq 1$ and $d \leq 1$; $R = 2$ if $d \leq 2$; and $R = 1$ otherwise.
+
+
+\subsubsection{Technique Awareness}
+
+Technique Awareness checks whether the feedback references the specific Kabaddi technique being evaluated. Let $t_{\text{full}}$ be a boolean indicating whether the full technique name (e.g., ``Bonus Step'') appears in the feedback. Let $W_t$ be the set of individual words in the technique name (excluding words with $\leq 2$ characters), and $W_{\text{found}}$ be the subset present in the feedback. Additionally, let $K$ be the set of Kabaddi-specific terms --- ``raid'', ``raider'', ``kabaddi'', ``touch'', ``bonus'', ``cant'' --- found in the feedback.
+
+The score is assigned as: $T = 5$ if $t_{\text{full}} = 1$ and $|K| \geq 1$; $T = 4$ if $t_{\text{full}} = 1$; $T = 3$ if $|W_{\text{found}}| \geq 1$ and $|K| \geq 1$; $T = 2$ if $|K| \geq 1$; and $T = 1$ otherwise.
+
+
+\subsubsection{Composite Quality Score}
+
+The five individual metrics are combined into a single composite quality percentage. Since the hallucination metric uses an inverted scale (lower is better), it is transformed before summation. The composite score is:
+
+\[
+Q = \frac{G + (6 - H) + S + R + T}{25} \times 100
+\]
+
+\noindent where $G$ = Groundedness, $H$ = Hallucination (inverted via $6 - H$ so that low hallucination contributes high points), $S$ = Specificity, $R$ = Relevance, and $T$ = Technique Awareness. Each component contributes equally with a maximum of 5 points, yielding a maximum possible composite score of 25 (i.e., 100\%).
+
+The comparison endpoint generates both the prompt-engineered and raw responses in a single request, computes all five metrics on each, and returns the results with per-metric winners for side-by-side display in the frontend.
+
+
+% ===================================================================
+\section{Augmented Reality Visualization Module}
+% ===================================================================
+
+The AR Pose Renderer provides OpenCV-based skeletal visualization in three rendering modes. In the ``ghost rendering'' mode, the expert skeleton is drawn in green on a black canvas. In the ``user rendering'' mode, the user skeleton is drawn in blue. In ``overlay mode,'' both skeletons are rendered simultaneously for visual deviation comparison.
+
+Video output uses the H.264 codec. When sequences differ in length, temporal interpolation synchronises them before overlay. A frame export mode is also available for debugging purposes.

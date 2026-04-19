@@ -1,0 +1,37 @@
+Based on the following movement analysis context, generate coaching feedback for the user.
+
+## Technique
+- Technique Name: {technique_name}
+
+## Overall Performance
+- Overall: {overall_assessment}
+- Form/Technique (Structural): {structural_assessment}
+- Timing (Temporal): {temporal_assessment}
+
+## Primary Areas for Attention
+{major_deviations_list}
+{moderate_deviations_section}
+
+## Phase Breakdown
+- Early Phase: {early_quality}
+  Dominant joints: {early_dominant_joints}
+
+- Mid Phase: {mid_quality}
+  Dominant joints: {mid_dominant_joints}
+
+- Late Phase: {late_quality}
+  Dominant joints: {late_dominant_joints}
+
+## Progression
+Temporal trend: {temporal_pattern}
+
+---
+
+Generate constructive coaching feedback based on the above context.
+
+**IMPORTANT RULES:**
+- If "Overall" is "Excellent" AND "Primary Areas for Attention" is empty/shows "None", give ONLY positive feedback - DO NOT invent problems
+- If there ARE listed deviations under "Primary Areas", focus on those specific issues
+- Be phase-aware if quality varies across early/mid/late phases
+- Acknowledge the temporal trend
+- Keep it encouraging and actionable

@@ -1,0 +1,273 @@
+\chapter{\MakeUppercase{SYSTEM DESIGN}}
+\begin{sloppypar}
+
+This chapter presents the system design of the Intelligent Competitive Exam Platform with Personalized Test Series. The proposed system integrates multiple modules, including automated question structuring, semantic classification, difficulty modeling, personalized test generation, performance analytics, Recommendation Engine, AI-based mentoring, study planning, and dynamic current affairs generation within a unified architecture.
+
+As illustrated in Figure~\ref{fig:system_architecture}, the overall platform is organized as an end-to-end adaptive learning architecture.
+
+The system is designed as a structured and end-to-end learning workflow, where each module contributes to a specific stage of the preparation process. Standardized data formats ensure consistency in question handling, while semantic tagging enables accurate topic and subtopic classification. Difficulty levels are assigned using a hybrid approach, combining theoretical models with performance-based recalibration.
+
+The architecture incorporates performance-driven analytics and recommendation mechanisms to guide learners through appropriate difficulty progression. Additionally, AI-based components provide personalized feedback and study plans, enhancing the overall learning experience.
+
+By integrating both deterministic algorithms and AI-powered modules, the system ensures scalability, adaptability, and reliability.
+
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \vspace*{\fill}
+
+    \includegraphics[width=0.80\linewidth]{assets/exam_platform/architecture_final}
+
+    \vspace{10pt}
+    \caption{System Architecture Overview}
+    \label{fig:system_architecture}
+
+    \vspace*{\fill}
+\end{figure}
+\end{landscape}
+
+
+
+\section{\MakeUppercase{SYSTEM ARCHITECTURE OVERVIEW}}
+
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \vspace*{\fill}
+
+    \includegraphics[width=0.60\linewidth]{assets/exam_platform/3.1}
+
+    \vspace{10pt}
+    \caption{Layered System Architecture Overview}
+    \label{fig:system_architecture_3_1}
+
+    \vspace*{\fill}
+\end{figure}
+\end{landscape}
+
+The layered decomposition of the platform is presented in Figure~\ref{fig:system_architecture_3_1}.
+
+The platform follows a modular and layered architecture consisting of four primary layers: Input Layer, Processing Layer, Core Engine Layer, and Output Layer. The system is designed to ensure scalability, flexibility, and efficient handling of both static and dynamic data, while supporting seamless integration of AI-based components.
+
+The Input Layer is responsible for ingesting data into the system. It primarily handles Excel-based question uploads provided by teachers. Each file undergoes validation, schema verification, and data sanitization before being processed. The system supports batch uploads and ensures that only clean and structured data enters the pipeline.
+
+The Processing Layer performs semantic and structural transformations on the input data. It integrates Natural Language Processing techniques using Sentence-BERT (SBERT) to generate vector embeddings and perform topic and subtopic classification based on semantic similarity. A confidence-based mechanism is applied to ensure accuracy, and low-confidence cases are handled using a controlled LLM-based fallback approach. This layer also assigns initial difficulty levels using Bloom's Taxonomy
+
+
+
+.
+
+The Core Engine Layer contains the main business logic of the system. It manages personalized test generation, subtopic balancing, and performance analytics. A weighted rolling ability model is used to analyze student performance and recommend appropriate difficulty levels for future tests. This layer also coordinates modules such as the AI Mentor, study plan generator, and current affairs pipeline, ensuring smooth data flow and decision-making.
+
+The Output Layer is responsible for delivering results to end users. It provides role-based interfaces for students and teachers, including test interfaces, performance dashboards, personalized feedback reports, study plans, and current affairs tests. All outputs are structured in a standardized format for seamless frontend integration.
+
+Overall, the architecture ensures a clear separation of concerns, efficient data processing, and the integration of both deterministic logic and AI-driven components, enabling a scalable and intelligent exam preparation system.
+
+\section{\MakeUppercase{AUTHENTICATION AND USER MODULE}}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{assets/exam_platform/3.2}
+    \caption{Authentication and User Module}
+    \label{fig:auth_user_management}
+\end{figure}
+
+The authentication and access-control workflow is shown in Figure~\ref{fig:auth_user_management}.
+
+The system implements a secure and scalable authentication mechanism using JSON Web Tokens (JWT). Upon successful login, a signed token containing the user ID, role, and expiration time is generated and sent to the client. This token is included in the authorization header of subsequent requests, enabling stateless authentication and efficient session management.
+
+To ensure data security, user passwords are hashed using the bcrypt algorithm before storage. Bcrypt applies salting and multiple hashing rounds, making it resistant to brute-force attacks. The system strictly avoids storing plaintext passwords, and all password verifications are performed using secure comparison methods.
+
+The platform follows a role-based access control (RBAC) model with two primary roles: Teacher and Student. Each role has clearly defined permissions, enforced through middleware that validates authentication tokens and restricts access to authorized functionalities.
+
+Teachers are responsible for managing the question bank and overseeing the classification process. They can upload Excel files, review and verify automatically classified questions, modify classifications if necessary, and approve questions for use in test generation. Teachers also have access to analytics related to question usage and overall system performance.
+
+Students interact with the learning components of the system. They can generate personalized tests, attempt questions, and view detailed performance analytics, including topic-wise and difficulty-wise breakdowns. Additionally, students receive personalized recommendations, AI-generated feedback, study plans, and access to current affairs tests. Access to administrative functionalities is restricted to ensure system integrity.
+
+This authentication and user management design ensures secure access control, protects user data, and maintains a clear separation of responsibilities between different user roles.
+
+\section{\MakeUppercase{QUESTION MANAGEMENT AND WORKFLOW ORCHESTRATION}}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{assets/exam_platform/3.3}
+    \caption{Question Management and Workflow Orchestration}
+    \label{fig:question_workflow}
+\end{figure}
+
+As illustrated in Figure~\ref{fig:question_workflow}, this module design is integrated into the overall system workflow.
+
+The system implements a structured workflow for managing questions through multiple controlled states: Unprocessed, Classified, Review Required, Difficulty Tagged, Verified, and Deployed. This state-driven pipeline ensures quality control and prevents unverified or incorrectly classified questions from being used in student tests.
+
+Initially, when questions are uploaded through Excel files, they enter the Unprocessed state. The system then triggers the semantic classification pipeline using Sentence-BERT (SBERT), which converts each question into a 768-dimensional embedding. These embeddings are compared with precomputed embeddings of syllabus topics and subtopics using cosine similarity to determine the most relevant classification.
+
+If the similarity score exceeds a predefined confidence threshold (typically 0.75), the question is automatically assigned a topic and subtopic and moves to the Classified state. If the confidence is low, the question is moved to the Review Required state, where it can be manually reviewed by the teacher or processed using a controlled LLM-based fallback mechanism for improved classification.
+
+Following classification, the system assigns an initial difficulty level using Bloom's Taxonomy. Questions that test basic recall or understanding are categorized as Easy, those requiring application are marked as Medium, and those involving higher-order thinking such as analysis, evaluation, or creation are labeled as Hard. This rule-based tagging provides a theoretical baseline for difficulty.
+
+To ensure real-world accuracy, the system incorporates performance-based recalibration. After a sufficient number of student attempts, the difficulty level is adjusted based on actual performance metrics. Questions with high correctness rates are classified as Easy, moderate rates as Medium, and low correctness rates as Hard. This ensures that difficulty reflects actual student experience rather than only theoretical assumptions.
+
+Before deployment, teachers review the questions in the Difficulty Tagged state and verify both classification and difficulty levels. Only questions marked as Verified are moved to the Deployed state and made available for test generation.
+
+This workflow orchestration ensures data consistency, classification accuracy, and high-quality question delivery, forming a reliable foundation for personalized test generation and performance analysis.
+
+\section{\MakeUppercase{PERFORMANCE AND ANALYTICS MODULE}}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{assets/exam_platform/3.4}
+    \caption{Performance and Analytics Module}
+    \label{fig:performance_analytics}
+\end{figure}
+
+As illustrated in Figure~\ref{fig:performance_analytics}, this module design is integrated into the overall system workflow.
+
+The Performance and Analytics Module plays a crucial role in evaluating student progress and enabling adaptive learning. It computes comprehensive metrics that provide insights into student performance and support data-driven recommendations. The module analyzes overall accuracy, topic-wise performance, difficulty-wise accuracy, time management, and performance trends.
+
+Overall accuracy is calculated as the ratio of correctly answered questions to the total number of attempted questions across all tests. Topic-wise accuracy further breaks down performance across different subjects, helping identify strong and weak areas for focused improvement. Difficulty-wise performance evaluates accuracy across Easy, Medium, and Hard questions, providing insights into conceptual understanding and problem-solving ability.
+
+The module also incorporates time-based metrics, including average time per question, total time spent, and time efficiency. Efficient responses---where questions are answered correctly within optimal time---are given higher significance compared to responses that take excessive time, ensuring a balance between accuracy and speed.
+
+A key component of this module is the Weighted Rolling Ability Model, which dynamically calculates a student's ability score by combining recent and historical performance. The model assigns 50\% weight to the most recent test, 30\% to the average of the last five tests, and 20\% to cumulative performance. This ensures that recent trends are prioritized while maintaining overall stability.
+
+The ability score is further computed using weighted difficulty-wise accuracies, with higher importance given to harder questions (50\% for Hard, 30\% for Medium, and 20\% for Easy). This reflects the principle that solving more challenging questions is a stronger indicator of student capability.
+
+Based on the computed ability score, students are categorized into three ability levels: Low, Moderate, and High. These categories are used by the recommendation engine to adjust future test difficulty and guide personalized learning. Overall, this module provides a comprehensive and structured analysis framework that supports effective performance tracking and adaptive exam preparation.
+
+\section{\MakeUppercase{SWOT ANALYSIS MODULE}}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{assets/exam_platform/3.5}
+    \caption{SWOT Analysis Module}
+    \label{fig:swot_module}
+\end{figure}
+
+As illustrated in Figure~\ref{fig:swot_module}, this module design is integrated into the overall system workflow.
+
+The SWOT Analysis Module transforms quantitative performance data into meaningful qualitative insights to guide student learning. SWOT stands for Strengths, Weaknesses, Opportunities, and Threats, and is adapted in this system to provide structured and actionable feedback based on student performance metrics.
+
+Strengths are identified when a student's accuracy in specific topics or difficulty levels exceeds 70\%. These areas indicate strong understanding and consistent performance. The system highlights these strengths in feedback reports to reinforce confidence and encourage continued practice at higher difficulty levels.
+
+Weaknesses are identified when accuracy falls below 50\%, indicating gaps in understanding or insufficient practice. These areas are prioritized in recommendations, and the system suggests targeted practice with a higher proportion of Easy and Medium questions to rebuild foundational knowledge.
+
+Opportunities are detected through positive performance trends, particularly when a student's accuracy improves significantly over consecutive tests in a specific topic. These trends indicate learning progress, and the system encourages continued effort by gradually increasing the difficulty level to strengthen mastery.
+
+Threats are identified when there is a decline in performance, such as a noticeable drop in accuracy over multiple tests or consistently high time taken per question. These signals may indicate knowledge decay, inefficient problem-solving strategies, or difficulty mismatch. The system responds by recommending corrective actions such as concept revision, focused practice, or time-bound exercises.
+
+The SWOT analysis is presented in a structured and easy-to-understand format, linking each category with specific topics and performance indicators. This enables students to clearly understand their current learning status and make informed decisions about their preparation strategy. By combining performance data with strategic insights, the module enhances personalized learning and supports continuous improvement.
+
+\section{\MakeUppercase{INTELLIGENT DIFFICULTY RECOMMENDATION MODULE}}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{assets/exam_platform/3.6}
+    \caption{Intelligent Difficulty Recommendation Module}
+    \label{fig:difficulty_recommendation}
+\end{figure}
+
+As illustrated in Figure~\ref{fig:difficulty_recommendation}, this module design is integrated into the overall system workflow.
+
+The Intelligent Difficulty Recommendation Module determines the optimal difficulty distribution for future tests based on student ability scores and performance trends. The module follows the principle of the Zone of Proximal Development (ZPD), ensuring that students are consistently challenged at a level slightly above their current capability to promote effective learning without causing frustration.
+
+For High Ability students (ability score above 75), the system recommends a distribution of 10\% Easy, 40\% Medium, and 50\% Hard questions. This configuration emphasizes advanced problem-solving and mastery while maintaining a balance to ensure consistency and confidence.
+
+For Moderate Ability students (ability score between 50 and 75), the recommended distribution is 30\% Easy, 50\% Medium, and 20\% Hard. This balanced approach focuses on strengthening conceptual understanding through Medium-level questions, supported by foundational reinforcement and gradual exposure to higher difficulty.
+
+For Low Ability students (ability score below 50), the system recommends 60\% Easy, 30\% Medium, and 10\% Hard questions. This prioritizes building a strong foundation, reduces cognitive overload, and gradually introduces more complex problems.
+
+For new students without prior performance data, a diagnostic distribution of 40\% Easy, 40\% Medium, and 20\% Hard is used. This initial assessment helps the system evaluate the student's baseline ability and adjust future recommendations accordingly.
+
+The module also adapts recommendations based on performance trends. If a student shows consistent improvement, the system gradually increases the proportion of harder questions. Conversely, if performance declines, the system temporarily shifts towards easier questions to rebuild confidence and address knowledge gaps.
+
+Additionally, recommendations are generated at a topic-specific level, allowing the system to assign different difficulty distributions for different subjects based on individual performance. This ensures highly personalized and targeted learning, rather than a uniform approach.
+
+Overall, this module enables adaptive and progressive learning by continuously aligning test difficulty with student ability, thereby improving learning efficiency and long-term performance.
+
+\section{\MakeUppercase{LLM-BASED FEEDBACK AND MENTOR ARCHITECTURE}}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{assets/exam_platform/3.7}
+    \caption{LLM-Based Feedback and Mentor Architecture}
+    \label{fig:llm_mentor}
+\end{figure}
+
+As illustrated in Figure~\ref{fig:llm_mentor}, this module design is integrated into the overall system workflow.
+
+The LLM-Based Feedback and Mentor Module serves as an interpretive enhancement layer within the system, transforming structured performance data into personalized, human-readable guidance. While the core platform relies on deterministic analytics and performance models, this module leverages a Large Language Model (LLM) to generate meaningful insights and mentor-like feedback for students.
+
+After a test is completed, the system compiles structured inputs including overall accuracy, topic-wise and difficulty-wise performance, time management metrics, weighted ability score, ability category, and SWOT analysis results. These inputs are passed to a prompt builder, which generates a well-structured and controlled prompt to ensure consistency, relevance, and accuracy in the LLM response.
+
+The LLM processes this information and produces concise, actionable feedback. This includes summaries of strengths and weaknesses, identification of key focus areas, recommendations for difficulty progression, time management suggestions, and an overall indication of exam readiness. The feedback is designed to be clear, structured, and aligned with the student's actual performance data.
+
+Importantly, the LLM operates strictly as a supportive layer and does not influence core system logic. It does not modify difficulty levels, ability scores, or recommendation outputs. This separation ensures that all critical decisions remain deterministic and reliable, while the LLM enhances the interpretability and usability of results.
+
+To ensure system robustness, a fallback mechanism is implemented. If the LLM service is unavailable or fails to respond, the system automatically generates rule-based feedback using predefined templates and performance thresholds.
+
+This hybrid architecture combines the reliability of rule-based analytics with the adaptability of AI-generated insights, enabling the platform to provide personalized, mentor-like guidance while maintaining consistency, scalability, and control.
+
+
+\section{\MakeUppercase{STUDY PLAN GENERATOR}}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{assets/exam_platform/3.8}
+    \caption{Study Plan Generator}
+    \label{fig:study_plan}
+\end{figure}
+
+The study-plan construction workflow is shown in Figure~\ref{fig:study_plan}.
+
+The Study Plan Generator is designed to provide a structured and personalized learning schedule based on the student's performance, available preparation time, and exam requirements. This module transforms analytical insights into actionable daily tasks, ensuring disciplined and goal-oriented preparation.
+
+The system divides the preparation timeline into three phases: Learning, Practice, and Revision. The duration of each phase is dynamically allocated based on the total number of days available. Greater emphasis is placed on the learning phase initially, followed by practice and revision to reinforce concepts and improve retention.
+
+The module utilizes performance analytics to categorize topics into weak, moderate, and strong areas. Based on this classification, time allocation is adjusted, giving higher priority to weaker topics while maintaining consistent revision of stronger areas. A deterministic scheduling algorithm generates day-wise study plans, ensuring balanced topic coverage, proper difficulty progression, and efficient time utilization.
+
+In addition to scheduling, the module integrates controlled LLM-based support to generate strategic guidance such as study tips, weekly targets, and preparation strategies. However, the core schedule generation remains deterministic to ensure consistency and reliability.
+
+Overall, the Study Plan Generator enables personalized, structured, and phase-based preparation, helping students effectively manage their time and focus on areas that require improvement.
+
+\section{\MakeUppercase{CURRENT AFFAIRS ENGINE}}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{assets/exam_platform/3.9}
+    \caption{Current Affairs Engine}
+    \label{fig:current_affairs}
+\end{figure}
+
+The current-affairs pipeline is illustrated in Figure~\ref{fig:current_affairs}.
+
+The Current Affairs Engine is designed to provide dynamic and up-to-date practice content by generating multiple-choice questions from recent news data. This module ensures that students stay aligned with current events, which are a crucial component of many competitive examinations.
+
+The system fetches news articles from external APIs and applies filtering mechanisms to select relevant and high-quality content based on predefined criteria such as topic importance and informational value. Selected articles are then processed using a Large Language Model (LLM) to generate structured multiple-choice questions.
+
+Each generated question undergoes a validation process to ensure correctness, uniqueness, and adherence to exam standards. Invalid or low-quality questions are discarded, and retry mechanisms are used to maintain a minimum quality threshold.
+
+The module follows a pipeline-based architecture consisting of news fetching, filtering, question generation, validation, and database storage. A scheduler is integrated to enable automated daily execution of this pipeline. However, teacher control is maintained for final publishing to ensure content quality and reliability.
+
+By combining real-time data processing with AI-based question generation, the Current Affairs Engine provides continuously updated and exam-relevant content, enhancing the overall effectiveness and relevance of the platform.
+
+\section{\MakeUppercase{DATA STORAGE AND SECURITY}}
+
+All data in the system is stored in structured database collections, including user profiles, question repositories, test sessions, and performance analytics. The database design ensures efficient organization, scalability, and quick access to frequently used data.
+
+Security is enforced through multiple mechanisms. The system uses JWT-based authentication to manage secure user sessions and bcrypt hashing to protect user passwords. Role-based access control (RBAC) ensures that users can only access functionalities permitted for their roles, maintaining data integrity and system security.
+
+Input validation and sanitization are applied at all entry points to prevent malicious data injection. Additionally, audit logging mechanisms are implemented to track important system activities, enhancing transparency and accountability.
+
+To support real-time operations such as test generation and analytics, indexing strategies are applied on key fields like topic, difficulty, and user identifiers. This ensures fast data retrieval and optimal system performance even with large datasets.
+
+\section{\MakeUppercase{SUMMARY}}
+
+This chapter presented the complete system design of the Intelligent Competitive Exam Platform with Personalized Test Series. The architecture integrates multiple components, including automated question structuring, semantic classification, hybrid difficulty modeling, personalized test generation, performance analytics, SWOT-based feedback, intelligent difficulty recommendation, LLM-based mentoring, study plan generation, and dynamic current affairs content.
+
+By combining deterministic algorithms with AI-powered modules, the system achieves a balance between reliability and adaptability. The modular design ensures scalability, efficient data processing, and seamless integration of new features.
+
+Overall, the system establishes a data-driven, scalable, and learner-centric ecosystem that supports structured, personalized, and efficient preparation for competitive examinations.
+
+\end{sloppypar}
+
+\end{sloppypar}
