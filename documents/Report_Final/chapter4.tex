@@ -292,6 +292,26 @@ Q = \left( \frac{G + (6 - H) + S + R + T}{25} \right) \times 100
 \algofooter
 
 
+\section{AR Ghost Avatar Implementation}
+
+The AR component of the system is implemented as a pre-computation pipeline that produces ready-to-render 3D animated GLB files from expert technique videos, which are then served to the mobile application on demand.
+
+\subsection{GLB Asset Generation using Plask.ai}
+
+Expert Kabaddi technique videos are uploaded to Plask.ai, an AI-based markerless motion capture platform. Plask.ai processes the input video by detecting the human subject, extracting skeletal joint trajectories, and retargeting the captured motion onto a standardized 3D humanoid avatar. The output is exported as a GLB file — a binary glTF format that encodes the 3D mesh, skeleton rig, and animation keyframes in a single self-contained file.
+
+A separate GLB file is generated for each supported technique (e.g., Hand Touch, Bonus Step). These files are stored on the Django server's filesystem under a dedicated media directory and their paths are registered in the \texttt{ar\_glb\_path} field of the corresponding Tutorial database record. This is a one-time offline process performed for each new technique added to the system.
+
+\subsection{GLB File Serving via Django}
+
+The Django backend exposes the \texttt{/api/tutorials/\{id\}/ar-pose/} endpoint, which retrieves the \texttt{ar\_glb\_path} from the Tutorial record and streams the GLB file as a binary HTTP response with the \texttt{model/gltf-binary} content type. The mobile application downloads this file on the AR Playback Screen when the user selects a technique.
+
+\subsection{AR Rendering in the Flutter Mobile Application}
+
+The downloaded GLB file is rendered in the AR Playback Screen using the \texttt{model\_viewer\_plus} Flutter package, which wraps Android's ARCore SDK. The package loads the GLB file and places the animated 3D avatar in the user's physical environment as seen through the rear camera. The avatar plays the looping technique animation, allowing the user to observe the correct expert movement in their actual training space at real-world scale before recording their own attempt.
+
+The AR rendering is entirely client-side and requires no additional server communication after the GLB file is downloaded. The user can reposition and rescale the avatar within the AR view using standard touch gestures before proceeding to the Recording Screen.
+
 \section{Backend Pipeline Orchestration}
 
 The Django backend orchestrates the complete four-level pipeline through an asynchronous task function executed in a background thread. This design prevents HTTP timeout on the mobile client during the long-running LLM inference stage.

@@ -44,11 +44,13 @@ Finally, the Feedback Output Layer is responsible for delivering tangible result
     \label{fig:app_module}
 \end{figure}
 
-The Mobile Application Module serves as the critical bridge between the athlete and the backend processing servers. Built within the Flutter framework \cite{flutter_dev}, it offers a seamless and responsive user experience adapted for practical training scenarios. 
+The Mobile Application Module serves as the critical bridge between the athlete and the backend processing servers. Built within the Flutter framework \cite{flutter_dev}, it offers a seamless and responsive user experience adapted for practical training scenarios.
 
 The application governs the entire capture process. When recording, it enforces a structured sequence, prompting users to perform specific designated techniques (e.g., ``Bonus Step'' or ``Hand Touch''). This minimizes extraneous variables and creates specialized endpoints for downstream performance metrics.
 
-Augmented Reality (AR) visualizations are handled inherently within this ecosystem. Rather than leaving students with raw numbers, the application renders a ``ghost'' skeletal overlay mapping the expert's ideal posture directly atop the recorded video. Visual markers differentiate between the expert trace and the user's execution, delivering immediate spatial corrections.
+The Augmented Reality (AR) component of the system is built around pre-generated 3D animated avatars derived from expert technique videos. Each expert video is processed through Plask.ai, an AI-based motion capture tool that extracts skeletal motion from monocular video and retargets it onto a 3D humanoid avatar, producing a GLB format animated model file. These GLB files represent the correct execution of each Kabaddi technique as a looping 3D animation and are stored on the Django server's filesystem, linked to their corresponding Tutorial record via the \texttt{ar\_glb\_path} field.
+
+When a user selects a technique in the mobile application, the AR Playback Screen fetches the corresponding GLB file from the server through the \texttt{/api/tutorials/\{id\}/ar-pose/} endpoint. The file is rendered in real-time using the \texttt{model\_viewer\_plus} Flutter package, which integrates Android's ARCore to place and display the 3D avatar in the user's physical environment through the device camera. The user can observe the expert avatar performing the technique in their actual training space before proceeding to record their own attempt.
 
 Furthermore, recognizing the diversity of regional Kabaddi practitioners, the mobile frontend provides accessibility features by driving LLM-generated feedback into natural language audio playback, enabling hands-free study integration during intense physical training.
 
@@ -133,7 +135,7 @@ A locally deployed Large Language Model (LLM) consumes this payload, operating o
 
 The system uses a relational database managed by Django ORM with SQLite for development and PostgreSQL-compatible for production. The database schema comprises six primary models organized around the session lifecycle.
 
-The \textbf{Tutorial} model stores expert technique definitions. Each tutorial record contains a unique identifier, a technique name (e.g., ``hand\_touch'', ``bonus''), a description, and the file path to the pre-extracted expert pose array stored as a NumPy file of shape $(T, 17, 2)$.
+The \textbf{Tutorial} model stores expert technique definitions. Each tutorial record contains a unique identifier, a technique name (e.g., ``hand\_touch'', ``bonus''), a description, the file path to the pre-extracted expert pose array stored as a NumPy file of shape $(T, 17, 2)$, and the file path to the pre-generated AR GLB animation file (\texttt{ar\_glb\_path}) produced by Plask.ai from the expert technique video.
 
 The \textbf{UserSession} model is the central entity tracking the lifecycle of a single training attempt. It stores the session UUID, a foreign key to the associated Tutorial, a status field tracking pipeline progress through states (``created'', ``video\_uploaded'', ``pose\_extracted'', ``level1\_complete'', ``scoring\_complete'', ``feedback\_generated'', ``failed''), a timestamp, and an optional error message field.
 

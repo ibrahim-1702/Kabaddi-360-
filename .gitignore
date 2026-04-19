@@ -106,3 +106,6 @@ yolov8n.pt
 # App/backend generated artifacts
 kabaddi_backend/media/
 outputs/
+
+# Archive folder (local only, do not push)
+_archive/
