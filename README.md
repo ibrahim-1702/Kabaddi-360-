@@ -548,9 +548,9 @@ GET  /session/<id>/results/   → { scores, error_metrics, feedback }
 
 ## 👨‍💻 Author
 
-**Mohamed Ibrahim S**  
+**Mohamed Ibrahim M S**  
 MCA, Department of Computer Applications  
-Anna University, MIT Campus, Chennai  
+Anna University, CEG Campus, Chennai  
 Roll No: 2024178011
 
 ---
