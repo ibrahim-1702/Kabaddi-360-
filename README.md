@@ -51,34 +51,26 @@ A player records themselves performing a move (Bonus, Hand Touch, Toe Touch, etc
 
 ## 🏗️ System Architecture
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                     MOBILE APP (Flutter)                        │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────┐   │
-│  │  Splash  │→ │ Connect  │→ │  Record  │→ │  AR Playback  │   │
-│  └──────────┘  └──────────┘  └──────────┘  └───────────────┘   │
-│                                    │              ↑              │
-│                                    ▼              │              │
-│                             ┌──────────┐  ┌──────────────┐      │
-│                             │Processing│→ │   Results     │      │
-│                             └──────────┘  └──────────────┘      │
-└────────────────────────────────┬──────────────────────────────────┘
-                                 │ REST API (http://<IP>:8000/api/)
-┌────────────────────────────────▼──────────────────────────────────┐
-│                    BACKEND (Django REST)                          │
-│                                                                  │
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐            │
-│  │ Level 1 │→ │ Level 2 │→ │ Level 3 │→ │ Level 4 │            │
-│  │  Pose   │  │   DTW   │  │  Error  │  │  Score  │            │
-│  │ Clean   │  │ Aligned │  │ Localize│  │  0-100  │            │
-│  └─────────┘  └─────────┘  └─────────┘  └─────────┘            │
-│                                               │                  │
-│                                               ▼                  │
-│                                    ┌──────────────────┐          │
-│                                    │   LLM Feedback   │          │
-│                                    │ (LLaMA 3 / Ollama)│          │
-│                                    └──────────────────┘          │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph APP["📱 MOBILE APP (Flutter)"]
+        A[Splash] --> B[Connect]
+        B --> C[Home / Techniques]
+        C --> D[AR Playback]
+        C --> E[Recording]
+        E --> F[Processing]
+        F --> G[Results]
+        G --> D
+    end
+
+    APP -->|REST API · http://IP:8000/api/| BACKEND
+
+    subgraph BACKEND["🖥️ BACKEND (Django REST)"]
+        L1[Level 1\nPose Extract\n& Clean] --> L2[Level 2\nDTW\nAlignment]
+        L2 --> L3[Level 3\nError\nLocalization]
+        L3 --> L4[Level 4\nSimilarity\nScore 0–100]
+        L4 --> LLM[LLM Feedback\nLLaMA 3 via Ollama]
+    end
 ```
 
 ---
